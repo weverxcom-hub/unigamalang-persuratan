@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
-import { getDb } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,16 +11,31 @@ import { redirect } from "next/navigation";
 export default async function DashboardHome() {
   const session = await getSession();
   if (!session) redirect("/login");
-  const db = getDb();
-
-  const scopedArchives =
-    session.role === "SUPER_ADMIN"
-      ? db.archives
-      : db.archives.filter((a) => a.unitId === session.unitId);
 
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
-  const thisYearArchives = scopedArchives.filter((a) => new Date(a.date).getFullYear() === currentYear);
+  const yearStart = new Date(Date.UTC(currentYear, 0, 1));
+  const yearEnd = new Date(Date.UTC(currentYear + 1, 0, 1));
+
+  const archiveScope = {
+    deletedAt: null,
+    ...(session.role !== "SUPER_ADMIN" && session.unitId
+      ? { unitId: session.unitId }
+      : {}),
+  } as const;
+
+  const [scopedArchives, thisYearArchives, totalUnits, totalUsers] = await Promise.all([
+    prisma.archive.findMany({
+      where: archiveScope,
+      orderBy: { date: "desc" },
+      take: 500,
+    }),
+    prisma.archive.findMany({
+      where: { ...archiveScope, date: { gte: yearStart, lt: yearEnd } },
+    }),
+    prisma.unit.count(),
+    prisma.user.count(),
+  ]);
 
   const archivesByType = new Map<string, number>();
   for (const a of thisYearArchives) {
@@ -42,25 +57,19 @@ export default async function DashboardHome() {
     },
     {
       label: "Unit Aktif",
-      value:
-        session.role === "SUPER_ADMIN"
-          ? db.units.length
-          : 1,
+      value: session.role === "SUPER_ADMIN" ? totalUnits : 1,
       description: session.role === "SUPER_ADMIN" ? "Seluruh kampus" : "Unit Anda",
       icon: Building2,
     },
     {
       label: "Pengguna Terdaftar",
-      value: session.role === "SUPER_ADMIN" ? db.users.length : "-",
+      value: session.role === "SUPER_ADMIN" ? totalUsers : "-",
       description: session.role === "SUPER_ADMIN" ? "Akun unigamalang" : "Khusus Super Admin",
       icon: Users2,
     },
   ];
 
-  const recent = scopedArchives
-    .slice()
-    .sort((a, b) => (a.date < b.date ? 1 : -1))
-    .slice(0, 5);
+  const recent = scopedArchives.slice(0, 5);
 
   return (
     <div className="space-y-8">

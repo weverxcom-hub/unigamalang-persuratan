@@ -16,6 +16,7 @@ import {
   BookOpen,
   Menu,
   X,
+  History,
 } from "lucide-react";
 
 interface NavbarProps {
@@ -32,6 +33,7 @@ const BASE_NAV = [
 const ADMIN_NAV = [
   { href: "/dashboard/units", label: "Unit", icon: Building2 },
   { href: "/dashboard/letter-types", label: "Jenis Surat", icon: FileType },
+  { href: "/dashboard/audit", label: "Audit Log", icon: History },
 ];
 
 export function Navbar({ session }: NavbarProps) {

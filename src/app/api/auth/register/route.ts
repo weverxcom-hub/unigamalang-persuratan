@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     );
   }
   try {
-    const user = registerUser({ name, email, password, unitId: unitId ?? null, role: "USER" });
+    const user = await registerUser({ name, email, password, unitId: unitId ?? null, role: "USER" });
     const payload = toSessionPayload(user);
     await setSessionCookie(payload);
     return NextResponse.json({ user: payload }, { status: 201 });

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
-import { getDb } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LetterTypesClient } from "./letter-types-client";
 
@@ -8,7 +8,13 @@ export default async function LetterTypesPage() {
   const session = await getSession();
   if (!session) redirect("/login");
   if (session.role !== "SUPER_ADMIN") redirect("/dashboard");
-  const db = getDb();
+  const letterTypesRaw = await prisma.letterType.findMany({ orderBy: { code: "asc" } });
+  const letterTypes = letterTypesRaw.map((lt) => ({
+    id: lt.id,
+    code: lt.code,
+    name: lt.name,
+    createdAt: lt.createdAt.toISOString(),
+  }));
   return (
     <div className="space-y-6">
       <div>
@@ -23,7 +29,7 @@ export default async function LetterTypesPage() {
           <CardDescription>Kode ini muncul sebagai segmen ketiga pada nomor surat.</CardDescription>
         </CardHeader>
         <CardContent>
-          <LetterTypesClient initialLetterTypes={db.letterTypes} />
+          <LetterTypesClient initialLetterTypes={letterTypes} />
         </CardContent>
       </Card>
     </div>

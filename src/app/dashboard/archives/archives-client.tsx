@@ -30,6 +30,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { formatDate } from "@/lib/utils";
+import Link from "next/link";
 import {
   Archive as ArchiveIcon,
   Filter,
@@ -40,11 +41,13 @@ import {
   Eye,
   Upload,
   Loader2,
+  FileText,
+  Send,
 } from "lucide-react";
 import type { Archive, ArchiveListItem, ArchiveStatus, Role } from "@/lib/types";
 
 interface Props {
-  units: { id: string; code: string; name: string }[];
+  units: { id: string; code: string; name: string; formatTemplate?: string }[];
   letterTypes: { id: string; code: string; name: string }[];
   role: Role;
   sessionUnitId: string | null;
@@ -99,6 +102,10 @@ export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Prop
   const [dialogOpen, setDialogOpen] = useState(false);
   const [proofArchive, setProofArchive] = useState<ArchiveListItem | null>(null);
   const [viewArchive, setViewArchive] = useState<ArchiveListItem | null>(null);
+  const [direction, setDirection] = useState<string>("__all");
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
+  const [disposeArchive, setDisposeArchive] = useState<ArchiveListItem | null>(null);
 
   const fetchArchives = useCallback(async () => {
     setLoading(true);
@@ -108,13 +115,16 @@ export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Prop
       if (unitId !== "__all") params.set("unitId", unitId);
       if (letterTypeId !== "__all") params.set("letterTypeId", letterTypeId);
       if (year !== "__all") params.set("year", year);
+      if (direction !== "__all") params.set("direction", direction);
+      if (dateFrom) params.set("dateFrom", dateFrom);
+      if (dateTo) params.set("dateTo", dateTo);
       const res = await fetch(`/api/archives?${params.toString()}`);
       const data = await res.json();
       setArchives(data.archives ?? []);
     } finally {
       setLoading(false);
     }
-  }, [q, unitId, letterTypeId, year]);
+  }, [q, unitId, letterTypeId, year, direction, dateFrom, dateTo]);
 
   useEffect(() => {
     fetchArchives();
@@ -133,6 +143,9 @@ export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Prop
     setUnitId("__all");
     setLetterTypeId("__all");
     setYear("__all");
+    setDirection("__all");
+    setDateFrom("");
+    setDateTo("");
   }
 
   async function onDelete(id: string) {
@@ -238,6 +251,37 @@ export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Prop
               <X className="h-4 w-4" />
               Reset
             </Button>
+          </div>
+          <div className="grid gap-3 md:grid-cols-[180px_180px_180px_1fr]">
+            <Select value={direction} onValueChange={setDirection}>
+              <SelectTrigger>
+                <SelectValue placeholder="Arah" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all">Semua Arah</SelectItem>
+                <SelectItem value="OUTGOING">Surat Keluar</SelectItem>
+                <SelectItem value="INCOMING">Surat Masuk</SelectItem>
+              </SelectContent>
+            </Select>
+            <div>
+              <Label htmlFor="date-from" className="text-xs text-muted-foreground">Dari</Label>
+              <Input
+                id="date-from"
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="date-to" className="text-xs text-muted-foreground">Sampai</Label>
+              <Input
+                id="date-to"
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+              />
+            </div>
+            <div />
           </div>
 
           {/* Mobile: card list */}
@@ -361,9 +405,37 @@ export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Prop
                         )}
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="icon" onClick={() => onDelete(a.id)} aria-label="Hapus arsip">
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          {a.direction === "INCOMING" && (
+                            <>
+                              <Button
+                                asChild
+                                variant="ghost"
+                                size="icon"
+                                aria-label="Tanda terima"
+                                title="Tanda terima"
+                              >
+                                <Link href={`/dashboard/archives/${a.id}/receipt`} target="_blank">
+                                  <FileText className="h-4 w-4" />
+                                </Link>
+                              </Button>
+                              {role !== "USER" && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  aria-label="Disposisi"
+                                  title="Disposisi"
+                                  onClick={() => setDisposeArchive(a)}
+                                >
+                                  <Send className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </>
+                          )}
+                          <Button variant="ghost" size="icon" onClick={() => onDelete(a.id)} aria-label="Hapus arsip">
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
@@ -394,7 +466,161 @@ export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Prop
       />
 
       <ProofViewDialog archive={viewArchive} onOpenChange={(open) => !open && setViewArchive(null)} />
+
+      <DispositionDialog
+        archive={disposeArchive}
+        units={units}
+        onOpenChange={(open) => !open && setDisposeArchive(null)}
+        onCreated={() => setDisposeArchive(null)}
+      />
     </div>
+  );
+}
+
+function DispositionDialog({
+  archive,
+  units,
+  onOpenChange,
+  onCreated,
+}: {
+  archive: ArchiveListItem | null;
+  units: Props["units"];
+  onOpenChange: (open: boolean) => void;
+  onCreated: () => void;
+}) {
+  const [users, setUsers] = useState<{ id: string; name: string; email: string }[]>([]);
+  const [toUserId, setToUserId] = useState<string>("__none");
+  const [toUnitId, setToUnitId] = useState<string>("__none");
+  const [instructions, setInstructions] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!archive) {
+      setToUserId("__none");
+      setToUnitId("__none");
+      setInstructions("");
+      setDueDate("");
+      setError(null);
+      return;
+    }
+    fetch("/api/users")
+      .then((r) => r.json())
+      .then((d) => setUsers(d.users ?? []))
+      .catch(() => setUsers([]));
+  }, [archive]);
+
+  async function onSubmit() {
+    if (!archive) return;
+    if (toUserId === "__none" && toUnitId === "__none") {
+      setError("Pilih pengguna atau unit tujuan");
+      return;
+    }
+    if (instructions.trim().length < 3) {
+      setError("Instruksi wajib diisi (minimal 3 karakter)");
+      return;
+    }
+    setSubmitting(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/archives/${archive.id}/dispositions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          toUserId: toUserId === "__none" ? null : toUserId,
+          toUnitId: toUnitId === "__none" ? null : toUnitId,
+          instructions,
+          dueDate: dueDate || null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Gagal membuat disposisi");
+        return;
+      }
+      onCreated();
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Dialog open={!!archive} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Buat Disposisi</DialogTitle>
+          <DialogDescription>
+            Teruskan arsip <code className="rounded bg-muted px-1 py-0.5 text-xs">{archive?.number}</code>{" "}
+            kepada pengguna atau unit tertentu.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div className="grid gap-2">
+            <Label>Tujukan ke Pengguna (opsional)</Label>
+            <Select value={toUserId} onValueChange={setToUserId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Pilih pengguna" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none">— tidak ditentukan —</SelectItem>
+                {users.map((u) => (
+                  <SelectItem key={u.id} value={u.id}>
+                    {u.name} ({u.email})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-2">
+            <Label>Atau Tujukan ke Unit (opsional)</Label>
+            <Select value={toUnitId} onValueChange={setToUnitId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Pilih unit" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none">— tidak ditentukan —</SelectItem>
+                {units.map((u) => (
+                  <SelectItem key={u.id} value={u.id}>
+                    {u.name} ({u.code})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="disp-instr">Instruksi</Label>
+            <textarea
+              id="disp-instr"
+              rows={3}
+              className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              placeholder="Mohon ditindaklanjuti…"
+              value={instructions}
+              onChange={(e) => setInstructions(e.target.value)}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="disp-due">Batas Waktu (opsional)</Label>
+            <Input
+              id="disp-due"
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+            />
+          </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+            Batal
+          </Button>
+          <Button onClick={onSubmit} disabled={submitting}>
+            {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+            Kirim Disposisi
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -664,6 +890,7 @@ function ManualArchiveDialog({
   const [direction, setDirection] = useState<"OUTGOING" | "INCOMING">("INCOMING");
   const [subject, setSubject] = useState("");
   const [recipient, setRecipient] = useState("");
+  const [externalSender, setExternalSender] = useState("");
   const [date, setDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -677,6 +904,7 @@ function ManualArchiveDialog({
       setDirection("INCOMING");
       setSubject("");
       setRecipient("");
+      setExternalSender("");
       setDate(new Date().toISOString().slice(0, 10));
       setFile(null);
       setError(null);
@@ -707,6 +935,7 @@ function ManualArchiveDialog({
           direction,
           subject,
           recipient,
+          externalSender: direction === "INCOMING" ? externalSender : null,
           date,
           fileName,
           fileDataUrl,
@@ -802,8 +1031,22 @@ function ManualArchiveDialog({
             <Label htmlFor="m-subject">Perihal</Label>
             <Input id="m-subject" value={subject} onChange={(e) => setSubject(e.target.value)} required />
           </div>
+          {direction === "INCOMING" && (
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="m-sender">Pengirim (Eksternal)</Label>
+              <Input
+                id="m-sender"
+                value={externalSender}
+                onChange={(e) => setExternalSender(e.target.value)}
+                placeholder="Mis. Kemendikbud"
+                required
+              />
+            </div>
+          )}
           <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="m-recipient">{direction === "INCOMING" ? "Pengirim" : "Tujuan"}</Label>
+            <Label htmlFor="m-recipient">
+              {direction === "INCOMING" ? "Diteruskan ke (Unit/Pejabat Internal)" : "Tujuan"}
+            </Label>
             <Input
               id="m-recipient"
               value={recipient}
