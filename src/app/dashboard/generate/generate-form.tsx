@@ -290,9 +290,11 @@ export function GenerateForm({ units, letterTypes, defaultUnitId, isUser }: Gene
           </div>
         )}
 
-        {isIssued && (
+        {!needsProof && (
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Button onClick={resetForm}>Buat Nomor Lagi</Button>
+            <Button onClick={resetForm}>
+              {isUser ? "Ajukan Draf Lagi" : "Buat Nomor Lagi"}
+            </Button>
             <Button variant="outline" asChild>
               <Link href="/dashboard/archives">Lihat Arsip</Link>
             </Button>

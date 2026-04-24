@@ -41,7 +41,7 @@ import {
   Upload,
   Loader2,
 } from "lucide-react";
-import type { Archive, ArchiveStatus, Role } from "@/lib/types";
+import type { Archive, ArchiveListItem, ArchiveStatus, Role } from "@/lib/types";
 
 interface Props {
   units: { id: string; code: string; name: string }[];
@@ -90,15 +90,15 @@ function readFileAsDataUrl(file: File): Promise<string> {
 }
 
 export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Props) {
-  const [archives, setArchives] = useState<Archive[]>([]);
+  const [archives, setArchives] = useState<ArchiveListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [unitId, setUnitId] = useState<string>("__all");
   const [letterTypeId, setLetterTypeId] = useState<string>("__all");
   const [year, setYear] = useState<string>("__all");
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [proofArchive, setProofArchive] = useState<Archive | null>(null);
-  const [viewArchive, setViewArchive] = useState<Archive | null>(null);
+  const [proofArchive, setProofArchive] = useState<ArchiveListItem | null>(null);
+  const [viewArchive, setViewArchive] = useState<ArchiveListItem | null>(null);
 
   const fetchArchives = useCallback(async () => {
     setLoading(true);
@@ -147,7 +147,20 @@ export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Prop
   }
 
   function handleProofUploaded(updated: Archive) {
-    setArchives((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
+    // Apply only the lightweight fields to the list; don't store the heavy
+    // base64 `fileDataUrl` here — the view dialog fetches it on demand.
+    setArchives((prev) =>
+      prev.map((a) =>
+        a.id === updated.id
+          ? {
+              ...a,
+              status: updated.status,
+              fileName: updated.fileName,
+              hasProof: !!updated.fileDataUrl,
+            }
+          : a
+      )
+    );
     setProofArchive(null);
   }
 
@@ -255,7 +268,7 @@ export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Prop
                     {formatDate(a.date)} · {a.unitCode}
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2">
-                    {a.fileDataUrl ? (
+                    {a.hasProof ? (
                       <Button size="sm" variant="outline" onClick={() => setViewArchive(a)}>
                         <Eye className="h-4 w-4" />
                         Lihat Bukti
@@ -331,7 +344,7 @@ export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Prop
                         <Badge variant={statusVariant(a.status)}>{STATUS_LABEL[a.status]}</Badge>
                       </TableCell>
                       <TableCell>
-                        {a.fileDataUrl ? (
+                        {a.hasProof ? (
                           <Button size="sm" variant="outline" onClick={() => setViewArchive(a)}>
                             <Eye className="h-4 w-4" />
                             Lihat
@@ -397,7 +410,7 @@ function StatCard({ label, value }: { label: string; value: number | string }) {
 }
 
 interface ProofUploadDialogProps {
-  archive: Archive | null;
+  archive: ArchiveListItem | null;
   onOpenChange: (open: boolean) => void;
   onUploaded: (archive: Archive) => void;
 }
@@ -537,10 +550,49 @@ function ProofViewDialog({
   archive,
   onOpenChange,
 }: {
-  archive: Archive | null;
+  archive: ArchiveListItem | null;
   onOpenChange: (open: boolean) => void;
 }) {
-  const isPdf = archive?.fileDataUrl?.startsWith("data:application/pdf");
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!archive) {
+      setDataUrl(null);
+      setFileName(null);
+      setError(null);
+      return;
+    }
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    fetch(`/api/archives/${archive.id}/proof`)
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (cancelled) return;
+        if (!res.ok) {
+          setError(data.error || "Gagal memuat bukti");
+          setDataUrl(null);
+          return;
+        }
+        setDataUrl(data.fileDataUrl ?? null);
+        setFileName(data.fileName ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setError("Gagal memuat bukti");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [archive]);
+
+  const isPdf = dataUrl?.startsWith("data:application/pdf");
+
   return (
     <Dialog open={!!archive} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
@@ -550,10 +602,19 @@ function ProofViewDialog({
             {archive?.number} &mdash; {archive?.subject}
           </DialogDescription>
         </DialogHeader>
-        {archive?.fileDataUrl ? (
+        {loading ? (
+          <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Memuat bukti…
+          </div>
+        ) : error ? (
+          <p className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+            {error}
+          </p>
+        ) : dataUrl ? (
           isPdf ? (
             <iframe
-              src={archive.fileDataUrl}
+              src={dataUrl}
               className="h-[70vh] w-full rounded-md border"
               title="Pratinjau PDF"
             />
@@ -561,8 +622,8 @@ function ProofViewDialog({
             <div className="overflow-auto rounded-md border bg-muted/30">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={archive.fileDataUrl}
-                alt={archive.fileName ?? "Bukti surat"}
+                src={dataUrl}
+                alt={fileName ?? "Bukti surat"}
                 className="mx-auto max-h-[70vh] w-auto"
               />
             </div>
@@ -570,8 +631,8 @@ function ProofViewDialog({
         ) : (
           <p className="text-sm text-muted-foreground">Bukti belum diunggah.</p>
         )}
-        {archive?.fileName && (
-          <p className="text-xs text-muted-foreground">Nama file: {archive.fileName}</p>
+        {fileName && (
+          <p className="text-xs text-muted-foreground">Nama file: {fileName}</p>
         )}
       </DialogContent>
     </Dialog>

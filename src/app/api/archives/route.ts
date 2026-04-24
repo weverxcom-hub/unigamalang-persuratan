@@ -34,7 +34,17 @@ export async function GET(req: Request) {
   }
 
   archives.sort((a, b) => (a.date < b.date ? 1 : -1));
-  return NextResponse.json({ archives });
+
+  // Strip the base64 `fileDataUrl` from the list response — it can be up to ~4MB
+  // per archive and is only needed when viewing a single proof. Clients receive a
+  // `hasProof` boolean instead and fetch the actual data lazily from
+  // GET /api/archives/[id]/proof.
+  const lightweight = archives.map(({ fileDataUrl, ...rest }) => ({
+    ...rest,
+    hasProof: !!fileDataUrl,
+  }));
+
+  return NextResponse.json({ archives: lightweight });
 }
 
 const createSchema = z.object({

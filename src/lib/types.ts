@@ -58,6 +58,12 @@ export interface Archive {
   createdAt: string;
 }
 
+/**
+ * Shape returned by GET /api/archives for list views. Omits the heavy base64
+ * `fileDataUrl` so payloads stay small, replacing it with a `hasProof` boolean.
+ */
+export type ArchiveListItem = Omit<Archive, "fileDataUrl"> & { hasProof: boolean };
+
 export interface DbShape {
   users: User[];
   units: Unit[];

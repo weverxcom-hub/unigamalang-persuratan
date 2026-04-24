@@ -17,6 +17,35 @@ const schema = z.object({
     .max(MAX_DATA_URL_LEN, "Ukuran file terlalu besar (maks. 3MB)"),
 });
 
+export async function GET(_req: Request, { params }: { params: { id: string } }) {
+  const session = await getSession();
+  if (!session) return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
+
+  const db = getDb();
+  const archive = db.archives.find((a) => a.id === params.id);
+  if (!archive) return NextResponse.json({ error: "Arsip tidak ditemukan" }, { status: 404 });
+
+  // Same scoping rule as the archive list: non-super-admins can only see arsip
+  // dalam unit mereka sendiri.
+  const canRead =
+    session.role === "SUPER_ADMIN" ||
+    (session.unitId && session.unitId === archive.unitId);
+  if (!canRead) {
+    return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
+  }
+
+  if (!archive.fileDataUrl) {
+    return NextResponse.json({ error: "Bukti belum diunggah" }, { status: 404 });
+  }
+
+  return NextResponse.json({
+    id: archive.id,
+    number: archive.number,
+    fileName: archive.fileName,
+    fileDataUrl: archive.fileDataUrl,
+  });
+}
+
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
