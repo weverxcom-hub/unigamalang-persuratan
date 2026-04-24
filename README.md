@@ -1,36 +1,126 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sistem Manajemen Persuratan — Universitas Gajayana (`unigamalang`)
 
-## Getting Started
+Prototipe platform digital untuk **penomoran otomatis**, **pengarsipan terpusat**, dan **pelacakan
+surat** seluruh unit di Universitas Gajayana (`unigamalang`). Dibangun dengan **Next.js 14 App
+Router**, **Tailwind CSS**, dan komponen gaya **shadcn/ui**.
 
-First, run the development server:
+> **Branding note:** Sistem ini menggunakan nama `unigamalang` secara konsisten di seluruh UI,
+> variabel, dan dokumentasi. Tidak pernah menggunakan varian lain.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Fitur Utama
+
+### 1. Penomoran Surat Dinamis & Otomatis
+Menggantikan buku penomoran fisik dengan format dinamis per unit:
+
+```
+[No. Urut] / [Kode Unit] / [Jenis Surat] / [Bulan Romawi] / [Tahun]
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Contoh:
+- `001/UNIGA/SK/IV/2026` (Rektorat)
+- `001/YAS/ST/IV/2026` (Yayasan)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Logika:
+- **No. Urut** auto-increment dan **reset ke 001 setiap 1 Januari**.
+- **Kode Unit** dikonfigurasi oleh Super Admin (UNIGA, YAS, FE, FH, …).
+- **Jenis Surat** dipilih saat generate (SK, ST, UND, …).
+- **Bulan Romawi** (I–XII) dan **Tahun** (4 digit) otomatis.
+- Tiap kombinasi `(unit, jenis, tahun)` memiliki penghitung independen.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 2. Pengarsipan Surat
+- Data table terpusat dengan pencarian (nomor/perihal/tujuan) dan filter (unit, jenis, tahun).
+- Field: Tanggal, Nomor Surat, Perihal, Tujuan/Pengirim, Unit Penerbit, Lampiran (mock upload),
+  Arah (Masuk/Keluar), Status.
+- Dukungan arsip manual (historis/surat masuk) dengan nomor manual opsional.
 
-## Learn More
+### 3. Kontrol Akses Berperan
+| Peran | Kewenangan |
+|---|---|
+| `SUPER_ADMIN` | Mengelola semua unit, kode unit, jenis surat, & arsip seluruh kampus. |
+| `ADMIN_UNIT` | Generate nomor & arsip untuk unitnya sendiri. |
+| `USER` | Ajukan draf ke Admin Unit (status `PENDING`). |
 
-To learn more about Next.js, take a look at the following resources:
+### 4. Autentikasi Terbatas Domain
+Registrasi & login **hanya** untuk email `@unigamalang.ac.id`. Session berbasis JWT
+(HTTP-only cookie) dengan middleware yang melindungi seluruh rute `/dashboard`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Tech Stack
+- **Framework:** Next.js 14 (App Router, Server Actions / Route Handlers)
+- **Styling:** Tailwind CSS + komponen gaya shadcn/ui (radix-ui primitives)
+- **Auth:** `jose` (JWT) + `bcryptjs`
+- **Validation:** `zod`
+- **Data layer:** JSON mock store (seeded in-memory; file-backed saat dev).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Akun Demo (auto-seed)
+| Peran | Email | Password |
+|---|---|---|
+| Super Admin | `superadmin@unigamalang.ac.id` | `Password123!` |
+| Admin Unit (Rektorat) | `admin.rektorat@unigamalang.ac.id` | `Password123!` |
+| Admin Unit (Yayasan) | `admin.yayasan@unigamalang.ac.id` | `Password123!` |
+| User | `staff@unigamalang.ac.id` | `Password123!` |
 
-## Deploy on Vercel
+## Menjalankan Secara Lokal
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm install
+cp .env.example .env.local
+npm run dev
+# buka http://localhost:3000
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploy ke Vercel
+
+Proyek ini siap dideploy ke Vercel:
+
+1. Push repository ke GitHub.
+2. Di Vercel → **Add New Project** → import repo.
+3. Tambahkan env var:
+   - `AUTH_SECRET` = string acak ≥ 32 karakter.
+4. Vercel akan menjalankan `next build` otomatis (lihat `vercel.json`).
+
+> **Catatan data layer:** JSON mock store bersifat _in-memory_ di serverless Vercel — data akan
+> kembali ke seed setiap cold start / deploy. Untuk produksi, ganti `src/lib/db.ts` dengan
+> adapter database sebenarnya (Postgres / Turso / Neon). Schema TypeScript sudah disiapkan
+> agar penggantian tidak memerlukan perubahan UI.
+
+## Struktur Direktori
+
+```
+src/
+  app/
+    api/                     # Route handlers (auth, archives, numbering, units, …)
+    dashboard/               # Area terproteksi
+      archives/              # Data table pengarsipan
+      generate/              # Generator nomor surat
+      units/                 # Manajemen unit (Super Admin)
+      letter-types/          # Manajemen jenis surat (Super Admin)
+    login/                   # Halaman login
+    register/                # Halaman registrasi
+    page.tsx                 # Landing page
+  components/
+    ui/                      # Primitif shadcn-style (Button, Input, Table, Dialog, …)
+    brand/logo.tsx           # Placeholder logo Universitas Gajayana
+    app/navbar.tsx           # Navbar dashboard
+  lib/
+    auth.ts                  # JWT session + password hashing + domain guard
+    db.ts                    # Mock JSON store + seed data
+    numbering.ts             # Alokasi nomor otomatis (yearly reset)
+    types.ts                 # Tipe domain
+    utils.ts                 # cn(), toRoman(), formatDate(), pad3()
+  middleware.ts              # Redirect guard untuk /dashboard
+```
+
+## Skema Data (ringkas)
+
+```ts
+User           { id, email, name, passwordHash, role, unitId, createdAt }
+Unit           { id, code, name, createdAt }
+LetterType     { id, code, name, createdAt }
+NumberingSequence { id: `${unitId}:${letterTypeId}:${year}`, unitId, letterTypeId, year, lastNumber }
+Archive        { id, number, date, subject, recipient, unitId, unitCode,
+                 letterTypeId, letterTypeCode, sequenceNumber, fileName,
+                 direction, status, createdById, createdAt }
+```
+
+`NumberingSequence` dikunci per tahun, sehingga penggantian tahun kalender otomatis membuat
+sequence baru yang dimulai dari `001`.
