@@ -35,7 +35,7 @@ export default async function GeneratePage() {
           <CardDescription>
             {session.role === "USER"
               ? "Draf akan dikirim ke Admin Unit untuk disetujui sebelum terbit."
-              : "Nomor akan langsung dialokasikan dan diarsipkan dalam status ISSUED."}
+              : "Nomor akan dialokasikan dengan status PENDING_PROOF. Unggah foto/scan surat sebagai bukti untuk menyelesaikan arsip menjadi ISSUED."}
           </CardDescription>
         </CardHeader>
         <CardContent>

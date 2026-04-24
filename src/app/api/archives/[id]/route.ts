@@ -11,7 +11,9 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
   const canDelete =
     session.role === "SUPER_ADMIN" ||
     (session.role === "ADMIN_UNIT" && session.unitId === archive.unitId) ||
-    (session.role === "USER" && archive.createdById === session.userId && archive.status === "PENDING");
+    (session.role === "USER" &&
+      archive.createdById === session.userId &&
+      (archive.status === "PENDING" || archive.status === "PENDING_PROOF"));
   if (!canDelete) {
     return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
   }

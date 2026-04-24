@@ -45,8 +45,9 @@ const createSchema = z.object({
   direction: z.enum(["OUTGOING", "INCOMING"]).default("OUTGOING"),
   date: z.string().optional(),
   fileName: z.string().nullable().optional(),
+  fileDataUrl: z.string().nullable().optional(),
   manualNumber: z.string().nullable().optional(),
-  status: z.enum(["DRAFT", "PENDING", "APPROVED", "ISSUED"]).optional(),
+  status: z.enum(["DRAFT", "PENDING", "PENDING_PROOF", "APPROVED", "ISSUED"]).optional(),
 });
 
 export async function POST(req: Request) {
@@ -80,18 +81,29 @@ export async function POST(req: Request) {
 
   let number: string;
   let sequenceNumber = 0;
+  const isManualArchive = Boolean(input.manualNumber && input.manualNumber.trim().length > 0);
 
-  if (input.manualNumber && input.manualNumber.trim().length > 0) {
-    // Manual archive (e.g. historical records).
-    number = input.manualNumber.trim();
+  if (isManualArchive) {
+    // Manual archive (e.g. historical records / incoming mail).
+    number = input.manualNumber!.trim();
   } else {
     const allocated = allocateNextNumber(input.unitId, input.letterTypeId);
     number = allocated.number;
     sequenceNumber = allocated.sequenceNumber;
   }
 
-  // Users submit drafts; Admin Unit / Super Admin issue directly.
-  const defaultStatus = session.role === "USER" ? "PENDING" : "ISSUED";
+  // Default flow:
+  //  - USER requesting a new number  -> PENDING (needs admin approval)
+  //  - Auto-generated number         -> PENDING_PROOF (must upload proof before ISSUED)
+  //  - Manual archive with file      -> ISSUED directly
+  let defaultStatus: Archive["status"];
+  if (session.role === "USER" && !isManualArchive) {
+    defaultStatus = "PENDING";
+  } else if (!isManualArchive) {
+    defaultStatus = "PENDING_PROOF";
+  } else {
+    defaultStatus = input.fileDataUrl ? "ISSUED" : "PENDING_PROOF";
+  }
   const status = input.status ?? defaultStatus;
 
   const archive: Archive = {
@@ -106,6 +118,7 @@ export async function POST(req: Request) {
     letterTypeCode: letterType.code,
     sequenceNumber,
     fileName: input.fileName ?? null,
+    fileDataUrl: input.fileDataUrl ?? null,
     direction: input.direction,
     status,
     createdById: session.userId,
