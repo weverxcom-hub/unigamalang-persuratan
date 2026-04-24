@@ -825,7 +825,8 @@ function ManualArchiveDialog({
               className="block w-full text-sm file:mr-2 file:rounded-md file:border file:border-input file:bg-background file:px-3 file:py-1.5 file:text-sm"
             />
             <p className="text-[11px] text-muted-foreground">
-              Opsional. Jika diisi, arsip langsung berstatus <em>Terbit</em>.
+              Opsional. Bila file dilampirkan, arsip langsung berstatus <em>Terbit</em>;
+              bila kosong, arsip berstatus <em>Menunggu Bukti</em>.
             </p>
           </div>
 
