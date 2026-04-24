@@ -117,12 +117,12 @@ export async function POST(req: Request) {
 
   // Status is always computed server-side so a malicious client cannot send
   // `status: "ISSUED"` to skip the PENDING / PENDING_PROOF workflow.
-  //  - USER requesting a new number  -> PENDING (needs admin approval)
+  //  - USER (any archive)            -> PENDING (always needs admin approval)
   //  - Auto-generated number         -> PENDING_PROOF (must upload proof before ISSUED)
   //  - Manual archive with file      -> ISSUED directly
   //  - Manual archive without file   -> PENDING_PROOF
   let status: Archive["status"];
-  if (session.role === "USER" && !isManualArchive) {
+  if (session.role === "USER") {
     status = "PENDING";
   } else if (!isManualArchive) {
     status = "PENDING_PROOF";

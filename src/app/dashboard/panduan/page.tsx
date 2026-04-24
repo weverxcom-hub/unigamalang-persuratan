@@ -69,7 +69,7 @@ export default async function PanduanPage() {
           <Step
             n={4}
             title="Unggah bukti surat"
-            body="Foto langsung dari ponsel (tombol Ambil Foto) atau unggah scan/PDF. Maksimal 5MB, tipe file gambar atau PDF."
+            body="Foto langsung dari ponsel (tombol Ambil Foto) atau unggah scan/PDF. Maksimal 3MB, tipe file gambar atau PDF."
           />
           <Step
             n={5}
