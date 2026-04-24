@@ -711,7 +711,7 @@ function ManualArchiveDialog({
           fileName,
           fileDataUrl,
           manualNumber: manualNumber || null,
-          status: fileDataUrl ? "ISSUED" : undefined,
+          // Status is computed server-side based on role + manualNumber + file.
         }),
       });
       const data = await res.json();

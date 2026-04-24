@@ -47,6 +47,11 @@ export async function GET(req: Request) {
   return NextResponse.json({ archives: lightweight });
 }
 
+// Keep these in sync with the proof-upload endpoint so both routes enforce the
+// same constraints on inline base64 payloads.
+const MAX_DATA_URL_LEN = 4 * 1024 * 1024; // ~3MB binary (base64 adds ~33% overhead)
+const DATA_URL_PATTERN = /^data:(image\/(png|jpe?g|webp|gif)|application\/pdf);base64,/i;
+
 const createSchema = z.object({
   subject: z.string().min(3, "Perihal minimal 3 karakter"),
   recipient: z.string().min(2, "Tujuan wajib diisi"),
@@ -55,9 +60,17 @@ const createSchema = z.object({
   direction: z.enum(["OUTGOING", "INCOMING"]).default("OUTGOING"),
   date: z.string().optional(),
   fileName: z.string().nullable().optional(),
-  fileDataUrl: z.string().nullable().optional(),
+  fileDataUrl: z
+    .string()
+    .regex(DATA_URL_PATTERN, {
+      message: "Hanya gambar (PNG/JPG/WEBP/GIF) atau PDF yang diperbolehkan",
+    })
+    .max(MAX_DATA_URL_LEN, "Ukuran file terlalu besar (maks. 3MB)")
+    .nullable()
+    .optional(),
   manualNumber: z.string().nullable().optional(),
-  status: z.enum(["DRAFT", "PENDING", "PENDING_PROOF", "APPROVED", "ISSUED"]).optional(),
+  // `status` is intentionally NOT accepted from the client here — it is always
+  // derived server-side to prevent bypassing the PENDING/PENDING_PROOF flow.
 });
 
 export async function POST(req: Request) {
@@ -102,19 +115,20 @@ export async function POST(req: Request) {
     sequenceNumber = allocated.sequenceNumber;
   }
 
-  // Default flow:
+  // Status is always computed server-side so a malicious client cannot send
+  // `status: "ISSUED"` to skip the PENDING / PENDING_PROOF workflow.
   //  - USER requesting a new number  -> PENDING (needs admin approval)
   //  - Auto-generated number         -> PENDING_PROOF (must upload proof before ISSUED)
   //  - Manual archive with file      -> ISSUED directly
-  let defaultStatus: Archive["status"];
+  //  - Manual archive without file   -> PENDING_PROOF
+  let status: Archive["status"];
   if (session.role === "USER" && !isManualArchive) {
-    defaultStatus = "PENDING";
+    status = "PENDING";
   } else if (!isManualArchive) {
-    defaultStatus = "PENDING_PROOF";
+    status = "PENDING_PROOF";
   } else {
-    defaultStatus = input.fileDataUrl ? "ISSUED" : "PENDING_PROOF";
+    status = input.fileDataUrl ? "ISSUED" : "PENDING_PROOF";
   }
-  const status = input.status ?? defaultStatus;
 
   const archive: Archive = {
     id: newArchiveId(),
