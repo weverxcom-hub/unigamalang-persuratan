@@ -24,18 +24,20 @@ export default async function DashboardHome() {
       : {}),
   } as const;
 
-  const [scopedArchives, thisYearArchives, totalUnits, totalUsers] = await Promise.all([
-    prisma.archive.findMany({
-      where: archiveScope,
-      orderBy: { date: "desc" },
-      take: 500,
-    }),
-    prisma.archive.findMany({
-      where: { ...archiveScope, date: { gte: yearStart, lt: yearEnd } },
-    }),
-    prisma.unit.count(),
-    prisma.user.count(),
-  ]);
+  const [scopedArchiveCount, scopedArchives, thisYearArchives, totalUnits, totalUsers] =
+    await Promise.all([
+      prisma.archive.count({ where: archiveScope }),
+      prisma.archive.findMany({
+        where: archiveScope,
+        orderBy: { date: "desc" },
+        take: 500,
+      }),
+      prisma.archive.findMany({
+        where: { ...archiveScope, date: { gte: yearStart, lt: yearEnd } },
+      }),
+      prisma.unit.count(),
+      prisma.user.count(),
+    ]);
 
   const archivesByType = new Map<string, number>();
   for (const a of thisYearArchives) {
@@ -45,7 +47,7 @@ export default async function DashboardHome() {
   const stats = [
     {
       label: "Total Arsip",
-      value: scopedArchives.length,
+      value: scopedArchiveCount,
       description: `${thisYearArchives.length} di tahun ${currentYear}`,
       icon: FileStack,
     },
