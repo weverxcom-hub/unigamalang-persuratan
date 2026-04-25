@@ -7,6 +7,14 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { SessionPayload } from "@/lib/types";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   LogOut,
   LayoutDashboard,
   FileStack,
@@ -17,20 +25,22 @@ import {
   Menu,
   X,
   History,
+  Settings,
+  ChevronDown,
 } from "lucide-react";
 
 interface NavbarProps {
   session: SessionPayload;
 }
 
-const BASE_NAV = [
+const PRIMARY_NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/archives", label: "Pengarsipan", icon: FileStack },
   { href: "/dashboard/generate", label: "Nomor Surat", icon: Hash },
   { href: "/dashboard/panduan", label: "Panduan", icon: BookOpen },
 ];
 
-const ADMIN_NAV = [
+const ADMIN_MENU = [
   { href: "/dashboard/units", label: "Unit", icon: Building2 },
   { href: "/dashboard/letter-types", label: "Jenis Surat", icon: FileType },
   { href: "/dashboard/audit", label: "Audit Log", icon: History },
@@ -41,7 +51,9 @@ export function Navbar({ session }: NavbarProps) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const canManage = session.role === "SUPER_ADMIN";
-  const nav = canManage ? [...BASE_NAV, ...ADMIN_NAV] : BASE_NAV;
+  const adminActive = ADMIN_MENU.some(
+    (i) => pathname === i.href || pathname.startsWith(i.href + "/")
+  );
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -57,7 +69,7 @@ export function Navbar({ session }: NavbarProps) {
             <Logo size={36} />
           </Link>
           <nav className="hidden items-center gap-1 lg:flex">
-            {nav.map((item) => {
+            {PRIMARY_NAV.map((item) => {
               const active = pathname === item.href || pathname.startsWith(item.href + "/");
               const Icon = item.icon;
               return (
@@ -76,6 +88,48 @@ export function Navbar({ session }: NavbarProps) {
                 </Link>
               );
             })}
+            {canManage && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className={cn(
+                      "inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors outline-none",
+                      adminActive
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                  >
+                    <Settings className="h-4 w-4" />
+                    Pengaturan
+                    <ChevronDown className="h-3.5 w-3.5 opacity-70" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  <DropdownMenuLabel>Manajemen Sistem</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {ADMIN_MENU.map((item) => {
+                    const Icon = item.icon;
+                    const active =
+                      pathname === item.href || pathname.startsWith(item.href + "/");
+                    return (
+                      <DropdownMenuItem key={item.href} asChild>
+                        <Link
+                          href={item.href}
+                          className={cn(
+                            "cursor-pointer",
+                            active && "bg-accent text-accent-foreground"
+                          )}
+                        >
+                          <Icon className="h-4 w-4" />
+                          {item.label}
+                        </Link>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </nav>
         </div>
         <div className="flex items-center gap-2">
@@ -111,7 +165,7 @@ export function Navbar({ session }: NavbarProps) {
               </p>
             </div>
             <nav className="flex flex-col gap-1">
-              {nav.map((item) => {
+              {PRIMARY_NAV.map((item) => {
                 const active = pathname === item.href || pathname.startsWith(item.href + "/");
                 const Icon = item.icon;
                 return (
@@ -131,6 +185,34 @@ export function Navbar({ session }: NavbarProps) {
                   </Link>
                 );
               })}
+              {canManage && (
+                <>
+                  <p className="mt-3 px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Pengaturan
+                  </p>
+                  {ADMIN_MENU.map((item) => {
+                    const active =
+                      pathname === item.href || pathname.startsWith(item.href + "/");
+                    const Icon = item.icon;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMenuOpen(false)}
+                        className={cn(
+                          "inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium",
+                          active
+                            ? "bg-primary/10 text-primary"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                        )}
+                      >
+                        <Icon className="h-4 w-4" />
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </>
+              )}
               <Button
                 variant="outline"
                 size="sm"

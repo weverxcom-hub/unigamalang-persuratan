@@ -45,12 +45,19 @@ import {
   Send,
 } from "lucide-react";
 import type { Archive, ArchiveListItem, ArchiveStatus, Role } from "@/lib/types";
+import {
+  uploadProofAsset,
+  assetToProofBody,
+  UploadError,
+  BLOB_MAX_BYTES,
+} from "@/lib/upload-client";
 
 interface Props {
   units: { id: string; code: string; name: string; formatTemplate?: string }[];
   letterTypes: { id: string; code: string; name: string }[];
   role: Role;
   sessionUnitId: string | null;
+  sessionUserId: string;
 }
 
 const YEAR_OPTIONS = (() => {
@@ -81,18 +88,13 @@ function statusVariant(status: ArchiveStatus): "default" | "secondary" | "succes
   }
 }
 
-const MAX_PROOF_BYTES = 3 * 1024 * 1024; // 3MB
-
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
-}
-
-export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Props) {
+export function ArchivesClient({
+  units,
+  letterTypes,
+  role,
+  sessionUnitId,
+  sessionUserId,
+}: Props) {
   const [archives, setArchives] = useState<ArchiveListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
@@ -453,6 +455,7 @@ export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Prop
         letterTypes={letterTypes}
         defaultUnitId={sessionUnitId ?? units[0]?.id ?? ""}
         canChooseUnit={role === "SUPER_ADMIN"}
+        sessionUserId={sessionUserId}
         onCreated={() => {
           setDialogOpen(false);
           fetchArchives();
@@ -461,6 +464,7 @@ export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Prop
 
       <ProofUploadDialog
         archive={proofArchive}
+        sessionUserId={sessionUserId}
         onOpenChange={(open) => !open && setProofArchive(null)}
         onUploaded={handleProofUploaded}
       />
@@ -637,11 +641,17 @@ function StatCard({ label, value }: { label: string; value: number | string }) {
 
 interface ProofUploadDialogProps {
   archive: ArchiveListItem | null;
+  sessionUserId: string;
   onOpenChange: (open: boolean) => void;
   onUploaded: (archive: Archive) => void;
 }
 
-function ProofUploadDialog({ archive, onOpenChange, onUploaded }: ProofUploadDialogProps) {
+function ProofUploadDialog({
+  archive,
+  sessionUserId,
+  onOpenChange,
+  onUploaded,
+}: ProofUploadDialogProps) {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -666,8 +676,8 @@ function ProofUploadDialog({ archive, onOpenChange, onUploaded }: ProofUploadDia
       setPreviewUrl(null);
       return;
     }
-    if (f.size > MAX_PROOF_BYTES) {
-      setError("Ukuran file melebihi 3MB. Mohon perkecil atau kompres foto.");
+    if (f.size > BLOB_MAX_BYTES) {
+      setError("Ukuran file melebihi 5MB. Mohon perkecil atau kompres foto.");
       setFile(null);
       setPreviewUrl(null);
       return;
@@ -684,20 +694,24 @@ function ProofUploadDialog({ archive, onOpenChange, onUploaded }: ProofUploadDia
     setUploading(true);
     setError(null);
     try {
-      const dataUrl = await readFileAsDataUrl(file);
+      const asset = await uploadProofAsset(sessionUserId, file);
       const res = await fetch(`/api/archives/${archive.id}/proof`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileName: file.name, fileDataUrl: dataUrl }),
+        body: JSON.stringify(assetToProofBody(asset)),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setError(data.error || "Gagal mengunggah bukti");
         return;
       }
       onUploaded(data.archive);
-    } catch {
-      setError("Gagal memproses file");
+    } catch (e) {
+      if (e instanceof UploadError) {
+        setError(e.message);
+      } else {
+        setError("Gagal memproses file. Periksa koneksi dan coba lagi.");
+      }
     } finally {
       setUploading(false);
     }
@@ -874,6 +888,7 @@ interface DialogProps {
   letterTypes: { id: string; code: string; name: string }[];
   defaultUnitId: string;
   canChooseUnit: boolean;
+  sessionUserId: string;
   onCreated: () => void;
 }
 
@@ -884,6 +899,7 @@ function ManualArchiveDialog({
   letterTypes,
   defaultUnitId,
   canChooseUnit,
+  sessionUserId,
   onCreated,
 }: DialogProps) {
   const [unitId, setUnitId] = useState<string>(defaultUnitId);
@@ -918,15 +934,28 @@ function ManualArchiveDialog({
     setError(null);
     setSubmitting(true);
     try {
-      let fileName: string | null = null;
-      let fileDataUrl: string | null = null;
+      let fileFields: Record<string, unknown> = {
+        fileName: null,
+        fileUrl: null,
+        blobPathname: null,
+        fileDataUrl: null,
+      };
       if (file) {
-        if (file.size > MAX_PROOF_BYTES) {
-          setError("Ukuran file melebihi 3MB.");
+        if (file.size > BLOB_MAX_BYTES) {
+          setError("Ukuran file melebihi 5MB.");
           return;
         }
-        fileName = file.name;
-        fileDataUrl = await readFileAsDataUrl(file);
+        try {
+          const asset = await uploadProofAsset(sessionUserId, file);
+          fileFields = { ...fileFields, ...assetToProofBody(asset) };
+        } catch (err) {
+          if (err instanceof UploadError) {
+            setError(err.message);
+          } else {
+            setError("Gagal memproses file. Periksa koneksi dan coba lagi.");
+          }
+          return;
+        }
       }
       const res = await fetch("/api/archives", {
         method: "POST",
@@ -939,13 +968,12 @@ function ManualArchiveDialog({
           recipient,
           externalSender: direction === "INCOMING" ? externalSender : null,
           date,
-          fileName,
-          fileDataUrl,
+          ...fileFields,
           manualNumber: manualNumber || null,
           // Status is computed server-side based on role + manualNumber + file.
         }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setError(data.error || "Gagal menyimpan arsip");
         return;

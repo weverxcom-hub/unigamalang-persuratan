@@ -1,28 +1,30 @@
 import { NextResponse } from "next/server";
+import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { getSession } from "@/lib/auth";
-import { BLOB_AVAILABLE, uploadToBlob } from "@/lib/blob";
+import { BLOB_AVAILABLE } from "@/lib/blob";
 
-const ALLOWED_MIME = new Set([
+const ALLOWED_MIME = [
   "image/png",
   "image/jpeg",
   "image/jpg",
   "image/webp",
   "image/gif",
   "application/pdf",
-]);
+];
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 
 /**
  * POST /api/blob/upload
  *
- * Multipart form upload. Returns `{ url, pathname, contentType, fileName }` on
- * success. When Vercel Blob is not configured, returns `501 BLOB_UNAVAILABLE`
- * so the client can fall back to inline base64.
+ * Issues a short-lived client token so the browser can upload directly to
+ * Vercel Blob storage, bypassing the 4.5MB serverless function body limit.
+ * The route never receives the file bytes itself — it only authorises and
+ * scopes the upload (path prefix, allowed MIME, max size).
+ *
+ * When Vercel Blob is not configured, returns 501 BLOB_UNAVAILABLE so the
+ * client can fall back to inline base64.
  */
 export async function POST(req: Request) {
-  const session = await getSession();
-  if (!session) return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
-
   if (!BLOB_AVAILABLE) {
     return NextResponse.json(
       {
@@ -34,43 +36,47 @@ export async function POST(req: Request) {
     );
   }
 
-  const form = await req.formData().catch(() => null);
-  if (!form) return NextResponse.json({ error: "Body tidak valid" }, { status: 400 });
-
-  const file = form.get("file");
-  if (!(file instanceof File)) {
-    return NextResponse.json({ error: "File wajib diisi" }, { status: 400 });
-  }
-  if (!ALLOWED_MIME.has(file.type)) {
-    return NextResponse.json(
-      { error: "Hanya gambar (PNG/JPG/WEBP/GIF) atau PDF yang diperbolehkan" },
-      { status: 400 }
-    );
-  }
-  if (file.size > MAX_SIZE) {
-    return NextResponse.json(
-      { error: "Ukuran file terlalu besar (maks. 5MB)" },
-      { status: 400 }
-    );
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
   }
 
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80) || "file";
-  const pathname = `persuratan/${session.userId}/${Date.now()}-${safeName}`;
-  const buffer = Buffer.from(await file.arrayBuffer());
+  const body = (await req.json().catch(() => null)) as HandleUploadBody | null;
+  if (!body) {
+    return NextResponse.json({ error: "Body tidak valid" }, { status: 400 });
+  }
+
   try {
-    const up = await uploadToBlob(pathname, buffer, { contentType: file.type });
-    return NextResponse.json({
-      url: up.url,
-      pathname: up.pathname,
-      contentType: up.contentType,
-      fileName: file.name,
+    const result = await handleUpload({
+      body,
+      request: req,
+      onBeforeGenerateToken: async (pathname) => {
+        // Defence in depth: enforce the path prefix server-side too. The
+        // client picks the path but we refuse to sign anything outside the
+        // user's directory.
+        const expectedPrefix = `persuratan/${session.userId}/`;
+        if (!pathname.startsWith(expectedPrefix)) {
+          throw new Error("Path tidak diizinkan");
+        }
+        return {
+          allowedContentTypes: ALLOWED_MIME,
+          maximumSizeInBytes: MAX_SIZE,
+          addRandomSuffix: true,
+          tokenPayload: JSON.stringify({ userId: session.userId }),
+        };
+      },
+      onUploadCompleted: async () => {
+        // No-op: the actual archive row is updated by the caller via
+        // /api/archives or /api/archives/[id]/proof once it has the URL.
+      },
     });
+    return NextResponse.json(result);
   } catch (e) {
     // eslint-disable-next-line no-console
-    console.error("[/api/blob/upload] error", e);
+    console.error("[/api/blob/upload] handleUpload error", e);
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Gagal mengunggah ke Blob" },
-      { status: 500 }
+      { status: 400 }
     );
   }
 }

@@ -58,6 +58,7 @@ export default async function GeneratePage() {
             letterTypes={letterTypes}
             defaultUnitId={session.unitId ?? visibleUnits[0]?.id ?? ""}
             isUser={session.role === "USER"}
+            sessionUserId={session.userId}
           />
         </CardContent>
       </Card>

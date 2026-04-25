@@ -43,6 +43,7 @@ export default async function ArchivesPage() {
         letterTypes={letterTypes}
         role={session.role}
         sessionUnitId={session.unitId}
+        sessionUserId={session.userId}
       />
     </div>
   );
