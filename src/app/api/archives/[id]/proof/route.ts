@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { audit } from "@/lib/audit";
+import { deleteFromBlob } from "@/lib/blob";
 import { serialiseArchive } from "../../serialise";
 
 const MAX_DATA_URL_LEN = 4 * 1024 * 1024;
@@ -92,13 +93,17 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     (session.role === "USER" && archive.createdById === session.userId);
   if (!canUpload) return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
 
+  // Capture old blob pathname so we can clean it up post-commit if it changed.
+  const previousBlobPathname = archive.blobPathname;
+  const newBlobPathname = parsed.data.blobPathname ?? null;
+
   const updated = await prisma.$transaction(async (tx) => {
     const u = await tx.archive.update({
       where: { id: archive.id },
       data: {
         fileName: parsed.data.fileName,
         fileUrl: parsed.data.fileUrl ?? null,
-        blobPathname: parsed.data.blobPathname ?? null,
+        blobPathname: newBlobPathname,
         fileDataUrl: parsed.data.fileUrl ? null : parsed.data.fileDataUrl ?? null,
         status: archive.status === "PENDING_PROOF" ? "ISSUED" : archive.status,
       },
@@ -122,6 +127,16 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     );
     return u;
   });
+
+  // Best-effort cleanup of the orphaned blob, after the DB commit. A failure
+  // here must not roll back the upload.
+  if (previousBlobPathname && previousBlobPathname !== newBlobPathname) {
+    try {
+      await deleteFromBlob(previousBlobPathname);
+    } catch (e) {
+      console.warn("[/api/archives/[id]/proof] failed to delete old blob", previousBlobPathname, e);
+    }
+  }
 
   return NextResponse.json({ archive: serialiseArchive(updated) });
 }
