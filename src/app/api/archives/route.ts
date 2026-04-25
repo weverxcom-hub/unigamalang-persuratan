@@ -48,9 +48,12 @@ export async function GET(req: Request) {
     where.deletedAt = null;
   }
   if (session.role !== "SUPER_ADMIN" && session.unitId) {
+    // Non-superadmin users are strictly scoped to their own unit; the unitId
+    // query param is ignored to prevent IDOR.
     where.unitId = session.unitId;
+  } else if (unitId) {
+    where.unitId = unitId;
   }
-  if (unitId) where.unitId = unitId;
   if (letterTypeId) where.letterTypeId = letterTypeId;
   if (direction === "OUTGOING" || direction === "INCOMING") where.direction = direction;
   if (status) where.status = status as Prisma.ArchiveWhereInput["status"];

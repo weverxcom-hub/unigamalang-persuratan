@@ -169,7 +169,7 @@ export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Prop
               ...a,
               status: updated.status,
               fileName: updated.fileName,
-              hasProof: !!updated.fileDataUrl,
+              hasProof: !!(updated.fileUrl || updated.fileDataUrl),
             }
           : a
       )
@@ -803,7 +803,7 @@ function ProofViewDialog({
           setDataUrl(null);
           return;
         }
-        setDataUrl(data.fileDataUrl ?? null);
+        setDataUrl(data.fileUrl ?? data.fileDataUrl ?? null);
         setFileName(data.fileName ?? null);
       })
       .catch(() => {
@@ -817,7 +817,9 @@ function ProofViewDialog({
     };
   }, [archive]);
 
-  const isPdf = dataUrl?.startsWith("data:application/pdf");
+  const isPdf =
+    !!dataUrl &&
+    (dataUrl.startsWith("data:application/pdf") || /\.pdf(\?|#|$)/i.test(dataUrl));
 
   return (
     <Dialog open={!!archive} onOpenChange={onOpenChange}>
