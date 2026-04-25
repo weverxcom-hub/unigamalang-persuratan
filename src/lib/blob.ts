@@ -5,7 +5,10 @@
 
 import { del, put, type PutCommandOptions } from "@vercel/blob";
 
-export const BLOB_AVAILABLE = !!process.env.BLOB_READ_WRITE_TOKEN || !!process.env.VERCEL;
+// Only the explicit Blob token is reliable. `process.env.VERCEL` is always
+// "1" on every Vercel deployment, so we cannot use it to infer that a Blob
+// store has been provisioned.
+export const BLOB_AVAILABLE = !!process.env.BLOB_READ_WRITE_TOKEN;
 
 export interface UploadedBlob {
   url: string;

@@ -72,24 +72,28 @@ export async function GET(req: Request) {
     }));
   }
 
+  // Explicit date range (dateFrom/dateTo) takes precedence over the year
+  // dropdown; mixing the two silently produced incorrect bounds.
   const dateFilter: Prisma.DateTimeFilter = {};
-  if (year) {
+  const hasExplicitRange = Boolean(dateFrom || dateTo);
+  if (hasExplicitRange) {
+    if (dateFrom) {
+      const d = new Date(dateFrom);
+      if (!Number.isNaN(d.getTime())) dateFilter.gte = d;
+    }
+    if (dateTo) {
+      const d = new Date(dateTo);
+      if (!Number.isNaN(d.getTime())) {
+        // treat dateTo as inclusive end-of-day
+        d.setUTCHours(23, 59, 59, 999);
+        dateFilter.lte = d;
+      }
+    }
+  } else if (year) {
     const y = Number(year);
     if (!Number.isNaN(y)) {
       dateFilter.gte = new Date(Date.UTC(y, 0, 1));
       dateFilter.lt = new Date(Date.UTC(y + 1, 0, 1));
-    }
-  }
-  if (dateFrom) {
-    const d = new Date(dateFrom);
-    if (!Number.isNaN(d.getTime())) dateFilter.gte = d;
-  }
-  if (dateTo) {
-    const d = new Date(dateTo);
-    if (!Number.isNaN(d.getTime())) {
-      // treat dateTo as inclusive end-of-day
-      d.setUTCHours(23, 59, 59, 999);
-      dateFilter.lte = d;
     }
   }
   if (Object.keys(dateFilter).length > 0) where.date = dateFilter;
