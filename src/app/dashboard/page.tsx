@@ -19,8 +19,8 @@ export default async function DashboardHome() {
 
   const archiveScope = {
     deletedAt: null,
-    ...(session.role !== "SUPER_ADMIN" && session.unitId
-      ? { unitId: session.unitId }
+    ...(session.role !== "SUPER_ADMIN"
+      ? { unitId: session.unitId ?? "__no_unit__" }
       : {}),
   } as const;
 

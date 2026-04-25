@@ -47,10 +47,12 @@ export async function GET(req: Request) {
   if (!(includeDeleted && session.role === "SUPER_ADMIN")) {
     where.deletedAt = null;
   }
-  if (session.role !== "SUPER_ADMIN" && session.unitId) {
+  if (session.role !== "SUPER_ADMIN") {
     // Non-superadmin users are strictly scoped to their own unit; the unitId
-    // query param is ignored to prevent IDOR.
-    where.unitId = session.unitId;
+    // query param is ignored to prevent IDOR. If they have no unit assigned
+    // (session.unitId === null), they see no archives — fail closed rather
+    // than open.
+    where.unitId = session.unitId ?? "__no_unit__";
   } else if (unitId) {
     where.unitId = unitId;
   }
@@ -171,11 +173,13 @@ export async function POST(req: Request) {
   }
   const input = parsed.data;
 
-  if (session.role !== "SUPER_ADMIN" && session.unitId && session.unitId !== input.unitId) {
-    return NextResponse.json(
-      { error: "Anda hanya dapat mengarsipkan surat untuk unit Anda sendiri" },
-      { status: 403 }
-    );
+  if (session.role !== "SUPER_ADMIN") {
+    if (!session.unitId || session.unitId !== input.unitId) {
+      return NextResponse.json(
+        { error: "Anda hanya dapat mengarsipkan surat untuk unit Anda sendiri" },
+        { status: 403 }
+      );
+    }
   }
 
   const [unit, letterType] = await Promise.all([

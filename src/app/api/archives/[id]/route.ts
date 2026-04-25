@@ -17,7 +17,9 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
 
-  const archive = await prisma.archive.findUnique({ where: { id: params.id } });
+  const archive = await prisma.archive.findFirst({
+    where: { id: params.id, deletedAt: null },
+  });
   if (!archive) return NextResponse.json({ error: "Arsip tidak ditemukan" }, { status: 404 });
 
   const canRead =
