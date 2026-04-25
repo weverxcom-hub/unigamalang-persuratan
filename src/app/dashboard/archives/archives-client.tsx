@@ -308,7 +308,8 @@ export function ArchivesClient({
                   </div>
                   <p className="mt-2 font-medium">{a.subject}</p>
                   <p className="text-xs text-muted-foreground">
-                    {a.direction === "OUTGOING" ? "Tujuan" : "Pengirim"}: {a.recipient}
+                    {a.direction === "OUTGOING" ? "Tujuan" : "Pengirim"}:{" "}
+                    {a.direction === "INCOMING" ? a.externalSender ?? a.recipient : a.recipient}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {formatDate(a.date)} · {a.unitCode}
@@ -380,8 +381,11 @@ export function ArchivesClient({
                       <TableCell className="max-w-[240px] truncate font-medium" title={a.subject}>
                         {a.subject}
                       </TableCell>
-                      <TableCell className="max-w-[180px] truncate text-sm" title={a.recipient}>
-                        {a.recipient}
+                      <TableCell
+                        className="max-w-[180px] truncate text-sm"
+                        title={a.direction === "INCOMING" ? a.externalSender ?? a.recipient : a.recipient}
+                      >
+                        {a.direction === "INCOMING" ? a.externalSender ?? a.recipient : a.recipient}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">{a.unitCode}</Badge>
