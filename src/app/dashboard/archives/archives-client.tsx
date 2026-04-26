@@ -44,6 +44,7 @@ import {
   FileText,
   Send,
   Printer,
+  Download,
 } from "lucide-react";
 import type { Archive, ArchiveListItem, ArchiveStatus, Role } from "@/lib/types";
 import {
@@ -66,13 +67,15 @@ const YEAR_OPTIONS = (() => {
   return [curr, curr - 1, curr - 2, curr - 3];
 })();
 
-function buildPrintUrl(filters: {
+function buildArchiveQuery(filters: {
   q?: string;
   unitId?: string;
   letterTypeId?: string;
   year?: string;
   direction?: string;
-}) {
+  dateFrom?: string;
+  dateTo?: string;
+}): string {
   const params = new URLSearchParams();
   if (filters.q) params.set("q", filters.q);
   if (filters.unitId && filters.unitId !== "__all") params.set("unitId", filters.unitId);
@@ -81,8 +84,22 @@ function buildPrintUrl(filters: {
   if (filters.year && filters.year !== "__all") params.set("year", filters.year);
   if (filters.direction && filters.direction !== "__all")
     params.set("direction", filters.direction);
-  const qs = params.toString();
+  if (filters.dateFrom) params.set("dateFrom", filters.dateFrom);
+  if (filters.dateTo) params.set("dateTo", filters.dateTo);
+  return params.toString();
+}
+
+function buildPrintUrl(filters: Parameters<typeof buildArchiveQuery>[0]) {
+  const qs = buildArchiveQuery(filters);
   return qs ? `/print/archives?${qs}` : "/print/archives";
+}
+
+function buildExportUrl(
+  filters: Parameters<typeof buildArchiveQuery>[0],
+  format: "csv" | "xlsx"
+) {
+  const qs = buildArchiveQuery(filters);
+  return `/api/archives/export?format=${format}${qs ? `&${qs}` : ""}`;
 }
 
 const STATUS_LABEL: Record<ArchiveStatus, string> = {
@@ -215,6 +232,24 @@ export function ArchivesClient({
             <CardTitle>Daftar Arsip</CardTitle>
           </div>
           <div className="flex flex-wrap gap-2 md:justify-end">
+            <Button variant="outline" type="button" asChild>
+              <a
+                href={buildExportUrl({ q, unitId, letterTypeId, year, direction, dateFrom, dateTo }, "csv")}
+                rel="noreferrer"
+              >
+                <Download className="h-4 w-4" />
+                CSV
+              </a>
+            </Button>
+            <Button variant="outline" type="button" asChild>
+              <a
+                href={buildExportUrl({ q, unitId, letterTypeId, year, direction, dateFrom, dateTo }, "xlsx")}
+                rel="noreferrer"
+              >
+                <Download className="h-4 w-4" />
+                Excel
+              </a>
+            </Button>
             <Button variant="outline" type="button" asChild>
               <a href={buildPrintUrl({ q, unitId, letterTypeId, year, direction })} target="_blank" rel="noreferrer">
                 <Printer className="h-4 w-4" />
@@ -1081,13 +1116,28 @@ function ManualArchiveDialog({
           </div>
 
           <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="m-number">Nomor Surat (manual, opsional)</Label>
+            <Label htmlFor="m-number">
+              {direction === "INCOMING"
+                ? "Nomor Surat (salin dari surat instansi pengirim)"
+                : "Nomor Surat (manual, opsional)"}
+            </Label>
             <Input
               id="m-number"
               value={manualNumber}
-              placeholder="Kosongkan untuk membuat nomor baru otomatis"
+              placeholder={
+                direction === "INCOMING"
+                  ? "Mis. 123/A.1/UND/IV/2026 (sesuai surat aslinya)"
+                  : "Kosongkan untuk membuat nomor baru otomatis"
+              }
               onChange={(e) => setManualNumber(e.target.value)}
+              required={direction === "INCOMING"}
             />
+            {direction === "INCOMING" && (
+              <p className="text-[11px] text-muted-foreground">
+                Surat masuk berasal dari instansi luar &mdash; sistem tidak meng-auto-generate nomor.
+                Salin persis nomor pada surat aslinya.
+              </p>
+            )}
           </div>
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="m-subject">Perihal</Label>
