@@ -115,6 +115,11 @@ export async function GET(req: Request) {
 const MAX_DATA_URL_LEN = 4 * 1024 * 1024; // ~3MB binary (base64 adds ~33%)
 const DATA_URL_PATTERN = /^data:(image\/(png|jpe?g|webp|gif)|application\/pdf);base64,/i;
 const BLOB_URL_PATTERN = /^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\//i;
+const GDRIVE_URL_PATTERN = /^https:\/\/(drive|docs)\.google\.com\//i;
+const FILE_URL_PATTERN = new RegExp(
+  `(${BLOB_URL_PATTERN.source})|(${GDRIVE_URL_PATTERN.source})`,
+  "i"
+);
 
 const createSchema = z
   .object({
@@ -129,10 +134,13 @@ const createSchema = z
     // Either an uploaded Blob URL (preferred) OR legacy inline base64.
     fileUrl: z
       .string()
-      .regex(BLOB_URL_PATTERN, { message: "fileUrl harus dari Vercel Blob" })
+      .regex(FILE_URL_PATTERN, {
+        message: "fileUrl harus dari Google Drive atau Vercel Blob",
+      })
       .nullable()
       .optional(),
     blobPathname: z.string().max(500).nullable().optional(),
+    gdriveFileId: z.string().max(120).nullable().optional(),
     fileDataUrl: z
       .string()
       .regex(DATA_URL_PATTERN, {
@@ -235,6 +243,7 @@ export async function POST(req: Request) {
         fileName: input.fileName ?? null,
         fileUrl: input.fileUrl ?? null,
         blobPathname: input.blobPathname ?? null,
+        gdriveFileId: input.gdriveFileId ?? null,
         fileDataUrl: input.fileUrl ? null : input.fileDataUrl ?? null,
         createdById: session.userId,
       },

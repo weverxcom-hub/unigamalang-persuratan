@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { audit } from "@/lib/audit";
 import { deleteFromBlob } from "@/lib/blob";
+import { deleteFile as deleteGdriveFile } from "@/lib/gdrive";
 import { serialiseArchive } from "../serialise";
 
 function clientIp(req: Request): string | null {
@@ -75,6 +76,9 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 
   if (archive.blobPathname) {
     await deleteFromBlob(archive.blobPathname);
+  }
+  if (archive.gdriveFileId) {
+    await deleteGdriveFile(archive.gdriveFileId);
   }
 
   return NextResponse.json({ ok: true });

@@ -898,8 +898,16 @@ function ProofViewDialog({
     };
   }, [archive]);
 
+  const isGdrive = !!dataUrl && /^https:\/\/(drive|docs)\.google\.com\//i.test(dataUrl);
+  // Drive webViewLink (`/file/d/<id>/view`) cannot be iframed, but the
+  // sibling `/preview` URL has a permissive frame policy and works for
+  // both images and PDFs.
+  const gdrivePreview = isGdrive
+    ? dataUrl!.replace(/\/view(\?[^#]*)?$/, "/preview")
+    : null;
   const isPdf =
     !!dataUrl &&
+    !isGdrive &&
     (dataUrl.startsWith("data:application/pdf") || /\.pdf(\?|#|$)/i.test(dataUrl));
 
   return (
@@ -921,7 +929,28 @@ function ProofViewDialog({
             {error}
           </p>
         ) : dataUrl ? (
-          isPdf ? (
+          isGdrive ? (
+            <div className="space-y-2">
+              <iframe
+                src={gdrivePreview!}
+                className="h-[70vh] w-full rounded-md border"
+                title="Pratinjau Google Drive"
+                allow="autoplay"
+              />
+              <p className="text-xs text-muted-foreground">
+                Tersimpan di Google Drive.{" "}
+                <a
+                  href={dataUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline hover:text-foreground"
+                >
+                  Buka di tab baru
+                </a>
+                .
+              </p>
+            </div>
+          ) : isPdf ? (
             <iframe
               src={dataUrl}
               className="h-[70vh] w-full rounded-md border"
