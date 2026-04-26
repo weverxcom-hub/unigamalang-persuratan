@@ -17,6 +17,7 @@ import {
   ChevronsRight,
   LogOut,
   Settings,
+  UserCog,
 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,10 @@ const PRIMARY_NAV: NavItem[] = [
   { href: "/dashboard/archives", label: "Pengarsipan", icon: FileStack },
   { href: "/dashboard/generate", label: "Nomor Surat", icon: Hash },
   { href: "/dashboard/panduan", label: "Panduan", icon: BookOpen },
+];
+
+const ACCOUNT_NAV: NavItem[] = [
+  { href: "/dashboard/profile", label: "Profil Saya", icon: UserCog },
 ];
 
 const ADMIN_NAV: NavItem[] = [
@@ -126,6 +131,13 @@ export function DashboardShell({
         <SidebarHeader collapsed={collapsed} onClose={() => setMobileOpen(false)} />
         <nav className="flex-1 overflow-y-auto px-2 py-3">
           <SidebarSection collapsed={collapsed} items={PRIMARY_NAV} onNavigate={() => setMobileOpen(false)} />
+          <SidebarSection
+            title="Akun"
+            icon={UserCog}
+            collapsed={collapsed}
+            items={ACCOUNT_NAV}
+            onNavigate={() => setMobileOpen(false)}
+          />
           {canManage && (
             <SidebarSection
               title="Pengaturan"
@@ -200,16 +212,27 @@ export function DashboardShell({
 function SidebarHeader({ collapsed, onClose }: { collapsed: boolean; onClose: () => void }) {
   return (
     <div className="flex h-14 items-center gap-2 border-b px-3">
-      <Link href="/dashboard" className="flex items-center gap-2 overflow-hidden" aria-label="Beranda">
-        <Logo size={32} />
+      <Link
+        href="/dashboard"
+        className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden"
+        aria-label="Beranda Sistem Persuratan Universitas Gajayana"
+      >
+        <Logo size={32} showWordmark={false} />
         {!collapsed && (
-          <span className="truncate text-sm font-semibold tracking-tight">unigamalang</span>
+          <span className="flex min-w-0 flex-col leading-tight">
+            <span className="truncate text-sm font-semibold tracking-tight">
+              Universitas Gajayana
+            </span>
+            <span className="truncate text-[11px] uppercase tracking-widest text-muted-foreground">
+              Sistem Persuratan
+            </span>
+          </span>
         )}
       </Link>
       <Button
         variant="ghost"
         size="icon"
-        className="ml-auto lg:hidden"
+        className="lg:hidden"
         aria-label="Tutup menu"
         onClick={onClose}
       >
