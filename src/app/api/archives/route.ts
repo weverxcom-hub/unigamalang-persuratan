@@ -190,8 +190,11 @@ export async function POST(req: Request) {
     prisma.unit.findUnique({ where: { id: input.unitId } }),
     prisma.letterType.findUnique({ where: { id: input.letterTypeId } }),
   ]);
-  if (!unit || !letterType) {
-    return NextResponse.json({ error: "Unit atau jenis surat tidak ditemukan" }, { status: 400 });
+  if (!unit || unit.deletedAt) {
+    return NextResponse.json({ error: "Unit tidak ditemukan atau telah dinonaktifkan" }, { status: 400 });
+  }
+  if (!letterType || letterType.deletedAt) {
+    return NextResponse.json({ error: "Jenis surat tidak ditemukan atau telah dinonaktifkan" }, { status: 400 });
   }
 
   const isManualArchive = Boolean(input.manualNumber && input.manualNumber.trim().length > 0);
