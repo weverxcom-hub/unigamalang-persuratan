@@ -143,16 +143,16 @@ export async function GET(req: Request) {
     take: 5000,
   });
 
+  // Build raw rows; per-format escaping is applied at output time so the CSV
+  // and XLSX paths each get exactly one layer of formula-injection guard.
   const rows: Row[] = archives.map((a) => ({
     date: fmtDate(a.date),
-    number: xlsxSafe(a.number),
+    number: a.number,
     direction: DIRECTION_LABEL[a.direction] ?? a.direction,
-    subject: xlsxSafe(a.subject),
-    partner: xlsxSafe(
-      a.direction === "INCOMING" ? a.externalSender ?? a.recipient : a.recipient
-    ),
-    unitCode: xlsxSafe(a.unitCode),
-    letterTypeCode: xlsxSafe(a.letterTypeCode),
+    subject: a.subject,
+    partner: a.direction === "INCOMING" ? a.externalSender ?? a.recipient : a.recipient,
+    unitCode: a.unitCode,
+    letterTypeCode: a.letterTypeCode,
     status: STATUS_LABEL[a.status] ?? a.status,
     hasProof: a.fileUrl || a.fileDataUrl ? "Ya" : "Tidak",
   }));
@@ -178,7 +178,16 @@ export async function GET(req: Request) {
     ];
     ws.getRow(1).font = { bold: true };
     ws.getRow(1).alignment = { vertical: "middle" };
-    rows.forEach((r) => ws.addRow(r));
+    rows.forEach((r) =>
+      ws.addRow({
+        ...r,
+        number: xlsxSafe(r.number),
+        subject: xlsxSafe(r.subject),
+        partner: xlsxSafe(r.partner),
+        unitCode: xlsxSafe(r.unitCode),
+        letterTypeCode: xlsxSafe(r.letterTypeCode),
+      })
+    );
     ws.autoFilter = {
       from: { row: 1, column: 1 },
       to: { row: rows.length + 1, column: 9 },

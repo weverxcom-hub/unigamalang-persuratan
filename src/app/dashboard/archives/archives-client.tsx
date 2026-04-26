@@ -251,7 +251,7 @@ export function ArchivesClient({
               </a>
             </Button>
             <Button variant="outline" type="button" asChild>
-              <a href={buildPrintUrl({ q, unitId, letterTypeId, year, direction })} target="_blank" rel="noreferrer">
+              <a href={buildPrintUrl({ q, unitId, letterTypeId, year, direction, dateFrom, dateTo })} target="_blank" rel="noreferrer">
                 <Printer className="h-4 w-4" />
                 Cetak
               </a>
