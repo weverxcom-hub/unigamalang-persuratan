@@ -33,6 +33,9 @@ export interface Unit {
   name: string;
   formatTemplate: string;
   createdAt: string;
+  /** Last allocated sequence number for the current year. Optional because
+   *  some callers (e.g. seed scripts) don't carry sequence state. */
+  currentYearLast?: number;
 }
 
 export interface LetterType {

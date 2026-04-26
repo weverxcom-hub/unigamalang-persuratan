@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { formatDate } from "@/lib/utils";
 import type { Unit } from "@/lib/types";
-import { Plus, Pencil, Trash2, Printer, RotateCcw } from "lucide-react";
+import { Plus, Pencil, Trash2, Printer, RotateCcw, Hash } from "lucide-react";
 
 interface Props {
   initialUnits: Unit[];
@@ -41,6 +41,7 @@ export function UnitsClient({ initialUnits, initialInactive = [] }: Props) {
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState<Unit | null>(null);
   const [deleting, setDeleting] = useState<Unit | null>(null);
+  const [setLastFor, setSetLastFor] = useState<Unit | null>(null);
 
   async function reactivate(u: Unit) {
     if (!confirm(`Aktifkan kembali unit ${u.code} (${u.name})?`)) return;
@@ -150,8 +151,9 @@ export function UnitsClient({ initialUnits, initialInactive = [] }: Props) {
               <TableHead className="w-[120px]">Kode</TableHead>
               <TableHead>Nama Unit</TableHead>
               <TableHead className="hidden lg:table-cell">Template Nomor</TableHead>
+              <TableHead className="w-[140px]">No. Terakhir</TableHead>
               <TableHead className="w-[160px]">Dibuat</TableHead>
-              <TableHead className="w-[150px] text-right">Aksi</TableHead>
+              <TableHead className="w-[230px] text-right">Aksi</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -164,10 +166,23 @@ export function UnitsClient({ initialUnits, initialInactive = [] }: Props) {
                 <TableCell className="hidden font-mono text-xs text-muted-foreground lg:table-cell">
                   {u.formatTemplate}
                 </TableCell>
+                <TableCell className="text-sm tabular-nums">
+                  <span className="font-medium">{u.currentYearLast ?? 0}</span>
+                  <span className="ml-1 text-xs text-muted-foreground">({new Date().getFullYear()})</span>
+                </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
                   {formatDate(u.createdAt)}
                 </TableCell>
                 <TableCell className="text-right">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setSetLastFor(u)}
+                    aria-label={`Atur nomor terakhir ${u.code}`}
+                  >
+                    <Hash className="h-3.5 w-3.5" />
+                    Atur No.
+                  </Button>
                   <Button
                     size="sm"
                     variant="ghost"
@@ -192,7 +207,7 @@ export function UnitsClient({ initialUnits, initialInactive = [] }: Props) {
             ))}
             {units.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="py-8 text-center text-sm text-muted-foreground">
+                <TableCell colSpan={6} className="py-8 text-center text-sm text-muted-foreground">
                   Belum ada unit. Tambahkan menggunakan form di atas.
                 </TableCell>
               </TableRow>
@@ -250,7 +265,103 @@ export function UnitsClient({ initialUnits, initialInactive = [] }: Props) {
           }}
         />
       )}
+      {setLastFor && (
+        <SetLastDialog
+          unit={setLastFor}
+          onClose={() => setSetLastFor(null)}
+          onSaved={(newLast) => {
+            setUnits((prev) =>
+              prev.map((u) =>
+                u.id === setLastFor.id ? { ...u, currentYearLast: newLast } : u
+              )
+            );
+            setSetLastFor(null);
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+function SetLastDialog({
+  unit,
+  onClose,
+  onSaved,
+}: {
+  unit: Unit;
+  onClose: () => void;
+  onSaved: (newLast: number) => void;
+}) {
+  const year = new Date().getFullYear();
+  const [last, setLast] = useState(String(unit.currentYearLast ?? 0));
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    const n = Number(last);
+    if (!Number.isInteger(n) || n < 0) {
+      setError("Nomor harus berupa bilangan bulat non-negatif");
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await fetch("/api/numbering/sequence", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ unitId: unit.id, year, last: n }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error ?? "Gagal menyimpan");
+      onSaved(data.last);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Gagal menyimpan");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Atur Nomor Terakhir &mdash; {unit.code}</DialogTitle>
+          <DialogDescription>
+            Setel nomor urut terakhir untuk tahun {year}. Generate berikutnya akan menghasilkan
+            angka <span className="font-semibold">{Number(last) + 1 || 1}</span>. Berguna saat sistem
+            mulai dipakai di tengah tahun untuk melanjutkan dari penomoran manual lama.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={onSubmit} className="grid gap-3">
+          <div className="grid gap-1.5">
+            <Label htmlFor="last">Nomor terakhir (tahun {year})</Label>
+            <Input
+              id="last"
+              type="number"
+              min={0}
+              max={99999}
+              value={last}
+              onChange={(e) => setLast(e.target.value)}
+              required
+            />
+            <p className="text-xs text-muted-foreground">
+              Mis. ketik <span className="font-mono">65</span> jika nomor terakhir yang sudah keluar
+              adalah 65 &mdash; generate berikutnya akan menjadi 066.
+            </p>
+          </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose} disabled={busy}>
+              Batal
+            </Button>
+            <Button type="submit" disabled={busy}>
+              {busy ? "Menyimpan…" : "Simpan"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
