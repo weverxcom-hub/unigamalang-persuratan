@@ -13,7 +13,11 @@ export default async function UsersPage() {
   if (session.role !== "SUPER_ADMIN") redirect("/dashboard");
 
   const [usersRaw, unitsRaw] = await Promise.all([
-    prisma.user.findMany({ orderBy: [{ deletedAt: "asc" }, { name: "asc" }] }),
+    // Active users first (deletedAt = NULL), then deactivated. Postgres puts
+    // NULLs last by default, so we override to NULLS FIRST.
+    prisma.user.findMany({
+      orderBy: [{ deletedAt: { sort: "asc", nulls: "first" } }, { name: "asc" }],
+    }),
     prisma.unit.findMany({ where: { deletedAt: null }, orderBy: { code: "asc" } }),
   ]);
 
