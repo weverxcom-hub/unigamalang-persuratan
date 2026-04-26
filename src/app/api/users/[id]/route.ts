@@ -39,6 +39,10 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   if (!existing) {
     return NextResponse.json({ error: "Pengguna tidak ditemukan" }, { status: 404 });
   }
+  // Reject silent edits to deactivated accounts (consistent with units / letter-types).
+  if (existing.deletedAt && !parsed.data.reactivate) {
+    return NextResponse.json({ error: "Akun telah dinonaktifkan" }, { status: 404 });
+  }
   if (parsed.data.unitId) {
     const unit = await prisma.unit.findUnique({ where: { id: parsed.data.unitId } });
     if (!unit || unit.deletedAt) {
