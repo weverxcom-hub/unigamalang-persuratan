@@ -96,8 +96,11 @@ export async function registerUser(params: {
     throw new Error("Email sudah terdaftar");
   }
 
-  if (params.unitId) {
-    const unit = await prisma.unit.findUnique({ where: { id: params.unitId } });
+  // Defensive: empty-string unitId from any caller is normalised to null
+  // so we don't slip past the truthiness check and crash on FK P2003.
+  const unitId = params.unitId === "" ? null : params.unitId ?? null;
+  if (unitId) {
+    const unit = await prisma.unit.findUnique({ where: { id: unitId } });
     if (!unit || unit.deletedAt) {
       throw new Error("Unit tidak ditemukan atau telah dinonaktifkan");
     }
@@ -109,7 +112,7 @@ export async function registerUser(params: {
       name: params.name,
       passwordHash: bcrypt.hashSync(params.password, 10),
       role: params.role ?? "USER",
-      unitId: params.unitId,
+      unitId,
     },
   });
 }

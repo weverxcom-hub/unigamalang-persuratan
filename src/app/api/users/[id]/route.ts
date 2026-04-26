@@ -10,7 +10,8 @@ const ROLES = ["SUPER_ADMIN", "ADMIN_UNIT", "USER"] as const;
 const patchSchema = z.object({
   name: z.string().min(2).optional(),
   role: z.enum(ROLES).optional(),
-  unitId: z.string().nullable().optional(),
+  // Empty string => null (avoid FK P2003 crash when UI picks "Tidak terikat").
+  unitId: z.preprocess((v) => (v === "" ? null : v), z.string().nullable().optional()),
   password: z.string().min(8, "Kata sandi minimal 8 karakter").optional(),
   // Reactivate (clear deletedAt). Cannot be combined with deactivation —
   // explicit DELETE handles that.

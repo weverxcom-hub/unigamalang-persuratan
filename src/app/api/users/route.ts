@@ -64,7 +64,10 @@ const createSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8, "Kata sandi minimal 8 karakter"),
   role: z.enum(ROLES),
-  unitId: z.string().nullable().optional(),
+  // Treat empty string as null so that picking "Tidak terikat" in the UI
+  // (which submits "") doesn't slip past the FK validation below and
+  // crash with P2003.
+  unitId: z.preprocess((v) => (v === "" ? null : v), z.string().nullable().optional()),
 });
 
 /**
