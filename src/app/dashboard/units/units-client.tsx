@@ -241,7 +241,11 @@ export function UnitsClient({ initialUnits, initialInactive = [] }: Props) {
           unit={deleting}
           onClose={() => setDeleting(null)}
           onDeleted={() => {
-            setUnits((prev) => prev.filter((x) => x.id !== deleting.id));
+            const deleted = deleting;
+            setUnits((prev) => prev.filter((x) => x.id !== deleted.id));
+            setInactive((prev) =>
+              [...prev, deleted].sort((a, b) => a.code.localeCompare(b.code))
+            );
             setDeleting(null);
           }}
         />

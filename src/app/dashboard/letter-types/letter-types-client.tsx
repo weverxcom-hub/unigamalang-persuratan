@@ -228,7 +228,11 @@ export function LetterTypesClient({ initialLetterTypes, initialInactive = [] }: 
           letterType={deleting}
           onClose={() => setDeleting(null)}
           onDeleted={() => {
-            onDeleted(deleting.id);
+            const deleted = deleting;
+            onDeleted(deleted.id);
+            setInactive((prev) =>
+              [...prev, deleted].sort((a, b) => a.code.localeCompare(b.code))
+            );
             setDeleting(null);
           }}
         />
