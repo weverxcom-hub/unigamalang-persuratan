@@ -74,11 +74,21 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     );
   });
 
+  // Best-effort storage cleanup. Failures here MUST NOT bubble up as a 500;
+  // the DB soft-delete already committed and the user expects success.
   if (archive.blobPathname) {
-    await deleteFromBlob(archive.blobPathname);
+    try {
+      await deleteFromBlob(archive.blobPathname);
+    } catch (e) {
+      console.warn("[/api/archives/[id]] failed to delete blob", archive.blobPathname, e);
+    }
   }
   if (archive.gdriveFileId) {
-    await deleteGdriveFile(archive.gdriveFileId);
+    try {
+      await deleteGdriveFile(archive.gdriveFileId);
+    } catch (e) {
+      console.warn("[/api/archives/[id]] failed to delete gdrive file", archive.gdriveFileId, e);
+    }
   }
 
   return NextResponse.json({ ok: true });

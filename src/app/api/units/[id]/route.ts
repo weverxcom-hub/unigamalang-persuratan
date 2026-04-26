@@ -65,6 +65,12 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       reactivated: !!parsed.data.reactivate,
     },
   });
+  // Include the current year's sequence counter so the client can keep
+  // showing the "No. Terakhir" column without a separate fetch.
+  const currentYear = new Date().getFullYear();
+  const seq = await prisma.numberingSequence.findUnique({
+    where: { unitId_year: { unitId: updated.id, year: currentYear } },
+  });
   return NextResponse.json({
     unit: {
       id: updated.id,
@@ -72,6 +78,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       name: updated.name,
       formatTemplate: updated.formatTemplate,
       createdAt: updated.createdAt.toISOString(),
+      currentYearLast: seq?.last ?? 0,
     },
   });
 }
