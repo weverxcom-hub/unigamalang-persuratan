@@ -12,6 +12,8 @@ const patchSchema = z.object({
     .regex(/^[A-Z0-9.-]+$/, "Kode harus huruf kapital/angka (mis. SK, ST)")
     .optional(),
   name: z.string().min(3).optional(),
+  // Reactivate a soft-deleted letter type (clear deletedAt).
+  reactivate: z.boolean().optional(),
 });
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
@@ -29,8 +31,11 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     );
   }
   const existing = await prisma.letterType.findUnique({ where: { id: params.id } });
-  if (!existing || existing.deletedAt) {
+  if (!existing) {
     return NextResponse.json({ error: "Jenis surat tidak ditemukan" }, { status: 404 });
+  }
+  if (existing.deletedAt && !parsed.data.reactivate) {
+    return NextResponse.json({ error: "Jenis surat telah dinonaktifkan" }, { status: 404 });
   }
   if (parsed.data.code && parsed.data.code !== existing.code) {
     const dup = await prisma.letterType.findUnique({ where: { code: parsed.data.code } });
@@ -38,7 +43,11 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
   const updated = await prisma.letterType.update({
     where: { id: params.id },
-    data: { code: parsed.data.code, name: parsed.data.name },
+    data: {
+      code: parsed.data.code,
+      name: parsed.data.name,
+      ...(parsed.data.reactivate ? { deletedAt: null } : {}),
+    },
   });
   await audit({
     action: "UPDATE",
@@ -46,7 +55,11 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     actorEmail: session.email,
     targetType: "LetterType",
     targetId: updated.id,
-    metadata: { before: { code: existing.code, name: existing.name }, after: { code: updated.code, name: updated.name } },
+    metadata: {
+      before: { code: existing.code, name: existing.name },
+      after: { code: updated.code, name: updated.name },
+      reactivated: !!parsed.data.reactivate,
+    },
   });
   return NextResponse.json({
     letterType: {

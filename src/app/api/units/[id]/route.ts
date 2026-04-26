@@ -13,6 +13,9 @@ const patchSchema = z.object({
     .optional(),
   name: z.string().min(3, "Nama unit minimal 3 karakter").optional(),
   formatTemplate: z.string().min(3).optional(),
+  // Reactivate a soft-deleted unit (clear deletedAt). When true, all other
+  // fields are optional and the operation is purely a status change.
+  reactivate: z.boolean().optional(),
 });
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
@@ -30,8 +33,12 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     );
   }
   const existing = await prisma.unit.findUnique({ where: { id: params.id } });
-  if (!existing || existing.deletedAt) {
+  if (!existing) {
     return NextResponse.json({ error: "Unit tidak ditemukan" }, { status: 404 });
+  }
+  // A soft-deleted unit can only be touched via the explicit `reactivate` flag.
+  if (existing.deletedAt && !parsed.data.reactivate) {
+    return NextResponse.json({ error: "Unit telah dinonaktifkan" }, { status: 404 });
   }
   if (parsed.data.code && parsed.data.code !== existing.code) {
     const dup = await prisma.unit.findUnique({ where: { code: parsed.data.code } });
@@ -43,6 +50,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       code: parsed.data.code,
       name: parsed.data.name,
       formatTemplate: parsed.data.formatTemplate,
+      ...(parsed.data.reactivate ? { deletedAt: null } : {}),
     },
   });
   await audit({
@@ -54,6 +62,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     metadata: {
       before: { code: existing.code, name: existing.name, formatTemplate: existing.formatTemplate },
       after: { code: updated.code, name: updated.name, formatTemplate: updated.formatTemplate },
+      reactivated: !!parsed.data.reactivate,
     },
   });
   return NextResponse.json({

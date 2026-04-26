@@ -22,14 +22,16 @@ import {
 } from "@/components/ui/dialog";
 import { formatDate } from "@/lib/utils";
 import type { LetterType } from "@/lib/types";
-import { Plus, Pencil, Trash2, Printer } from "lucide-react";
+import { Plus, Pencil, Trash2, Printer, RotateCcw } from "lucide-react";
 
 interface Props {
   initialLetterTypes: LetterType[];
+  initialInactive?: LetterType[];
 }
 
-export function LetterTypesClient({ initialLetterTypes }: Props) {
+export function LetterTypesClient({ initialLetterTypes, initialInactive = [] }: Props) {
   const [letterTypes, setLetterTypes] = useState<LetterType[]>(initialLetterTypes);
+  const [inactive, setInactive] = useState<LetterType[]>(initialInactive);
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -66,6 +68,24 @@ export function LetterTypesClient({ initialLetterTypes }: Props) {
 
   function onDeleted(id: string) {
     setLetterTypes((prev) => prev.filter((lt) => lt.id !== id));
+  }
+
+  async function reactivate(lt: LetterType) {
+    if (!confirm(`Aktifkan kembali jenis surat ${lt.code} (${lt.name})?`)) return;
+    const res = await fetch(`/api/letter-types/${lt.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reactivate: true }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      alert(data.error || "Gagal mengaktifkan kembali");
+      return;
+    }
+    setInactive((prev) => prev.filter((x) => x.id !== lt.id));
+    setLetterTypes((prev) =>
+      [...prev, data.letterType].sort((a, b) => a.code.localeCompare(b.code))
+    );
   }
 
   return (
@@ -167,6 +187,31 @@ export function LetterTypesClient({ initialLetterTypes }: Props) {
           </TableBody>
         </Table>
       </div>
+
+      {inactive.length > 0 && (
+        <details className="rounded-md border bg-muted/30">
+          <summary className="cursor-pointer px-4 py-2 text-sm font-medium">
+            Jenis surat dinonaktifkan ({inactive.length})
+          </summary>
+          <div className="divide-y">
+            {inactive.map((lt) => (
+              <div
+                key={lt.id}
+                className="flex items-center justify-between gap-3 px-4 py-2 text-sm"
+              >
+                <div className="flex flex-1 items-center gap-3">
+                  <Badge variant="outline">{lt.code}</Badge>
+                  <span className="text-muted-foreground">{lt.name}</span>
+                </div>
+                <Button size="sm" variant="ghost" onClick={() => reactivate(lt)}>
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Aktifkan kembali
+                </Button>
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
 
       {editing && (
         <EditDialog

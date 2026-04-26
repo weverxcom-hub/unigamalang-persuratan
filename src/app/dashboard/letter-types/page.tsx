@@ -8,16 +8,18 @@ export default async function LetterTypesPage() {
   const session = await getSession();
   if (!session) redirect("/login");
   if (session.role !== "SUPER_ADMIN") redirect("/dashboard");
-  const letterTypesRaw = await prisma.letterType.findMany({
-    where: { deletedAt: null },
-    orderBy: { code: "asc" },
-  });
-  const letterTypes = letterTypesRaw.map((lt) => ({
+  const [activeRaw, inactiveRaw] = await Promise.all([
+    prisma.letterType.findMany({ where: { deletedAt: null }, orderBy: { code: "asc" } }),
+    prisma.letterType.findMany({ where: { deletedAt: { not: null } }, orderBy: { code: "asc" } }),
+  ]);
+  const toDto = (lt: typeof activeRaw[number]) => ({
     id: lt.id,
     code: lt.code,
     name: lt.name,
     createdAt: lt.createdAt.toISOString(),
-  }));
+  });
+  const letterTypes = activeRaw.map(toDto);
+  const inactiveLetterTypes = inactiveRaw.map(toDto);
   return (
     <div className="space-y-6">
       <div>
@@ -32,7 +34,10 @@ export default async function LetterTypesPage() {
           <CardDescription>Kode ini muncul sebagai segmen ketiga pada nomor surat.</CardDescription>
         </CardHeader>
         <CardContent>
-          <LetterTypesClient initialLetterTypes={letterTypes} />
+          <LetterTypesClient
+            initialLetterTypes={letterTypes}
+            initialInactive={inactiveLetterTypes}
+          />
         </CardContent>
       </Card>
     </div>

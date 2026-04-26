@@ -22,16 +22,18 @@ import {
 } from "@/components/ui/dialog";
 import { formatDate } from "@/lib/utils";
 import type { Unit } from "@/lib/types";
-import { Plus, Pencil, Trash2, Printer } from "lucide-react";
+import { Plus, Pencil, Trash2, Printer, RotateCcw } from "lucide-react";
 
 interface Props {
   initialUnits: Unit[];
+  initialInactive?: Unit[];
 }
 
 const DEFAULT_TEMPLATE = "[NO]/[UNIT_CODE]/[TYPE_CODE]/[ROMAN_MONTH]/[YEAR]";
 
-export function UnitsClient({ initialUnits }: Props) {
+export function UnitsClient({ initialUnits, initialInactive = [] }: Props) {
   const [units, setUnits] = useState<Unit[]>(initialUnits);
+  const [inactive, setInactive] = useState<Unit[]>(initialInactive);
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [formatTemplate, setFormatTemplate] = useState("");
@@ -39,6 +41,22 @@ export function UnitsClient({ initialUnits }: Props) {
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState<Unit | null>(null);
   const [deleting, setDeleting] = useState<Unit | null>(null);
+
+  async function reactivate(u: Unit) {
+    if (!confirm(`Aktifkan kembali unit ${u.code} (${u.name})?`)) return;
+    const res = await fetch(`/api/units/${u.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reactivate: true }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      alert(data.error || "Gagal mengaktifkan kembali");
+      return;
+    }
+    setInactive((prev) => prev.filter((x) => x.id !== u.id));
+    setUnits((prev) => [...prev, data.unit].sort((a, b) => a.code.localeCompare(b.code)));
+  }
 
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -182,6 +200,31 @@ export function UnitsClient({ initialUnits }: Props) {
           </TableBody>
         </Table>
       </div>
+
+      {inactive.length > 0 && (
+        <details className="rounded-md border bg-muted/30">
+          <summary className="cursor-pointer px-4 py-2 text-sm font-medium">
+            Unit dinonaktifkan ({inactive.length})
+          </summary>
+          <div className="divide-y">
+            {inactive.map((u) => (
+              <div
+                key={u.id}
+                className="flex items-center justify-between gap-3 px-4 py-2 text-sm"
+              >
+                <div className="flex flex-1 items-center gap-3">
+                  <Badge variant="outline">{u.code}</Badge>
+                  <span className="text-muted-foreground">{u.name}</span>
+                </div>
+                <Button size="sm" variant="ghost" onClick={() => reactivate(u)}>
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Aktifkan kembali
+                </Button>
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
 
       {editing && (
         <EditDialog

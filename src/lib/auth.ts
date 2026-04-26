@@ -35,7 +35,16 @@ export async function verifySession(token: string): Promise<SessionPayload | nul
 export async function getSession(): Promise<SessionPayload | null> {
   const token = cookies().get(COOKIE_NAME)?.value;
   if (!token) return null;
-  return await verifySession(token);
+  const payload = await verifySession(token);
+  if (!payload) return null;
+  // Reject sessions for deactivated accounts. One DB lookup per request, but
+  // gives immediate revocation when an account is soft-deleted.
+  const user = await prisma.user.findUnique({
+    where: { id: payload.userId },
+    select: { deletedAt: true },
+  });
+  if (!user || user.deletedAt) return null;
+  return payload;
 }
 
 export async function setSessionCookie(payload: SessionPayload) {
@@ -85,6 +94,13 @@ export async function registerUser(params: {
       throw new Error("Email pernah terdaftar (akun dinonaktifkan). Hubungi administrator untuk aktivasi ulang.");
     }
     throw new Error("Email sudah terdaftar");
+  }
+
+  if (params.unitId) {
+    const unit = await prisma.unit.findUnique({ where: { id: params.unitId } });
+    if (!unit || unit.deletedAt) {
+      throw new Error("Unit tidak ditemukan atau telah dinonaktifkan");
+    }
   }
 
   return prisma.user.create({
