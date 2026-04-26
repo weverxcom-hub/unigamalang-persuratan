@@ -4,11 +4,14 @@ import ExcelJS from "exceljs";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+// Mirrors the labels in dashboard/archives/archives-client.tsx so the export
+// uses the same Indonesian wording the user sees in the UI.
 const STATUS_LABEL: Record<string, string> = {
+  DRAFT: "Draf",
   PENDING: "Menunggu Persetujuan",
   PENDING_PROOF: "Menunggu Bukti",
+  APPROVED: "Disetujui",
   ISSUED: "Terbit",
-  REVOKED: "Dibatalkan",
 };
 
 const DIRECTION_LABEL: Record<string, string> = {
@@ -30,9 +33,20 @@ interface Row {
 
 function csvEscape(v: string): string {
   if (v == null) return "";
-  // Quote if it contains comma, quote, newline, or starts with whitespace.
-  if (/[",\n\r]/.test(v)) return `"${v.replace(/"/g, '""')}"`;
-  return v;
+  // CSV-injection hardening: cells starting with =, +, -, @, or TAB are
+  // treated as formulas by Excel/LibreOffice. Prefix with a single quote
+  // so the recipient sees the literal string, then quote-escape as usual.
+  let safe = v;
+  if (/^[=+\-@\t]/.test(safe)) safe = "'" + safe;
+  if (/[",\n\r]/.test(safe)) return `"${safe.replace(/"/g, '""')}"`;
+  return safe;
+}
+
+function xlsxSafe(v: string): string {
+  // Same neutralisation for the XLSX rows; ExcelJS doesn't escape formula
+  // characters either.
+  if (v == null) return "";
+  return /^[=+\-@\t]/.test(v) ? "'" + v : v;
 }
 
 function rowToCsv(r: Row): string {
@@ -131,12 +145,14 @@ export async function GET(req: Request) {
 
   const rows: Row[] = archives.map((a) => ({
     date: fmtDate(a.date),
-    number: a.number,
+    number: xlsxSafe(a.number),
     direction: DIRECTION_LABEL[a.direction] ?? a.direction,
-    subject: a.subject,
-    partner: a.direction === "INCOMING" ? a.externalSender ?? a.recipient : a.recipient,
-    unitCode: a.unitCode,
-    letterTypeCode: a.letterTypeCode,
+    subject: xlsxSafe(a.subject),
+    partner: xlsxSafe(
+      a.direction === "INCOMING" ? a.externalSender ?? a.recipient : a.recipient
+    ),
+    unitCode: xlsxSafe(a.unitCode),
+    letterTypeCode: xlsxSafe(a.letterTypeCode),
     status: STATUS_LABEL[a.status] ?? a.status,
     hasProof: a.fileUrl || a.fileDataUrl ? "Ya" : "Tidak",
   }));
