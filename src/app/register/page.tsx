@@ -8,7 +8,10 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export default async function RegisterPage() {
-  const unitsRaw = await prisma.unit.findMany({ orderBy: { code: "asc" } });
+  const unitsRaw = await prisma.unit.findMany({
+    where: { deletedAt: null },
+    orderBy: { code: "asc" },
+  });
   const units = unitsRaw.map((u) => ({ id: u.id, code: u.code, name: u.name }));
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-background via-background to-primary/5">

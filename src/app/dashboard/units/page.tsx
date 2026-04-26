@@ -8,7 +8,10 @@ export default async function UnitsPage() {
   const session = await getSession();
   if (!session) redirect("/login");
   if (session.role !== "SUPER_ADMIN") redirect("/dashboard");
-  const unitsRaw = await prisma.unit.findMany({ orderBy: { code: "asc" } });
+  const unitsRaw = await prisma.unit.findMany({
+    where: { deletedAt: null },
+    orderBy: { code: "asc" },
+  });
   const units = unitsRaw.map((u) => ({
     id: u.id,
     code: u.code,

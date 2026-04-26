@@ -10,8 +10,8 @@ export default async function GeneratePage() {
   if (!session) redirect("/login");
 
   const [unitsRaw, letterTypesRaw] = await Promise.all([
-    prisma.unit.findMany({ orderBy: { code: "asc" } }),
-    prisma.letterType.findMany({ orderBy: { code: "asc" } }),
+    prisma.unit.findMany({ where: { deletedAt: null }, orderBy: { code: "asc" } }),
+    prisma.letterType.findMany({ where: { deletedAt: null }, orderBy: { code: "asc" } }),
   ]);
   const visibleUnits = unitsRaw
     .filter((u) => session.role === "SUPER_ADMIN" || u.id === session.unitId)

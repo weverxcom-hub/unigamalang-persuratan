@@ -154,10 +154,10 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         const u = await prisma.user.findUnique({
           where: { id: disposition.toUserId },
         });
-        if (u) recipients = [{ email: u.email, name: u.name }];
+        if (u && !u.deletedAt) recipients = [{ email: u.email, name: u.name }];
       } else if (disposition.toUnitId) {
         const admins = await prisma.user.findMany({
-          where: { unitId: disposition.toUnitId, role: "ADMIN_UNIT" },
+          where: { unitId: disposition.toUnitId, role: "ADMIN_UNIT", deletedAt: null },
         });
         recipients = admins.map((a) => ({ email: a.email, name: a.name }));
       }

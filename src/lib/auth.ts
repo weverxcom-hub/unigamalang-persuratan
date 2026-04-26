@@ -61,6 +61,8 @@ export async function authenticate(
     where: { email: email.toLowerCase() },
   });
   if (!user) return null;
+  // Deactivated accounts (soft-deleted) cannot log in.
+  if (user.deletedAt) return null;
   const ok = bcrypt.compareSync(password, user.passwordHash);
   return ok ? user : null;
 }
@@ -78,7 +80,12 @@ export async function registerUser(params: {
   const existing = await prisma.user.findUnique({
     where: { email: params.email.toLowerCase() },
   });
-  if (existing) throw new Error("Email sudah terdaftar");
+  if (existing) {
+    if (existing.deletedAt) {
+      throw new Error("Email pernah terdaftar (akun dinonaktifkan). Hubungi administrator untuk aktivasi ulang.");
+    }
+    throw new Error("Email sudah terdaftar");
+  }
 
   return prisma.user.create({
     data: {

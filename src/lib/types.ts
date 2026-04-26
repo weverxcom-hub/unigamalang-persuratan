@@ -24,6 +24,7 @@ export interface User {
   role: Role;
   unitId: string | null;
   createdAt: string;
+  deletedAt?: string | null;
 }
 
 export interface Unit {

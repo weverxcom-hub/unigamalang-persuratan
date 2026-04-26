@@ -266,7 +266,7 @@ export async function POST(req: Request) {
     try {
       if (archive.direction === "INCOMING") {
         const admins = await prisma.user.findMany({
-          where: { unitId: archive.unitId, role: "ADMIN_UNIT" },
+          where: { unitId: archive.unitId, role: "ADMIN_UNIT", deletedAt: null },
         });
         const dateStr = new Date(archive.date).toLocaleDateString("id-ID", {
           day: "2-digit",

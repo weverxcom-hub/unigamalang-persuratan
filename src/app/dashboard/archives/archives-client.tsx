@@ -43,6 +43,7 @@ import {
   Loader2,
   FileText,
   Send,
+  Printer,
 } from "lucide-react";
 import type { Archive, ArchiveListItem, ArchiveStatus, Role } from "@/lib/types";
 import {
@@ -64,6 +65,25 @@ const YEAR_OPTIONS = (() => {
   const curr = new Date().getFullYear();
   return [curr, curr - 1, curr - 2, curr - 3];
 })();
+
+function buildPrintUrl(filters: {
+  q?: string;
+  unitId?: string;
+  letterTypeId?: string;
+  year?: string;
+  direction?: string;
+}) {
+  const params = new URLSearchParams();
+  if (filters.q) params.set("q", filters.q);
+  if (filters.unitId && filters.unitId !== "__all") params.set("unitId", filters.unitId);
+  if (filters.letterTypeId && filters.letterTypeId !== "__all")
+    params.set("letterTypeId", filters.letterTypeId);
+  if (filters.year && filters.year !== "__all") params.set("year", filters.year);
+  if (filters.direction && filters.direction !== "__all")
+    params.set("direction", filters.direction);
+  const qs = params.toString();
+  return qs ? `/print/archives?${qs}` : "/print/archives";
+}
 
 const STATUS_LABEL: Record<ArchiveStatus, string> = {
   DRAFT: "Draf",
@@ -194,10 +214,18 @@ export function ArchivesClient({
             <ArchiveIcon className="h-5 w-5 text-primary" />
             <CardTitle>Daftar Arsip</CardTitle>
           </div>
-          <Button onClick={() => setDialogOpen(true)} className="w-full md:w-auto">
-            <Plus className="h-4 w-4" />
-            Arsipkan Surat (Lama / Masuk)
-          </Button>
+          <div className="flex flex-wrap gap-2 md:justify-end">
+            <Button variant="outline" type="button" asChild>
+              <a href={buildPrintUrl({ q, unitId, letterTypeId, year, direction })} target="_blank" rel="noreferrer">
+                <Printer className="h-4 w-4" />
+                Cetak
+              </a>
+            </Button>
+            <Button onClick={() => setDialogOpen(true)} className="w-full md:w-auto">
+              <Plus className="h-4 w-4" />
+              Arsipkan Surat (Lama / Masuk)
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-3 md:grid-cols-[1fr_180px_180px_140px_auto]">

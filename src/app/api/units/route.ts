@@ -5,7 +5,10 @@ import { prisma } from "@/lib/prisma";
 import { DEFAULT_FORMAT_TEMPLATE } from "@/lib/format";
 
 export async function GET() {
-  const units = await prisma.unit.findMany({ orderBy: { code: "asc" } });
+  const units = await prisma.unit.findMany({
+    where: { deletedAt: null },
+    orderBy: { code: "asc" },
+  });
   return NextResponse.json({
     units: units.map((u) => ({
       id: u.id,
@@ -46,6 +49,12 @@ export async function POST(req: Request) {
   }
   const existing = await prisma.unit.findUnique({ where: { code: parsed.data.code } });
   if (existing) {
+    if (existing.deletedAt) {
+      return NextResponse.json(
+        { error: "Kode pernah dipakai (unit dinonaktifkan). Aktifkan kembali alih-alih membuat baru." },
+        { status: 409 }
+      );
+    }
     return NextResponse.json({ error: "Kode unit sudah digunakan" }, { status: 409 });
   }
   const unit = await prisma.unit.create({

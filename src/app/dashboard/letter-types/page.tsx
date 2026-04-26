@@ -8,7 +8,10 @@ export default async function LetterTypesPage() {
   const session = await getSession();
   if (!session) redirect("/login");
   if (session.role !== "SUPER_ADMIN") redirect("/dashboard");
-  const letterTypesRaw = await prisma.letterType.findMany({ orderBy: { code: "asc" } });
+  const letterTypesRaw = await prisma.letterType.findMany({
+    where: { deletedAt: null },
+    orderBy: { code: "asc" },
+  });
   const letterTypes = letterTypesRaw.map((lt) => ({
     id: lt.id,
     code: lt.code,
