@@ -1,13 +1,17 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Logo } from "@/components/brand/logo";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SiteFooter } from "@/components/app/footer";
 import { RegisterForm } from "./register-form";
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function RegisterPage() {
+  const session = await getSession();
+  if (session) redirect("/dashboard");
   const unitsRaw = await prisma.unit.findMany({
     where: { deletedAt: null },
     orderBy: { code: "asc" },

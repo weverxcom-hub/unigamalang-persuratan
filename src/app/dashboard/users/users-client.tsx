@@ -128,11 +128,23 @@ export function UsersClient({ initialUsers, units, currentUserId }: Props) {
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button size="sm" variant="ghost" onClick={() => setEditing(u)}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setEditing(u)}
+                      disabled={inactive}
+                      title={inactive ? "Aktifkan kembali akun ini sebelum mengedit" : undefined}
+                    >
                       <Pencil className="h-3.5 w-3.5" />
                       Edit
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => setResetting(u)}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setResetting(u)}
+                      disabled={inactive}
+                      title={inactive ? "Aktifkan kembali akun ini sebelum reset password" : undefined}
+                    >
                       <KeyRound className="h-3.5 w-3.5" />
                       Reset
                     </Button>
