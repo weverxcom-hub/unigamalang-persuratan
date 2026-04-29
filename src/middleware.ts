@@ -22,7 +22,6 @@ export async function middleware(req: NextRequest) {
   const token = req.cookies.get(COOKIE_NAME)?.value;
   const valid = await isValidSession(token);
 
-  const isAuthRoute = pathname.startsWith("/login") || pathname.startsWith("/register");
   const isProtectedRoute = pathname.startsWith("/dashboard");
 
   if (isProtectedRoute && !valid) {
@@ -32,13 +31,12 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (isAuthRoute && valid) {
-    const url = req.nextUrl.clone();
-    url.pathname = "/dashboard";
-    url.search = "";
-    return NextResponse.redirect(url);
-  }
-
+  // Redirecting authenticated users away from /login and /register is handled
+  // by those pages themselves (via getSession, which also rejects deactivated
+  // accounts). Doing it here would cause a redirect loop for soft-deleted
+  // users whose JWT is still cryptographically valid: the dashboard layout's
+  // getSession would redirect to /login, but the middleware would then
+  // redirect right back to /dashboard.
   return NextResponse.next();
 }
 

@@ -1,14 +1,21 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Logo } from "@/components/brand/logo";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SiteFooter } from "@/components/app/footer";
 import { RegisterForm } from "./register-form";
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function RegisterPage() {
-  const unitsRaw = await prisma.unit.findMany({ orderBy: { code: "asc" } });
+  const session = await getSession();
+  if (session) redirect("/dashboard");
+  const unitsRaw = await prisma.unit.findMany({
+    where: { deletedAt: null },
+    orderBy: { code: "asc" },
+  });
   const units = unitsRaw.map((u) => ({ id: u.id, code: u.code, name: u.name }));
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-background via-background to-primary/5">

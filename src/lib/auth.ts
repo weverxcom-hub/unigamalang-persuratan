@@ -35,7 +35,16 @@ export async function verifySession(token: string): Promise<SessionPayload | nul
 export async function getSession(): Promise<SessionPayload | null> {
   const token = cookies().get(COOKIE_NAME)?.value;
   if (!token) return null;
-  return await verifySession(token);
+  const payload = await verifySession(token);
+  if (!payload) return null;
+  // Reject sessions for deactivated accounts. One DB lookup per request, but
+  // gives immediate revocation when an account is soft-deleted.
+  const user = await prisma.user.findUnique({
+    where: { id: payload.userId },
+    select: { deletedAt: true },
+  });
+  if (!user || user.deletedAt) return null;
+  return payload;
 }
 
 export async function setSessionCookie(payload: SessionPayload) {
@@ -61,6 +70,8 @@ export async function authenticate(
     where: { email: email.toLowerCase() },
   });
   if (!user) return null;
+  // Deactivated accounts (soft-deleted) cannot log in.
+  if (user.deletedAt) return null;
   const ok = bcrypt.compareSync(password, user.passwordHash);
   return ok ? user : null;
 }
@@ -78,7 +89,22 @@ export async function registerUser(params: {
   const existing = await prisma.user.findUnique({
     where: { email: params.email.toLowerCase() },
   });
-  if (existing) throw new Error("Email sudah terdaftar");
+  if (existing) {
+    if (existing.deletedAt) {
+      throw new Error("Email pernah terdaftar (akun dinonaktifkan). Hubungi administrator untuk aktivasi ulang.");
+    }
+    throw new Error("Email sudah terdaftar");
+  }
+
+  // Defensive: empty-string unitId from any caller is normalised to null
+  // so we don't slip past the truthiness check and crash on FK P2003.
+  const unitId = params.unitId === "" ? null : params.unitId ?? null;
+  if (unitId) {
+    const unit = await prisma.unit.findUnique({ where: { id: unitId } });
+    if (!unit || unit.deletedAt) {
+      throw new Error("Unit tidak ditemukan atau telah dinonaktifkan");
+    }
+  }
 
   return prisma.user.create({
     data: {
@@ -86,7 +112,7 @@ export async function registerUser(params: {
       name: params.name,
       passwordHash: bcrypt.hashSync(params.password, 10),
       role: params.role ?? "USER",
-      unitId: params.unitId,
+      unitId,
     },
   });
 }

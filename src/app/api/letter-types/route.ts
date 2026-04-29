@@ -4,7 +4,10 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-  const letterTypes = await prisma.letterType.findMany({ orderBy: { code: "asc" } });
+  const letterTypes = await prisma.letterType.findMany({
+    where: { deletedAt: null },
+    orderBy: { code: "asc" },
+  });
   return NextResponse.json({
     letterTypes: letterTypes.map((lt) => ({
       id: lt.id,
@@ -40,6 +43,12 @@ export async function POST(req: Request) {
   }
   const existing = await prisma.letterType.findUnique({ where: { code: parsed.data.code } });
   if (existing) {
+    if (existing.deletedAt) {
+      return NextResponse.json(
+        { error: "Kode pernah dipakai (jenis dinonaktifkan). Aktifkan kembali alih-alih membuat baru." },
+        { status: 409 }
+      );
+    }
     return NextResponse.json({ error: "Kode jenis surat sudah digunakan" }, { status: 409 });
   }
   const letterType = await prisma.letterType.create({

@@ -69,15 +69,18 @@ enum WebhookDeliveryStatus {
 // -------------------------------------------------------------------------
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String    @id @default(cuid())
+  email        String    @unique
   name         String
   passwordHash String
-  role         Role     @default(USER)
+  role         Role      @default(USER)
   unitId       String?
-  unit         Unit?    @relation(fields: [unitId], references: [id], onDelete: SetNull)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  unit         Unit?     @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  // Soft-delete sentinel. When non-null, account is deactivated: cannot
+  // log in and is hidden from list endpoints by default.
+  deletedAt    DateTime?
 
   archives             Archive[]
   dispositionsSent     Disposition[] @relation("DispositionFrom")
@@ -85,11 +88,12 @@ model User {
   auditLogs            AuditLog[]
 
   @@index([unitId])
+  @@index([deletedAt])
 }
 
 model Unit {
-  id             String   @id @default(cuid())
-  code           String   @unique // e.g. "UNIGA", "YAS"
+  id             String    @id @default(cuid())
+  code           String    @unique // e.g. "UNIGA", "YAS"
   name           String
   // Template for numbering. Supported placeholders:
   //   [NO]          zero-padded sequence (3 digits)
@@ -98,24 +102,34 @@ model Unit {
   //   [ROMAN_MONTH] current month in Roman numerals (I..XII)
   //   [MONTH]       current month (1..12)
   //   [YEAR]        current 4-digit year
-  formatTemplate String   @default("[NO]/[UNIT_CODE]/[TYPE_CODE]/[ROMAN_MONTH]/[YEAR]")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  formatTemplate String    @default("[NO]/[UNIT_CODE]/[TYPE_CODE]/[ROMAN_MONTH]/[YEAR]")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  // Soft delete — never hard-delete (Archive.unit / User.unit / sequences
+  // reference this row).
+  deletedAt      DateTime?
 
   users        User[]
   archives     Archive[]
   sequences    NumberingSequence[]
   dispositions Disposition[]
+
+  @@index([deletedAt])
 }
 
 model LetterType {
-  id        String   @id @default(cuid())
-  code      String   @unique // e.g. "SK", "ST"
+  id        String    @id @default(cuid())
+  code      String    @unique // e.g. "SK", "ST"
   name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  // Soft delete — never hard-delete (Archive.letterType references this
+  // row).
+  deletedAt DateTime?
 
   archives Archive[]
+
+  @@index([deletedAt])
 }
 
 /// Per-unit per-year sequence counter. Tracked ONLY by (unitId, year) to
@@ -152,8 +166,9 @@ model Archive {
 
   sequenceNumber Int @default(0)
 
-  fileUrl      String? // Vercel Blob URL (preferred)
-  blobPathname String? // Vercel Blob pathname (for deletion)
+  fileUrl      String? // Storage URL (Google Drive webViewLink, or legacy Vercel Blob URL)
+  blobPathname String? // Vercel Blob pathname (legacy, for cleanup of old Blob assets)
+  gdriveFileId String? // Google Drive file ID, for permission management & deletion
   fileName     String?
   fileDataUrl  String? // legacy inline base64; superseded by fileUrl
 

@@ -24,6 +24,7 @@ export interface User {
   role: Role;
   unitId: string | null;
   createdAt: string;
+  deletedAt?: string | null;
 }
 
 export interface Unit {
@@ -32,6 +33,9 @@ export interface Unit {
   name: string;
   formatTemplate: string;
   createdAt: string;
+  /** Last allocated sequence number for the current year. Optional because
+   *  some callers (e.g. seed scripts) don't carry sequence state. */
+  currentYearLast?: number;
 }
 
 export interface LetterType {

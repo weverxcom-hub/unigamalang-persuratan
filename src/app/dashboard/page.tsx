@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate, toRoman } from "@/lib/utils";
-import { ArrowRight, FileStack, Hash, Users2, Building2 } from "lucide-react";
+import { ArrowRight, FileStack, Hash, Building2, Users2, Inbox, Send, Clock } from "lucide-react";
 import { redirect } from "next/navigation";
 
 export default async function DashboardHome() {
@@ -16,6 +16,8 @@ export default async function DashboardHome() {
   const currentMonth = new Date().getMonth() + 1;
   const yearStart = new Date(Date.UTC(currentYear, 0, 1));
   const yearEnd = new Date(Date.UTC(currentYear + 1, 0, 1));
+  const monthStart = new Date(Date.UTC(currentYear, currentMonth - 1, 1));
+  const monthEnd = new Date(Date.UTC(currentYear, currentMonth, 1));
 
   const archiveScope = {
     deletedAt: null,
@@ -24,54 +26,102 @@ export default async function DashboardHome() {
       : {}),
   } as const;
 
-  const [scopedArchiveCount, scopedArchives, thisYearArchives, totalUnits, totalUsers] =
-    await Promise.all([
-      prisma.archive.count({ where: archiveScope }),
-      prisma.archive.findMany({
-        where: archiveScope,
-        orderBy: { date: "desc" },
-        take: 500,
-      }),
-      prisma.archive.findMany({
-        where: { ...archiveScope, date: { gte: yearStart, lt: yearEnd } },
-      }),
-      prisma.unit.count(),
-      prisma.user.count(),
-    ]);
+  const [
+    scopedArchiveCount,
+    scopedArchives,
+    thisYearCount,
+    typeBreakdown,
+    outgoingThisMonth,
+    incomingThisMonth,
+    pendingProofCount,
+    totalUnits,
+    totalUsers,
+  ] = await Promise.all([
+    prisma.archive.count({ where: archiveScope }),
+    prisma.archive.findMany({
+      where: archiveScope,
+      orderBy: { date: "desc" },
+      take: 5,
+    }),
+    prisma.archive.count({
+      where: { ...archiveScope, date: { gte: yearStart, lt: yearEnd } },
+    }),
+    prisma.archive.groupBy({
+      by: ["letterTypeCode"],
+      where: { ...archiveScope, date: { gte: yearStart, lt: yearEnd } },
+      _count: { _all: true },
+    }),
+    prisma.archive.count({
+      where: {
+        ...archiveScope,
+        direction: "OUTGOING",
+        date: { gte: monthStart, lt: monthEnd },
+      },
+    }),
+    prisma.archive.count({
+      where: {
+        ...archiveScope,
+        direction: "INCOMING",
+        date: { gte: monthStart, lt: monthEnd },
+      },
+    }),
+    prisma.archive.count({
+      where: { ...archiveScope, status: "PENDING_PROOF" },
+    }),
+    prisma.unit.count({ where: { deletedAt: null } }),
+    prisma.user.count({ where: { deletedAt: null } }),
+  ]);
 
-  const archivesByType = new Map<string, number>();
-  for (const a of thisYearArchives) {
-    archivesByType.set(a.letterTypeCode, (archivesByType.get(a.letterTypeCode) ?? 0) + 1);
-  }
+  const archivesByType = new Map<string, number>(
+    typeBreakdown.map((b) => [b.letterTypeCode, b._count._all] as const)
+  );
 
   const stats = [
     {
-      label: "Total Arsip",
+      label: "Surat Keluar Bulan Ini",
+      value: outgoingThisMonth,
+      description: `Bulan ${toRoman(currentMonth)} / ${currentYear}`,
+      icon: Send,
+    },
+    {
+      label: "Surat Masuk Bulan Ini",
+      value: incomingThisMonth,
+      description: `Bulan ${toRoman(currentMonth)} / ${currentYear}`,
+      icon: Inbox,
+    },
+    {
+      label: "Arsip Aktif",
       value: scopedArchiveCount,
-      description: `${thisYearArchives.length} di tahun ${currentYear}`,
+      description: `${thisYearCount} di tahun ${currentYear}`,
       icon: FileStack,
     },
     {
-      label: "Nomor Surat Bulan Ini",
-      value: thisYearArchives.filter((a) => new Date(a.date).getMonth() + 1 === currentMonth).length,
-      description: `Bulan ${toRoman(currentMonth)} / ${currentYear}`,
-      icon: Hash,
-    },
-    {
-      label: "Unit Aktif",
-      value: session.role === "SUPER_ADMIN" ? totalUnits : 1,
-      description: session.role === "SUPER_ADMIN" ? "Seluruh kampus" : "Unit Anda",
-      icon: Building2,
-    },
-    {
-      label: "Pengguna Terdaftar",
-      value: session.role === "SUPER_ADMIN" ? totalUsers : "-",
-      description: session.role === "SUPER_ADMIN" ? "Akun unigamalang" : "Khusus Super Admin",
-      icon: Users2,
+      label: "Menunggu Bukti",
+      value: pendingProofCount,
+      description: "Surat keluar belum unggah bukti",
+      icon: Clock,
     },
   ];
 
-  const recent = scopedArchives.slice(0, 5);
+  const adminStats =
+    session.role === "SUPER_ADMIN"
+      ? [
+          {
+            label: "Unit Aktif",
+            value: totalUnits,
+            description: "Seluruh kampus",
+            icon: Building2,
+          },
+          {
+            label: "Pengguna Terdaftar",
+            value: totalUsers,
+            description: "Akun aktif",
+            icon: Users2,
+          },
+        ]
+      : [];
+
+  const recent = scopedArchives;
 
   return (
     <div className="space-y-8">
@@ -113,6 +163,23 @@ export default async function DashboardHome() {
           </Card>
         ))}
       </div>
+
+      {adminStats.length > 0 && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {adminStats.map((s) => (
+            <Card key={s.label}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">{s.label}</CardTitle>
+                <s.icon className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{s.value}</div>
+                <p className="text-xs text-muted-foreground">{s.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
