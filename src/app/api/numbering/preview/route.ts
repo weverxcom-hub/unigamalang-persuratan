@@ -16,7 +16,7 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Data tidak valid" }, { status: 400 });
   }
-  const preview = previewNextNumber(parsed.data.unitId, parsed.data.letterTypeId);
+  const preview = await previewNextNumber(parsed.data.unitId, parsed.data.letterTypeId);
   if (!preview) return NextResponse.json({ error: "Unit atau jenis surat tidak ditemukan" }, { status: 404 });
   return NextResponse.json({ preview });
 }

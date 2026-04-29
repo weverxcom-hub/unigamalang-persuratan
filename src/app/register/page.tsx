@@ -3,13 +3,13 @@ import { Logo } from "@/components/brand/logo";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SiteFooter } from "@/components/app/footer";
 import { RegisterForm } from "./register-form";
-import { getDb } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export default function RegisterPage() {
-  const db = getDb();
-  const units = db.units.map((u) => ({ id: u.id, code: u.code, name: u.name }));
+export default async function RegisterPage() {
+  const unitsRaw = await prisma.unit.findMany({ orderBy: { code: "asc" } });
+  const units = unitsRaw.map((u) => ({ id: u.id, code: u.code, name: u.name }));
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-background via-background to-primary/5">
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-10">

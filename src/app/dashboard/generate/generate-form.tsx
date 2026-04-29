@@ -8,12 +8,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, FileUp, Sparkles, CheckCircle2, AlertCircle, Camera } from "lucide-react";
+import {
+  uploadProofAsset,
+  assetToProofBody,
+  UploadError,
+  BLOB_MAX_BYTES,
+} from "@/lib/upload-client";
 
 interface GenerateFormProps {
   units: { id: string; code: string; name: string }[];
   letterTypes: { id: string; code: string; name: string }[];
   defaultUnitId: string;
   isUser: boolean;
+  sessionUserId: string;
 }
 
 interface AllocatedArchive {
@@ -25,18 +32,13 @@ interface AllocatedArchive {
   fileDataUrl: string | null;
 }
 
-const MAX_PROOF_BYTES = 3 * 1024 * 1024; // 3MB
-
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
-}
-
-export function GenerateForm({ units, letterTypes, defaultUnitId, isUser }: GenerateFormProps) {
+export function GenerateForm({
+  units,
+  letterTypes,
+  defaultUnitId,
+  isUser,
+  sessionUserId,
+}: GenerateFormProps) {
   const router = useRouter();
   const [unitId, setUnitId] = useState<string>(defaultUnitId);
   const [letterTypeId, setLetterTypeId] = useState<string>(letterTypes[0]?.id ?? "");
@@ -128,8 +130,8 @@ export function GenerateForm({ units, letterTypes, defaultUnitId, isUser }: Gene
       setProofPreviewUrl(null);
       return;
     }
-    if (file.size > MAX_PROOF_BYTES) {
-      setUploadError("Ukuran file melebihi 3MB. Mohon perkecil atau kompres foto.");
+    if (file.size > BLOB_MAX_BYTES) {
+      setUploadError("Ukuran file melebihi 5MB. Mohon perkecil atau kompres foto.");
       setProofFile(null);
       setProofPreviewUrl(null);
       return;
@@ -146,13 +148,13 @@ export function GenerateForm({ units, letterTypes, defaultUnitId, isUser }: Gene
     setUploading(true);
     setUploadError(null);
     try {
-      const dataUrl = await readFileAsDataUrl(proofFile);
+      const asset = await uploadProofAsset(sessionUserId, proofFile);
       const res = await fetch(`/api/archives/${allocated.id}/proof`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileName: proofFile.name, fileDataUrl: dataUrl }),
+        body: JSON.stringify(assetToProofBody(asset)),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setUploadError(data.error || "Gagal mengunggah bukti");
         return;
@@ -166,8 +168,12 @@ export function GenerateForm({ units, letterTypes, defaultUnitId, isUser }: Gene
         fileDataUrl: data.archive.fileDataUrl,
       });
       router.refresh();
-    } catch {
-      setUploadError("Gagal memproses file");
+    } catch (e) {
+      if (e instanceof UploadError) {
+        setUploadError(e.message);
+      } else {
+        setUploadError("Gagal memproses file. Periksa koneksi dan coba lagi.");
+      }
     } finally {
       setUploading(false);
     }
@@ -230,7 +236,7 @@ export function GenerateForm({ units, letterTypes, defaultUnitId, isUser }: Gene
             </div>
             <p className="text-sm text-muted-foreground">
               Ambil foto atau unggah scan surat yang sudah ditandatangani. File gambar (PNG/JPG/WEBP) atau PDF,
-              maksimal 3MB.
+              maksimal 5MB.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <label

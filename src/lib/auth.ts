@@ -1,8 +1,9 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
-import { getDb, saveDb, uid } from "./db";
-import type { Role, SessionPayload, User } from "./types";
+import { prisma } from "./prisma";
+import type { Role, SessionPayload } from "./types";
+import type { User as PrismaUser } from "@prisma/client";
 
 const SECRET = new TextEncoder().encode(
   process.env.AUTH_SECRET || "unigamalang-dev-secret-change-me-in-production-0123456789"
@@ -52,43 +53,45 @@ export function clearSessionCookie() {
   cookies().delete(COOKIE_NAME);
 }
 
-export async function authenticate(email: string, password: string): Promise<User | null> {
-  const db = getDb();
-  const user = db.users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+export async function authenticate(
+  email: string,
+  password: string
+): Promise<PrismaUser | null> {
+  const user = await prisma.user.findUnique({
+    where: { email: email.toLowerCase() },
+  });
   if (!user) return null;
   const ok = bcrypt.compareSync(password, user.passwordHash);
   return ok ? user : null;
 }
 
-export function registerUser(params: {
+export async function registerUser(params: {
   email: string;
   password: string;
   name: string;
   unitId: string | null;
   role?: Role;
-}): User {
-  const db = getDb();
-  if (db.users.some((u) => u.email.toLowerCase() === params.email.toLowerCase())) {
-    throw new Error("Email sudah terdaftar");
-  }
+}): Promise<PrismaUser> {
   if (!isAllowedEmail(params.email)) {
     throw new Error(`Hanya email ${EMAIL_DOMAIN} yang diizinkan`);
   }
-  const user: User = {
-    id: uid("user"),
-    email: params.email,
-    name: params.name,
-    passwordHash: bcrypt.hashSync(params.password, 10),
-    role: params.role ?? "USER",
-    unitId: params.unitId,
-    createdAt: new Date().toISOString(),
-  };
-  db.users.push(user);
-  saveDb(db);
-  return user;
+  const existing = await prisma.user.findUnique({
+    where: { email: params.email.toLowerCase() },
+  });
+  if (existing) throw new Error("Email sudah terdaftar");
+
+  return prisma.user.create({
+    data: {
+      email: params.email.toLowerCase(),
+      name: params.name,
+      passwordHash: bcrypt.hashSync(params.password, 10),
+      role: params.role ?? "USER",
+      unitId: params.unitId,
+    },
+  });
 }
 
-export function toSessionPayload(user: User): SessionPayload {
+export function toSessionPayload(user: PrismaUser): SessionPayload {
   return {
     userId: user.id,
     email: user.email,

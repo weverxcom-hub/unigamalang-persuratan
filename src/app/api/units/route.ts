@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
-import { getDb, saveDb, uid } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
+import { DEFAULT_FORMAT_TEMPLATE } from "@/lib/format";
 
 export async function GET() {
-  const db = getDb();
-  return NextResponse.json({ units: db.units });
+  const units = await prisma.unit.findMany({ orderBy: { code: "asc" } });
+  return NextResponse.json({
+    units: units.map((u) => ({
+      id: u.id,
+      code: u.code,
+      name: u.name,
+      formatTemplate: u.formatTemplate,
+      createdAt: u.createdAt.toISOString(),
+    })),
+  });
 }
 
 const schema = z.object({
@@ -15,6 +24,7 @@ const schema = z.object({
     .max(10, "Kode maksimal 10 karakter")
     .regex(/^[A-Z0-9]+$/, "Kode harus huruf kapital/angka (mis. UNIGA, YAS)"),
   name: z.string().min(3, "Nama unit minimal 3 karakter"),
+  formatTemplate: z.string().min(3).optional(),
 });
 
 export async function POST(req: Request) {
@@ -34,17 +44,27 @@ export async function POST(req: Request) {
       { status: 400 }
     );
   }
-  const db = getDb();
-  if (db.units.some((u) => u.code === parsed.data.code)) {
+  const existing = await prisma.unit.findUnique({ where: { code: parsed.data.code } });
+  if (existing) {
     return NextResponse.json({ error: "Kode unit sudah digunakan" }, { status: 409 });
   }
-  const unit = {
-    id: uid("u"),
-    code: parsed.data.code,
-    name: parsed.data.name,
-    createdAt: new Date().toISOString(),
-  };
-  db.units.push(unit);
-  saveDb(db);
-  return NextResponse.json({ unit }, { status: 201 });
+  const unit = await prisma.unit.create({
+    data: {
+      code: parsed.data.code,
+      name: parsed.data.name,
+      formatTemplate: parsed.data.formatTemplate || DEFAULT_FORMAT_TEMPLATE,
+    },
+  });
+  return NextResponse.json(
+    {
+      unit: {
+        id: unit.id,
+        code: unit.code,
+        name: unit.name,
+        formatTemplate: unit.formatTemplate,
+        createdAt: unit.createdAt.toISOString(),
+      },
+    },
+    { status: 201 }
+  );
 }
