@@ -4,7 +4,11 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { audit } from "@/lib/audit";
 import { deleteFromBlob } from "@/lib/blob";
-import { deleteFile as deleteGdriveFile } from "@/lib/gdrive";
+import {
+  deleteFile as deleteGdriveFile,
+  renameFile as renameGdriveFile,
+} from "@/lib/gdrive";
+import { buildArchiveFilename } from "@/lib/archive-filename";
 import { serialiseArchive } from "../../serialise";
 
 const MAX_DATA_URL_LEN = 4 * 1024 * 1024;
@@ -163,6 +167,28 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         previousGdriveFileId,
         e
       );
+    }
+  }
+
+  // Auto-rename the new Drive file to `{nomor}_{subject}.{ext}` so it sorts
+  // alongside the archive in Drive's UI. Best-effort.
+  if (newGdriveFileId) {
+    try {
+      const newName = buildArchiveFilename({
+        number: updated.number,
+        subject: updated.subject,
+        originalFilename: parsed.data.fileName,
+      });
+      const ok = await renameGdriveFile(newGdriveFileId, newName);
+      if (ok && newName !== parsed.data.fileName) {
+        await prisma.archive.update({
+          where: { id: updated.id },
+          data: { fileName: newName },
+        });
+        updated.fileName = newName;
+      }
+    } catch (e) {
+      console.warn("[/api/archives/[id]/proof] failed to rename gdrive file", e);
     }
   }
 
