@@ -68,13 +68,22 @@ async function tryGdriveUpload(file: File): Promise<UploadedAsset | null> {
   const { uploadUrl } = (await initRes.json()) as { uploadUrl: string };
 
   // Step 2: PUT bytes directly to Drive (browser ↔ Drive, no Vercel hop).
-  const putRes = await fetch(uploadUrl, {
-    method: "PUT",
-    headers: {
-      "Content-Type": file.type || "application/octet-stream",
-    },
-    body: file,
-  });
+  let putRes: Response;
+  try {
+    putRes = await fetch(uploadUrl, {
+      method: "PUT",
+      headers: {
+        "Content-Type": file.type || "application/octet-stream",
+      },
+      body: file,
+    });
+  } catch (e) {
+    // Network/CORS error (browser surfaces this as TypeError "Failed to
+    // fetch"). Fall through to Blob/inline so the user is not blocked.
+    // eslint-disable-next-line no-console
+    console.warn("[gdrive] PUT to resumable session failed, falling back", e);
+    return null;
+  }
   if (!putRes.ok) {
     throw new UploadError(`Gagal mengunggah ke Drive (HTTP ${putRes.status})`);
   }

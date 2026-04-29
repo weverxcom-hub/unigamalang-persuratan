@@ -79,7 +79,8 @@ export interface ResumableSession {
  */
 export async function createResumableSession(
   filename: string,
-  mimeType: string
+  mimeType: string,
+  origin?: string | null
 ): Promise<ResumableSession> {
   if (!gdriveAvailable()) {
     throw new Error("Google Drive tidak terkonfigurasi");
@@ -91,15 +92,20 @@ export async function createResumableSession(
     parents: [folderId],
     mimeType,
   };
+  // Drive only attaches CORS metadata to a resumable session URL when the
+  // request that created it includes an `Origin` header. Without this, the
+  // browser PUT to `uploadUrl` fails preflight with "Failed to fetch".
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json; charset=UTF-8",
+    "X-Upload-Content-Type": mimeType,
+  };
+  if (origin) headers["Origin"] = origin;
   const res = await fetch(
     "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&supportsAllDrives=true",
     {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json; charset=UTF-8",
-        "X-Upload-Content-Type": mimeType,
-      },
+      headers,
       body: JSON.stringify(metadata),
     }
   );

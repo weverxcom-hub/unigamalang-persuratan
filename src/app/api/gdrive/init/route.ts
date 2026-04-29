@@ -78,8 +78,11 @@ export async function POST(req: Request) {
   const safe = filename.replace(/[\\/:*?"<>|]/g, "_").slice(0, 180);
   const stamped = `${Date.now()}-${session.userId.slice(0, 8)}-${safe}`;
 
+  // Forward the browser's Origin so Drive issues a CORS-enabled session URL.
+  const origin = req.headers.get("origin");
+
   try {
-    const sess = await createResumableSession(stamped, mimeType);
+    const sess = await createResumableSession(stamped, mimeType, origin);
     return NextResponse.json({
       uploadUrl: sess.uploadUrl,
       filename: sess.filename,
