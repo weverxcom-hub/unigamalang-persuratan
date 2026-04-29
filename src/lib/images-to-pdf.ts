@@ -33,22 +33,23 @@ function readImage(file: File): Promise<HTMLImageElement> {
   });
 }
 
-function imageFormat(file: File): "JPEG" | "PNG" {
-  if (file.type === "image/jpeg" || file.type === "image/jpg") return "JPEG";
-  // jsPDF accepts PNG; WebP gets transcoded via canvas below.
-  return "PNG";
+interface PreparedImage {
+  dataUrl: string;
+  format: "JPEG" | "PNG";
 }
 
-async function fileToDataUrl(file: File): Promise<string> {
-  // For WebP / unknown image types, render to canvas as JPEG to maximise
-  // jsPDF compatibility.
-  if (file.type === "image/jpeg" || file.type === "image/png") {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(new Error("Gagal membaca gambar"));
-      reader.readAsDataURL(file);
-    });
+/**
+ * Prepare an image for jsPDF. JPEG and PNG are passed through directly so
+ * jsPDF can re-encode them losslessly. Anything else (WebP, AVIF, …) is
+ * transcoded to JPEG via canvas and we tag the format accordingly so the
+ * `format` argument to `pdf.addImage` matches the actual bytes.
+ */
+async function prepareImage(file: File): Promise<PreparedImage> {
+  if (file.type === "image/jpeg" || file.type === "image/jpg") {
+    return { dataUrl: await readAsDataUrl(file), format: "JPEG" };
+  }
+  if (file.type === "image/png") {
+    return { dataUrl: await readAsDataUrl(file), format: "PNG" };
   }
   const img = await readImage(file);
   const canvas = document.createElement("canvas");
@@ -57,7 +58,16 @@ async function fileToDataUrl(file: File): Promise<string> {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Browser tidak mendukung canvas");
   ctx.drawImage(img, 0, 0);
-  return canvas.toDataURL("image/jpeg", 0.9);
+  return { dataUrl: canvas.toDataURL("image/jpeg", 0.9), format: "JPEG" };
+}
+
+function readAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error("Gagal membaca gambar"));
+    reader.readAsDataURL(file);
+  });
 }
 
 export async function imagesToPdf(
@@ -72,7 +82,7 @@ export async function imagesToPdf(
   for (let i = 0; i < files.length; i++) {
     const f = files[i];
     const img = await readImage(f);
-    const dataUrl = await fileToDataUrl(f);
+    const prepared = await prepareImage(f);
     const ratio = img.naturalWidth / img.naturalHeight;
     let drawW = usableW;
     let drawH = usableW / ratio;
@@ -83,11 +93,16 @@ export async function imagesToPdf(
     const offsetX = (A4_WIDTH_MM - drawW) / 2;
     const offsetY = (A4_HEIGHT_MM - drawH) / 2;
     if (i > 0) pdf.addPage();
-    // Cast to a runtime format string acceptable by jsPDF; WebP went
-    // through the canvas above so dataUrl is already JPEG/PNG.
-    const fmt =
-      f.type === "image/jpeg" || f.type === "image/jpg" ? "JPEG" : imageFormat(f);
-    pdf.addImage(dataUrl, fmt, offsetX, offsetY, drawW, drawH, undefined, "FAST");
+    pdf.addImage(
+      prepared.dataUrl,
+      prepared.format,
+      offsetX,
+      offsetY,
+      drawW,
+      drawH,
+      undefined,
+      "FAST"
+    );
   }
 
   const blob = pdf.output("blob");
