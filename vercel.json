@@ -3,5 +3,6 @@
   "framework": "nextjs",
   "buildCommand": "prisma migrate deploy && next build",
   "installCommand": "npm install",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "regions": ["sin1"]
 }

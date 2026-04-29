@@ -1,4 +1,6 @@
-import { imagesToPdf } from "./images-to-pdf";
+// `imagesToPdf` pulls in jsPDF (~250KB minified). Loaded lazily so the dashboard
+// shell, which always imports `isImageFile`, doesn't pay the bundle cost up
+// front.
 
 export interface BundleResult {
   file: File;
@@ -39,6 +41,7 @@ export async function bundleProofFiles(
     );
   }
   const safeBase = outputBaseName.replace(/[^A-Za-z0-9._-]+/g, "_") || "surat";
+  const { imagesToPdf } = await import("./images-to-pdf");
   const pdf = await imagesToPdf(files, `${safeBase}.pdf`);
   return { file: pdf, merged: true };
 }
