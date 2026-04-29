@@ -8,20 +8,16 @@ export default async function UnitsPage() {
   const session = await getSession();
   if (!session) redirect("/login");
   if (session.role !== "SUPER_ADMIN") redirect("/dashboard");
-  const currentYear = new Date().getFullYear();
-  const [activeRaw, inactiveRaw, sequencesRaw] = await Promise.all([
+  const [activeRaw, inactiveRaw] = await Promise.all([
     prisma.unit.findMany({ where: { deletedAt: null }, orderBy: { code: "asc" } }),
     prisma.unit.findMany({ where: { deletedAt: { not: null } }, orderBy: { code: "asc" } }),
-    prisma.numberingSequence.findMany({ where: { year: currentYear } }),
   ]);
-  const seqByUnit = new Map<string, number>(sequencesRaw.map((s) => [s.unitId, s.last]));
   const toDto = (u: typeof activeRaw[number]) => ({
     id: u.id,
     code: u.code,
     name: u.name,
     formatTemplate: u.formatTemplate,
     createdAt: u.createdAt.toISOString(),
-    currentYearLast: seqByUnit.get(u.id) ?? 0,
   });
   const units = activeRaw.map(toDto);
   const inactiveUnits = inactiveRaw.map(toDto);
@@ -38,7 +34,8 @@ export default async function UnitsPage() {
           <CardTitle>Daftar Unit</CardTitle>
           <CardDescription>
             Tambah unit baru dengan kode unik (mis. UNIGA, YAS). Setiap unit dapat memiliki template
-            nomor surat sendiri.
+            nomor surat sendiri. Tombol &quot;Atur No.&quot; membuka editor counter per jenis surat
+            untuk tahun berjalan.
           </CardDescription>
         </CardHeader>
         <CardContent>

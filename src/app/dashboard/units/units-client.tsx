@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -151,7 +151,6 @@ export function UnitsClient({ initialUnits, initialInactive = [] }: Props) {
               <TableHead className="w-[120px]">Kode</TableHead>
               <TableHead>Nama Unit</TableHead>
               <TableHead className="hidden lg:table-cell">Template Nomor</TableHead>
-              <TableHead className="w-[140px]">No. Terakhir</TableHead>
               <TableHead className="w-[160px]">Dibuat</TableHead>
               <TableHead className="w-[230px] text-right">Aksi</TableHead>
             </TableRow>
@@ -165,10 +164,6 @@ export function UnitsClient({ initialUnits, initialInactive = [] }: Props) {
                 <TableCell className="font-medium">{u.name}</TableCell>
                 <TableCell className="hidden font-mono text-xs text-muted-foreground lg:table-cell">
                   {u.formatTemplate}
-                </TableCell>
-                <TableCell className="text-sm tabular-nums">
-                  <span className="font-medium">{u.currentYearLast ?? 0}</span>
-                  <span className="ml-1 text-xs text-muted-foreground">({new Date().getFullYear()})</span>
                 </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
                   {formatDate(u.createdAt)}
@@ -207,7 +202,7 @@ export function UnitsClient({ initialUnits, initialInactive = [] }: Props) {
             ))}
             {units.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="py-8 text-center text-sm text-muted-foreground">
+                <TableCell colSpan={5} className="py-8 text-center text-sm text-muted-foreground">
                   Belum ada unit. Tambahkan menggunakan form di atas.
                 </TableCell>
               </TableRow>
@@ -269,97 +264,212 @@ export function UnitsClient({ initialUnits, initialInactive = [] }: Props) {
         <SetLastDialog
           unit={setLastFor}
           onClose={() => setSetLastFor(null)}
-          onSaved={(newLast) => {
-            setUnits((prev) =>
-              prev.map((u) =>
-                u.id === setLastFor.id ? { ...u, currentYearLast: newLast } : u
-              )
-            );
-            setSetLastFor(null);
-          }}
         />
       )}
     </div>
   );
 }
 
-function SetLastDialog({
-  unit,
-  onClose,
-  onSaved,
-}: {
-  unit: Unit;
-  onClose: () => void;
-  onSaved: (newLast: number) => void;
-}) {
-  const year = new Date().getFullYear();
-  const [last, setLast] = useState(String(unit.currentYearLast ?? 0));
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+interface SequenceRow {
+  letterTypeId: string;
+  letterTypeCode: string;
+  letterTypeName: string;
+  last: number;
+}
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    const n = Number(last);
-    if (!Number.isInteger(n) || n < 0) {
-      setError("Nomor harus berupa bilangan bulat non-negatif");
+function SetLastDialog({ unit, onClose }: { unit: Unit; onClose: () => void }) {
+  const currentYear = new Date().getFullYear();
+  const [year, setYear] = useState(currentYear);
+  const [rows, setRows] = useState<SequenceRow[] | null>(null);
+  const [edits, setEdits] = useState<Record<string, string>>({});
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [savedId, setSavedId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Load (and reload) when year changes.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(
+          `/api/numbering/sequence?unitId=${unit.id}&year=${year}`,
+          { cache: "no-store" }
+        );
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error ?? "Gagal memuat");
+        if (cancelled) return;
+        setRows(data.rows as SequenceRow[]);
+        setEdits({});
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : "Gagal memuat");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [unit.id, year]);
+
+  async function saveRow(row: SequenceRow) {
+    const raw = edits[row.letterTypeId] ?? String(row.last);
+    const n = Number(raw);
+    if (!Number.isInteger(n) || n < 0 || n > 99999) {
+      setError(`Nomor untuk ${row.letterTypeCode} harus 0–99999`);
       return;
     }
-    setBusy(true);
+    setError(null);
+    setSavingId(row.letterTypeId);
     try {
       const res = await fetch("/api/numbering/sequence", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ unitId: unit.id, year, last: n }),
+        body: JSON.stringify({
+          unitId: unit.id,
+          letterTypeId: row.letterTypeId,
+          year,
+          last: n,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? "Gagal menyimpan");
-      onSaved(data.last);
+      setRows((prev) =>
+        (prev ?? []).map((r) =>
+          r.letterTypeId === row.letterTypeId ? { ...r, last: data.last } : r
+        )
+      );
+      setEdits((prev) => {
+        const next = { ...prev };
+        delete next[row.letterTypeId];
+        return next;
+      });
+      setSavedId(row.letterTypeId);
+      setTimeout(() => setSavedId((v) => (v === row.letterTypeId ? null : v)), 1200);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Gagal menyimpan");
     } finally {
-      setBusy(false);
+      setSavingId(null);
     }
   }
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Atur Nomor Terakhir &mdash; {unit.code}</DialogTitle>
           <DialogDescription>
-            Setel nomor urut terakhir untuk tahun {year}. Generate berikutnya akan menghasilkan
-            angka <span className="font-semibold">{Number(last) + 1 || 1}</span>. Berguna saat sistem
-            mulai dipakai di tengah tahun untuk melanjutkan dari penomoran manual lama.
+            Tiap jenis surat punya counter sendiri per tahun. Set &quot;Nomor Terakhir&quot; agar
+            generate berikutnya melanjutkan dari sana. Misal SK = 45 → generate berikutnya 046.
+            Kosongkan / 0 jika belum pernah keluar di tahun itu.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="grid gap-3">
-          <div className="grid gap-1.5">
-            <Label htmlFor="last">Nomor terakhir (tahun {year})</Label>
-            <Input
-              id="last"
-              type="number"
-              min={0}
-              max={99999}
-              value={last}
-              onChange={(e) => setLast(e.target.value)}
-              required
-            />
-            <p className="text-xs text-muted-foreground">
-              Mis. ketik <span className="font-mono">65</span> jika nomor terakhir yang sudah keluar
-              adalah 65 &mdash; generate berikutnya akan menjadi 066.
-            </p>
-          </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose} disabled={busy}>
-              Batal
-            </Button>
-            <Button type="submit" disabled={busy}>
-              {busy ? "Menyimpan…" : "Simpan"}
-            </Button>
-          </DialogFooter>
-        </form>
+        <div className="flex items-center gap-3 pb-2">
+          <Label htmlFor="year-picker" className="shrink-0">
+            Tahun
+          </Label>
+          <Input
+            id="year-picker"
+            type="number"
+            min={2000}
+            max={2100}
+            className="w-28"
+            value={year}
+            onChange={(e) => {
+              const y = Number(e.target.value);
+              if (Number.isInteger(y)) setYear(y);
+            }}
+          />
+        </div>
+        <div className="max-h-[60vh] overflow-y-auto rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">Jenis</TableHead>
+                <TableHead>Nama</TableHead>
+                <TableHead className="w-[150px]">Nomor Terakhir</TableHead>
+                <TableHead className="w-[110px]">Berikutnya</TableHead>
+                <TableHead className="w-[100px] text-right">Aksi</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading && (
+                <TableRow>
+                  <TableCell colSpan={5} className="py-6 text-center text-sm text-muted-foreground">
+                    Memuat…
+                  </TableCell>
+                </TableRow>
+              )}
+              {!loading && rows && rows.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} className="py-6 text-center text-sm text-muted-foreground">
+                    Belum ada jenis surat aktif. Tambah dulu di Pengaturan → Jenis Surat.
+                  </TableCell>
+                </TableRow>
+              )}
+              {!loading &&
+                rows?.map((row) => {
+                  const editing = edits[row.letterTypeId];
+                  const value = editing ?? String(row.last);
+                  const next = Number(value) + 1 || 1;
+                  const dirty = editing !== undefined && editing !== String(row.last);
+                  return (
+                    <TableRow key={row.letterTypeId}>
+                      <TableCell>
+                        <Badge variant="outline">{row.letterTypeCode}</Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {row.letterTypeName}
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min={0}
+                          max={99999}
+                          value={value}
+                          onChange={(e) =>
+                            setEdits((prev) => ({
+                              ...prev,
+                              [row.letterTypeId]: e.target.value,
+                            }))
+                          }
+                          className="h-8 w-24 tabular-nums"
+                        />
+                      </TableCell>
+                      <TableCell className="text-sm tabular-nums text-muted-foreground">
+                        {String(next).padStart(3, "0")}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {savedId === row.letterTypeId ? (
+                          <span className="text-xs text-emerald-600">Tersimpan</span>
+                        ) : (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant={dirty ? "default" : "outline"}
+                            disabled={savingId === row.letterTypeId || !dirty}
+                            onClick={() => saveRow(row)}
+                          >
+                            {savingId === row.letterTypeId ? "…" : "Simpan"}
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+            </TableBody>
+          </Table>
+        </div>
+        {error && <p className="text-sm text-destructive">{error}</p>}
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={onClose}>
+            Tutup
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
