@@ -9,15 +9,25 @@ export async function GET() {
     where: { deletedAt: null },
     orderBy: { code: "asc" },
   });
-  return NextResponse.json({
-    units: units.map((u) => ({
-      id: u.id,
-      code: u.code,
-      name: u.name,
-      formatTemplate: u.formatTemplate,
-      createdAt: u.createdAt.toISOString(),
-    })),
-  });
+  // Units rarely change. Browser cache for 30s + serve-while-revalidate to
+  // reduce repeat DB hits during navigation between dashboard pages. `private`
+  // keeps it out of any shared CDN cache.
+  return NextResponse.json(
+    {
+      units: units.map((u) => ({
+        id: u.id,
+        code: u.code,
+        name: u.name,
+        formatTemplate: u.formatTemplate,
+        createdAt: u.createdAt.toISOString(),
+      })),
+    },
+    {
+      headers: {
+        "Cache-Control": "private, max-age=30, stale-while-revalidate=120",
+      },
+    }
+  );
 }
 
 const schema = z.object({

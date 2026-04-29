@@ -60,6 +60,7 @@ interface Props {
   role: Role;
   sessionUnitId: string | null;
   sessionUserId: string;
+  sessionUserName: string;
 }
 
 const YEAR_OPTIONS = (() => {
@@ -131,6 +132,7 @@ export function ArchivesClient({
   role,
   sessionUnitId,
   sessionUserId,
+  sessionUserName,
 }: Props) {
   const [archives, setArchives] = useState<ArchiveListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -523,6 +525,10 @@ export function ArchivesClient({
         defaultUnitId={sessionUnitId ?? units[0]?.id ?? ""}
         canChooseUnit={role === "SUPER_ADMIN"}
         sessionUserId={sessionUserId}
+        defaultRecipientLabel={(() => {
+          const myUnit = units.find((u) => u.id === sessionUnitId);
+          return myUnit ? `${sessionUserName} (${myUnit.code})` : sessionUserName;
+        })()}
         onCreated={() => {
           setDialogOpen(false);
           fetchArchives();
@@ -985,6 +991,7 @@ interface DialogProps {
   defaultUnitId: string;
   canChooseUnit: boolean;
   sessionUserId: string;
+  defaultRecipientLabel: string;
   onCreated: () => void;
 }
 
@@ -996,6 +1003,7 @@ function ManualArchiveDialog({
   defaultUnitId,
   canChooseUnit,
   sessionUserId,
+  defaultRecipientLabel,
   onCreated,
 }: DialogProps) {
   const [unitId, setUnitId] = useState<string>(defaultUnitId);
@@ -1013,17 +1021,33 @@ function ManualArchiveDialog({
   useEffect(() => {
     if (open) {
       setUnitId(defaultUnitId);
-      setLetterTypeId(letterTypes[0]?.id ?? "");
+      // Default to a "generic" letter type if one exists (UMUM/UND/SP) so
+      // INCOMING tidak memaksa user memilih klasifikasi yang tidak mereka tahu.
+      const preferredCodes = ["UMUM", "SP", "UND"];
+      const preferred = letterTypes.find((lt) => preferredCodes.includes(lt.code));
+      setLetterTypeId(preferred?.id ?? letterTypes[0]?.id ?? "");
       setManualNumber("");
       setDirection("INCOMING");
       setSubject("");
-      setRecipient("");
+      // For INCOMING, the "Diteruskan ke" defaults to the logged-in user.
+      // User can override if the letter is being forwarded to someone else.
+      setRecipient(defaultRecipientLabel);
       setExternalSender("");
       setDate(new Date().toISOString().slice(0, 10));
       setFile(null);
       setError(null);
     }
-  }, [open, defaultUnitId, letterTypes]);
+  }, [open, defaultUnitId, letterTypes, defaultRecipientLabel]);
+
+  // When user toggles direction, reset recipient to a sensible default.
+  useEffect(() => {
+    if (direction === "INCOMING") {
+      setRecipient((prev) => (prev ? prev : defaultRecipientLabel));
+    } else {
+      // Outgoing: default empty so user types the external recipient.
+      setRecipient((prev) => (prev === defaultRecipientLabel ? "" : prev));
+    }
+  }, [direction, defaultRecipientLabel]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -1080,14 +1104,16 @@ function ManualArchiveDialog({
     }
   }
 
+  const isIncoming = direction === "INCOMING";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>Tambah Arsip Manual</DialogTitle>
           <DialogDescription>
-            Gunakan untuk mengarsipkan surat masuk atau surat lama yang nomornya sudah ada. Untuk nomor baru
-            otomatis, gunakan halaman <strong>Buat Nomor Surat</strong>.
+            Gunakan untuk mengarsipkan surat masuk dari instansi luar atau surat lama yang nomornya sudah ada.
+            Untuk membuat nomor surat keluar baru otomatis, pakai halaman <strong>Buat Nomor Surat</strong>.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2">
@@ -1096,7 +1122,7 @@ function ManualArchiveDialog({
             <div className="flex gap-2">
               <Button
                 type="button"
-                variant={direction === "INCOMING" ? "default" : "outline"}
+                variant={isIncoming ? "default" : "outline"}
                 size="sm"
                 onClick={() => setDirection("INCOMING")}
               >
@@ -1104,7 +1130,7 @@ function ManualArchiveDialog({
               </Button>
               <Button
                 type="button"
-                variant={direction === "OUTGOING" ? "default" : "outline"}
+                variant={!isIncoming ? "default" : "outline"}
                 size="sm"
                 onClick={() => setDirection("OUTGOING")}
               >
@@ -1113,91 +1139,128 @@ function ManualArchiveDialog({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="m-unit">Unit</Label>
-            <Select value={unitId} onValueChange={setUnitId} disabled={!canChooseUnit}>
-              <SelectTrigger id="m-unit">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {units.map((u) => (
-                  <SelectItem key={u.id} value={u.id}>
-                    {u.code}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="m-type">Jenis Surat</Label>
-            <Select value={letterTypeId} onValueChange={setLetterTypeId}>
-              <SelectTrigger id="m-type">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {letterTypes.map((lt) => (
-                  <SelectItem key={lt.id} value={lt.id}>
-                    {lt.code}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {isIncoming && (
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="m-sender">Pengirim Eksternal</Label>
+              <Input
+                id="m-sender"
+                value={externalSender}
+                onChange={(e) => setExternalSender(e.target.value)}
+                placeholder="Mis. Universitas Brawijaya, Kemendikbud, BNI Pusat"
+                required
+                autoFocus
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Nama instansi atau perorangan asal surat. Wajib diisi.
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="m-number">
-              {direction === "INCOMING"
-                ? "Nomor Surat (salin dari surat instansi pengirim)"
+              {isIncoming
+                ? "Nomor Surat (sesuai surat asli)"
                 : "Nomor Surat (manual, opsional)"}
             </Label>
             <Input
               id="m-number"
               value={manualNumber}
               placeholder={
-                direction === "INCOMING"
-                  ? "Mis. 123/A.1/UND/IV/2026 (sesuai surat aslinya)"
+                isIncoming
+                  ? "Mis. 123/A.1/UND/IV/2026"
                   : "Kosongkan untuk membuat nomor baru otomatis"
               }
               onChange={(e) => setManualNumber(e.target.value)}
-              required={direction === "INCOMING"}
+              required={isIncoming}
             />
-            {direction === "INCOMING" && (
+            {isIncoming && (
               <p className="text-[11px] text-muted-foreground">
-                Surat masuk berasal dari instansi luar &mdash; sistem tidak meng-auto-generate nomor.
-                Salin persis nomor pada surat aslinya.
+                Salin persis nomor yang tertera di surat aslinya.
               </p>
             )}
           </div>
+
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="m-subject">Perihal</Label>
             <Input id="m-subject" value={subject} onChange={(e) => setSubject(e.target.value)} required />
           </div>
-          {direction === "INCOMING" && (
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="m-sender">Pengirim (Eksternal)</Label>
-              <Input
-                id="m-sender"
-                value={externalSender}
-                onChange={(e) => setExternalSender(e.target.value)}
-                placeholder="Mis. Kemendikbud"
-                required
-              />
-            </div>
-          )}
-          <div className="space-y-2 sm:col-span-2">
+
+          <div className="space-y-2">
+            <Label htmlFor="m-date">Tanggal Surat</Label>
+            <Input id="m-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+          </div>
+          <div className="space-y-2 sm:col-span-2 sm:order-none">
             <Label htmlFor="m-recipient">
-              {direction === "INCOMING" ? "Diteruskan ke (Unit/Pejabat Internal)" : "Tujuan"}
+              {isIncoming ? "Diteruskan ke (Pejabat / Unit Internal)" : "Tujuan"}
             </Label>
             <Input
               id="m-recipient"
               value={recipient}
               onChange={(e) => setRecipient(e.target.value)}
               required
+              placeholder={
+                isIncoming
+                  ? "Mis. Wakil Rektor I, Bagian Akademik"
+                  : "Nama / instansi penerima"
+              }
             />
+            {isIncoming && (
+              <p className="text-[11px] text-muted-foreground">
+                Pre-filled ke akun Anda. Ubah bila surat ditujukan ke pejabat lain.
+              </p>
+            )}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="m-date">Tanggal</Label>
-            <Input id="m-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+
+          <div className="space-y-2 sm:col-span-2 rounded-md border bg-muted/30 p-3">
+            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Klasifikasi
+            </Label>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="m-unit" className="text-xs">
+                  {isIncoming ? "Unit Penerima Internal" : "Unit"}
+                </Label>
+                <Select value={unitId} onValueChange={setUnitId} disabled={!canChooseUnit}>
+                  <SelectTrigger id="m-unit">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {units.map((u) => (
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.code} &mdash; {u.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {isIncoming && !canChooseUnit && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Otomatis ke unit Anda. Surat masuk akan masuk ke buku arsip unit ini.
+                  </p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="m-type" className="text-xs">
+                  Jenis Surat
+                </Label>
+                <Select value={letterTypeId} onValueChange={setLetterTypeId}>
+                  <SelectTrigger id="m-type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {letterTypes.map((lt) => (
+                      <SelectItem key={lt.id} value={lt.id}>
+                        {lt.code} &mdash; {lt.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {isIncoming && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Pilih yang paling mendekati. Bila tidak yakin, pakai default.
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="m-file">Bukti / Lampiran</Label>
