@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
+import { cache } from "react";
 import { prisma } from "./prisma";
 import type { Role, SessionPayload } from "./types";
 import type { User as PrismaUser } from "@prisma/client";
@@ -32,20 +33,26 @@ export async function verifySession(token: string): Promise<SessionPayload | nul
   }
 }
 
-export async function getSession(): Promise<SessionPayload | null> {
-  const token = cookies().get(COOKIE_NAME)?.value;
-  if (!token) return null;
-  const payload = await verifySession(token);
-  if (!payload) return null;
-  // Reject sessions for deactivated accounts. One DB lookup per request, but
-  // gives immediate revocation when an account is soft-deleted.
-  const user = await prisma.user.findUnique({
-    where: { id: payload.userId },
-    select: { deletedAt: true },
-  });
-  if (!user || user.deletedAt) return null;
-  return payload;
-}
+// Wrapped in React `cache()` so that within a single render (layout + page +
+// nested server components, or one API request handler) the JWT verification
+// + DB liveness lookup happens at most once. Without this, every server
+// component that needs the session re-runs the same Neon query.
+export const getSession = cache(
+  async (): Promise<SessionPayload | null> => {
+    const token = cookies().get(COOKIE_NAME)?.value;
+    if (!token) return null;
+    const payload = await verifySession(token);
+    if (!payload) return null;
+    // Reject sessions for deactivated accounts. One DB lookup per request,
+    // but gives immediate revocation when an account is soft-deleted.
+    const user = await prisma.user.findUnique({
+      where: { id: payload.userId },
+      select: { deletedAt: true },
+    });
+    if (!user || user.deletedAt) return null;
+    return payload;
+  }
+);
 
 export async function setSessionCookie(payload: SessionPayload) {
   const token = await signSession(payload);

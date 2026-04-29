@@ -190,6 +190,32 @@ export async function finaliseUpload(fileId: string): Promise<FinalisedFile> {
 }
 
 /**
+ * Best-effort rename of a Drive file. Used after Archive creation so files
+ * land in Drive with a human-readable name like
+ * `001_UNIGA_SK_IV_2026_Penetapan_Dosen.pdf` instead of the upload-time
+ * placeholder. Returns true on success, false on any error (caller keeps
+ * going — the file still exists, it just has the original name).
+ */
+export async function renameFile(
+  fileId: string,
+  newName: string
+): Promise<boolean> {
+  if (!gdriveAvailable()) return false;
+  try {
+    const drive = getDrive();
+    await drive.files.update({
+      fileId,
+      requestBody: { name: newName },
+      supportsAllDrives: true,
+      fields: "id,name",
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Best-effort delete (used when an Archive's proof is replaced or when the
  * archive itself is hard-deleted). Returns true on success, false on any
  * error so callers can keep going.

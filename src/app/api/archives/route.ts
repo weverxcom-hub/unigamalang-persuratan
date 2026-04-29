@@ -7,6 +7,8 @@ import { allocateNextNumber } from "@/lib/numbering";
 import { audit } from "@/lib/audit";
 import { fireWebhook } from "@/lib/webhook";
 import { sendEmail, renderIncomingLetterEmail } from "@/lib/email";
+import { renameFile as renameGdriveFile } from "@/lib/gdrive";
+import { buildArchiveFilename } from "@/lib/archive-filename";
 import type { ArchiveListItem } from "@/lib/types";
 import { serialiseArchive, serialiseArchiveList } from "./serialise";
 
@@ -318,6 +320,23 @@ export async function POST(req: Request) {
         date: archive.date.toISOString(),
         createdAt: archive.createdAt.toISOString(),
       });
+      // Auto-rename the Drive file to `{nomor}_{subject_slug}.{ext}` so
+      // operators browsing the Shared Drive directly can find letters by
+      // filename. Best-effort: failure does not affect the archive record.
+      if (archive.gdriveFileId) {
+        const newName = buildArchiveFilename({
+          number: archive.number,
+          subject: archive.subject,
+          originalFilename: archive.fileName,
+        });
+        const ok = await renameGdriveFile(archive.gdriveFileId, newName);
+        if (ok) {
+          await prisma.archive.update({
+            where: { id: archive.id },
+            data: { fileName: newName },
+          });
+        }
+      }
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error("[archives.POST] post-commit side effects failed", e);

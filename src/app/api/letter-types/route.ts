@@ -8,14 +8,22 @@ export async function GET() {
     where: { deletedAt: null },
     orderBy: { code: "asc" },
   });
-  return NextResponse.json({
-    letterTypes: letterTypes.map((lt) => ({
-      id: lt.id,
-      code: lt.code,
-      name: lt.name,
-      createdAt: lt.createdAt.toISOString(),
-    })),
-  });
+  // Letter types are tiny + change rarely. 30s browser cache.
+  return NextResponse.json(
+    {
+      letterTypes: letterTypes.map((lt) => ({
+        id: lt.id,
+        code: lt.code,
+        name: lt.name,
+        createdAt: lt.createdAt.toISOString(),
+      })),
+    },
+    {
+      headers: {
+        "Cache-Control": "private, max-age=30, stale-while-revalidate=120",
+      },
+    }
+  );
 }
 
 const schema = z.object({

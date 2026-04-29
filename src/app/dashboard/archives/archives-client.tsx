@@ -1,6 +1,5 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,6 +52,7 @@ import {
   UploadError,
   BLOB_MAX_BYTES,
 } from "@/lib/upload-client";
+import { bundleProofFiles, isImageFile } from "@/lib/proof-bundle";
 
 interface Props {
   units: { id: string; code: string; name: string; formatTemplate?: string }[];
@@ -60,6 +60,7 @@ interface Props {
   role: Role;
   sessionUnitId: string | null;
   sessionUserId: string;
+  sessionUserName: string;
 }
 
 const YEAR_OPTIONS = (() => {
@@ -131,6 +132,7 @@ export function ArchivesClient({
   role,
   sessionUnitId,
   sessionUserId,
+  sessionUserName,
 }: Props) {
   const [archives, setArchives] = useState<ArchiveListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -523,6 +525,10 @@ export function ArchivesClient({
         defaultUnitId={sessionUnitId ?? units[0]?.id ?? ""}
         canChooseUnit={role === "SUPER_ADMIN"}
         sessionUserId={sessionUserId}
+        defaultRecipientLabel={(() => {
+          const myUnit = units.find((u) => u.id === sessionUnitId);
+          return myUnit ? `${sessionUserName} (${myUnit.code})` : sessionUserName;
+        })()}
         onCreated={() => {
           setDialogOpen(false);
           fetchArchives();
@@ -719,49 +725,63 @@ function ProofUploadDialog({
   onOpenChange,
   onUploaded,
 }: ProofUploadDialogProps) {
-  const [file, setFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!archive) {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-      setFile(null);
-      setPreviewUrl(null);
+      setFiles([]);
       setError(null);
       if (inputRef.current) inputRef.current.value = "";
     }
-  }, [archive, previewUrl]);
+  }, [archive]);
 
-  function pickFile(f: File | null) {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
+  function addFiles(picked: FileList | null) {
+    if (!picked || picked.length === 0) return;
     setError(null);
-    setFile(f);
-    if (!f) {
-      setPreviewUrl(null);
+    const incoming = Array.from(picked);
+    // Reject any single file that exceeds the upload cap up front. The bundle
+    // step (multi-image -> PDF) usually shrinks JPGs further, but we still
+    // protect against absurd inputs.
+    const tooBig = incoming.find((f) => f.size > BLOB_MAX_BYTES * 5);
+    if (tooBig) {
+      setError(`File "${tooBig.name}" terlalu besar (>25MB).`);
       return;
     }
-    if (f.size > BLOB_MAX_BYTES) {
-      setError("Ukuran file melebihi 5MB. Mohon perkecil atau kompres foto.");
-      setFile(null);
-      setPreviewUrl(null);
-      return;
-    }
-    if (f.type.startsWith("image/")) {
-      setPreviewUrl(URL.createObjectURL(f));
-    } else {
-      setPreviewUrl(null);
-    }
+    setFiles((prev) => {
+      const next = [...prev, ...incoming];
+      const totalImages = next.filter(isImageFile).length;
+      const totalNonImages = next.length - totalImages;
+      if (totalImages > 0 && totalNonImages > 0) {
+        setError(
+          "Tidak bisa mencampur foto dan PDF/Word. Pilih semua foto, atau satu file PDF."
+        );
+        return prev;
+      }
+      if (totalNonImages > 1) {
+        setError("Hanya satu file PDF/Word yang dapat diunggah.");
+        return prev;
+      }
+      return next;
+    });
+    if (inputRef.current) inputRef.current.value = "";
+  }
+
+  function removeAt(i: number) {
+    setFiles((prev) => prev.filter((_, idx) => idx !== i));
   }
 
   async function onUpload() {
-    if (!archive || !file) return;
+    if (!archive || files.length === 0) return;
     setUploading(true);
     setError(null);
     try {
-      const asset = await uploadProofAsset(sessionUserId, file);
+      const baseName = `${archive.number}_${archive.subject}`.slice(0, 80);
+      const { file: bundled, merged } = await bundleProofFiles(files, baseName);
+      void merged;
+      const asset = await uploadProofAsset(sessionUserId, bundled);
       const res = await fetch(`/api/archives/${archive.id}/proof`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -776,6 +796,8 @@ function ProofUploadDialog({
     } catch (e) {
       if (e instanceof UploadError) {
         setError(e.message);
+      } else if (e instanceof Error) {
+        setError(e.message);
       } else {
         setError("Gagal memproses file. Periksa koneksi dan coba lagi.");
       }
@@ -784,6 +806,9 @@ function ProofUploadDialog({
     }
   }
 
+  const imageCount = files.filter(isImageFile).length;
+  const willMerge = imageCount >= 2;
+
   return (
     <Dialog open={!!archive} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
@@ -791,7 +816,8 @@ function ProofUploadDialog({
           <DialogTitle>Unggah Bukti Surat</DialogTitle>
           <DialogDescription>
             Arsip <code className="rounded bg-muted px-1 py-0.5 text-xs">{archive?.number}</code> akan berubah
-            menjadi <strong>Terbit</strong> setelah bukti diunggah.
+            menjadi <strong>Terbit</strong> setelah bukti diunggah. Pilih beberapa foto sekaligus untuk surat
+            multi-halaman; sistem akan menggabungkannya jadi satu PDF otomatis.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
@@ -801,7 +827,7 @@ function ProofUploadDialog({
               className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm hover:bg-accent sm:w-auto"
             >
               <Upload className="h-4 w-4" />
-              Pilih / Ambil Foto
+              {files.length === 0 ? "Pilih / Ambil Foto" : "Tambah Foto"}
             </label>
             <input
               id="proof-file"
@@ -809,28 +835,39 @@ function ProofUploadDialog({
               type="file"
               accept="image/*,application/pdf"
               capture="environment"
+              multiple
               className="hidden"
-              onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
+              onChange={(e) => addFiles(e.target.files)}
             />
-            <span className="text-sm text-muted-foreground break-all">
-              {file ? file.name : "Belum ada file"}
-            </span>
           </div>
 
-          {previewUrl && (
-            <div className="overflow-hidden rounded-md border">
-              <Image
-                src={previewUrl}
-                alt="Pratinjau bukti"
-                width={600}
-                height={400}
-                unoptimized
-                className="max-h-64 w-auto object-contain"
-              />
-            </div>
+          {files.length > 0 && (
+            <ul className="space-y-1.5 rounded-md border p-2 text-sm">
+              {files.map((f, i) => (
+                <li key={`${f.name}-${i}`} className="flex items-center justify-between gap-2">
+                  <span className="truncate">
+                    {i + 1}. {f.name}{" "}
+                    <span className="text-xs text-muted-foreground">
+                      ({(f.size / 1024).toFixed(0)} KB)
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeAt(i)}
+                    className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    aria-label={`Hapus ${f.name}`}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </li>
+              ))}
+            </ul>
           )}
-          {file && file.type === "application/pdf" && (
-            <p className="text-xs text-muted-foreground">File PDF terpilih: {file.name}</p>
+
+          {willMerge && (
+            <p className="rounded-md bg-primary/10 px-3 py-2 text-xs text-primary">
+              {imageCount} foto akan digabung jadi 1 PDF saat diunggah.
+            </p>
           )}
 
           {error && (
@@ -843,9 +880,9 @@ function ProofUploadDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Batal
           </Button>
-          <Button onClick={onUpload} disabled={!file || uploading}>
+          <Button onClick={onUpload} disabled={files.length === 0 || uploading}>
             {uploading && <Loader2 className="h-4 w-4 animate-spin" />}
-            Unggah Bukti
+            {willMerge ? "Gabung & Unggah Bukti" : "Unggah Bukti"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -985,6 +1022,7 @@ interface DialogProps {
   defaultUnitId: string;
   canChooseUnit: boolean;
   sessionUserId: string;
+  defaultRecipientLabel: string;
   onCreated: () => void;
 }
 
@@ -996,6 +1034,7 @@ function ManualArchiveDialog({
   defaultUnitId,
   canChooseUnit,
   sessionUserId,
+  defaultRecipientLabel,
   onCreated,
 }: DialogProps) {
   const [unitId, setUnitId] = useState<string>(defaultUnitId);
@@ -1006,24 +1045,40 @@ function ManualArchiveDialog({
   const [recipient, setRecipient] = useState("");
   const [externalSender, setExternalSender] = useState("");
   const [date, setDate] = useState<string>(new Date().toISOString().slice(0, 10));
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (open) {
       setUnitId(defaultUnitId);
-      setLetterTypeId(letterTypes[0]?.id ?? "");
+      // Default to a "generic" letter type if one exists (UMUM/UND/SP) so
+      // INCOMING tidak memaksa user memilih klasifikasi yang tidak mereka tahu.
+      const preferredCodes = ["UMUM", "SP", "UND"];
+      const preferred = letterTypes.find((lt) => preferredCodes.includes(lt.code));
+      setLetterTypeId(preferred?.id ?? letterTypes[0]?.id ?? "");
       setManualNumber("");
       setDirection("INCOMING");
       setSubject("");
-      setRecipient("");
+      // For INCOMING, the "Diteruskan ke" defaults to the logged-in user.
+      // User can override if the letter is being forwarded to someone else.
+      setRecipient(defaultRecipientLabel);
       setExternalSender("");
       setDate(new Date().toISOString().slice(0, 10));
-      setFile(null);
+      setFiles([]);
       setError(null);
     }
-  }, [open, defaultUnitId, letterTypes]);
+  }, [open, defaultUnitId, letterTypes, defaultRecipientLabel]);
+
+  // When user toggles direction, reset recipient to a sensible default.
+  useEffect(() => {
+    if (direction === "INCOMING") {
+      setRecipient((prev) => (prev ? prev : defaultRecipientLabel));
+    } else {
+      // Outgoing: default empty so user types the external recipient.
+      setRecipient((prev) => (prev === defaultRecipientLabel ? "" : prev));
+    }
+  }, [direction, defaultRecipientLabel]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -1036,16 +1091,16 @@ function ManualArchiveDialog({
         blobPathname: null,
         fileDataUrl: null,
       };
-      if (file) {
-        if (file.size > BLOB_MAX_BYTES) {
-          setError("Ukuran file melebihi 5MB.");
-          return;
-        }
+      if (files.length > 0) {
         try {
-          const asset = await uploadProofAsset(sessionUserId, file);
+          const baseName = (manualNumber || subject || "arsip").slice(0, 80);
+          const { file: bundled } = await bundleProofFiles(files, baseName);
+          const asset = await uploadProofAsset(sessionUserId, bundled);
           fileFields = { ...fileFields, ...assetToProofBody(asset) };
         } catch (err) {
           if (err instanceof UploadError) {
+            setError(err.message);
+          } else if (err instanceof Error) {
             setError(err.message);
           } else {
             setError("Gagal memproses file. Periksa koneksi dan coba lagi.");
@@ -1080,14 +1135,16 @@ function ManualArchiveDialog({
     }
   }
 
+  const isIncoming = direction === "INCOMING";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>Tambah Arsip Manual</DialogTitle>
           <DialogDescription>
-            Gunakan untuk mengarsipkan surat masuk atau surat lama yang nomornya sudah ada. Untuk nomor baru
-            otomatis, gunakan halaman <strong>Buat Nomor Surat</strong>.
+            Gunakan untuk mengarsipkan surat masuk dari instansi luar atau surat lama yang nomornya sudah ada.
+            Untuk membuat nomor surat keluar baru otomatis, pakai halaman <strong>Buat Nomor Surat</strong>.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2">
@@ -1096,7 +1153,7 @@ function ManualArchiveDialog({
             <div className="flex gap-2">
               <Button
                 type="button"
-                variant={direction === "INCOMING" ? "default" : "outline"}
+                variant={isIncoming ? "default" : "outline"}
                 size="sm"
                 onClick={() => setDirection("INCOMING")}
               >
@@ -1104,7 +1161,7 @@ function ManualArchiveDialog({
               </Button>
               <Button
                 type="button"
-                variant={direction === "OUTGOING" ? "default" : "outline"}
+                variant={!isIncoming ? "default" : "outline"}
                 size="sm"
                 onClick={() => setDirection("OUTGOING")}
               >
@@ -1113,104 +1170,193 @@ function ManualArchiveDialog({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="m-unit">Unit</Label>
-            <Select value={unitId} onValueChange={setUnitId} disabled={!canChooseUnit}>
-              <SelectTrigger id="m-unit">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {units.map((u) => (
-                  <SelectItem key={u.id} value={u.id}>
-                    {u.code}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="m-type">Jenis Surat</Label>
-            <Select value={letterTypeId} onValueChange={setLetterTypeId}>
-              <SelectTrigger id="m-type">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {letterTypes.map((lt) => (
-                  <SelectItem key={lt.id} value={lt.id}>
-                    {lt.code}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {isIncoming && (
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="m-sender">Pengirim Eksternal</Label>
+              <Input
+                id="m-sender"
+                value={externalSender}
+                onChange={(e) => setExternalSender(e.target.value)}
+                placeholder="Mis. Universitas Brawijaya, Kemendikbud, BNI Pusat"
+                required
+                autoFocus
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Nama instansi atau perorangan asal surat. Wajib diisi.
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="m-number">
-              {direction === "INCOMING"
-                ? "Nomor Surat (salin dari surat instansi pengirim)"
+              {isIncoming
+                ? "Nomor Surat (sesuai surat asli)"
                 : "Nomor Surat (manual, opsional)"}
             </Label>
             <Input
               id="m-number"
               value={manualNumber}
               placeholder={
-                direction === "INCOMING"
-                  ? "Mis. 123/A.1/UND/IV/2026 (sesuai surat aslinya)"
+                isIncoming
+                  ? "Mis. 123/A.1/UND/IV/2026"
                   : "Kosongkan untuk membuat nomor baru otomatis"
               }
               onChange={(e) => setManualNumber(e.target.value)}
-              required={direction === "INCOMING"}
+              required={isIncoming}
             />
-            {direction === "INCOMING" && (
+            {isIncoming && (
               <p className="text-[11px] text-muted-foreground">
-                Surat masuk berasal dari instansi luar &mdash; sistem tidak meng-auto-generate nomor.
-                Salin persis nomor pada surat aslinya.
+                Salin persis nomor yang tertera di surat aslinya.
               </p>
             )}
           </div>
+
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="m-subject">Perihal</Label>
             <Input id="m-subject" value={subject} onChange={(e) => setSubject(e.target.value)} required />
           </div>
-          {direction === "INCOMING" && (
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="m-sender">Pengirim (Eksternal)</Label>
-              <Input
-                id="m-sender"
-                value={externalSender}
-                onChange={(e) => setExternalSender(e.target.value)}
-                placeholder="Mis. Kemendikbud"
-                required
-              />
-            </div>
-          )}
-          <div className="space-y-2 sm:col-span-2">
+
+          <div className="space-y-2">
+            <Label htmlFor="m-date">Tanggal Surat</Label>
+            <Input id="m-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+          </div>
+          <div className="space-y-2 sm:col-span-2 sm:order-none">
             <Label htmlFor="m-recipient">
-              {direction === "INCOMING" ? "Diteruskan ke (Unit/Pejabat Internal)" : "Tujuan"}
+              {isIncoming ? "Diteruskan ke (Pejabat / Unit Internal)" : "Tujuan"}
             </Label>
             <Input
               id="m-recipient"
               value={recipient}
               onChange={(e) => setRecipient(e.target.value)}
               required
+              placeholder={
+                isIncoming
+                  ? "Mis. Wakil Rektor I, Bagian Akademik"
+                  : "Nama / instansi penerima"
+              }
             />
+            {isIncoming && (
+              <p className="text-[11px] text-muted-foreground">
+                Pre-filled ke akun Anda. Ubah bila surat ditujukan ke pejabat lain.
+              </p>
+            )}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="m-date">Tanggal</Label>
-            <Input id="m-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+
+          <div className="space-y-2 sm:col-span-2 rounded-md border bg-muted/30 p-3">
+            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Klasifikasi
+            </Label>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="m-unit" className="text-xs">
+                  {isIncoming ? "Unit Penerima Internal" : "Unit"}
+                </Label>
+                <Select value={unitId} onValueChange={setUnitId} disabled={!canChooseUnit}>
+                  <SelectTrigger id="m-unit">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {units.map((u) => (
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.code} &mdash; {u.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {isIncoming && !canChooseUnit && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Otomatis ke unit Anda. Surat masuk akan masuk ke buku arsip unit ini.
+                  </p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="m-type" className="text-xs">
+                  Jenis Surat
+                </Label>
+                <Select value={letterTypeId} onValueChange={setLetterTypeId}>
+                  <SelectTrigger id="m-type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {letterTypes.map((lt) => (
+                      <SelectItem key={lt.id} value={lt.id}>
+                        {lt.code} &mdash; {lt.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {isIncoming && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Pilih yang paling mendekati. Bila tidak yakin, pakai default.
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="m-file">Bukti / Lampiran</Label>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="m-file">Bukti / Lampiran (opsional)</Label>
             <input
               id="m-file"
               type="file"
               accept="image/*,application/pdf"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              multiple
+              onChange={(e) => {
+                const picked = Array.from(e.target.files ?? []);
+                if (picked.length === 0) return;
+                setError(null);
+                const tooBig = picked.find((f) => f.size > BLOB_MAX_BYTES * 5);
+                if (tooBig) {
+                  setError(`File "${tooBig.name}" terlalu besar (>25MB).`);
+                  e.target.value = "";
+                  return;
+                }
+                setFiles((prev) => {
+                  const next = [...prev, ...picked];
+                  const imgs = next.filter(isImageFile).length;
+                  const others = next.length - imgs;
+                  if (imgs > 0 && others > 0) {
+                    setError(
+                      "Tidak bisa mencampur foto dan PDF/Word. Pilih semua foto, atau satu file PDF."
+                    );
+                    return prev;
+                  }
+                  if (others > 1) {
+                    setError("Hanya satu file PDF/Word yang dapat diunggah.");
+                    return prev;
+                  }
+                  return next;
+                });
+                e.target.value = "";
+              }}
               className="block w-full text-sm file:mr-2 file:rounded-md file:border file:border-input file:bg-background file:px-3 file:py-1.5 file:text-sm"
             />
+            {files.length > 0 && (
+              <ul className="space-y-1 rounded-md border p-2 text-xs">
+                {files.map((f, i) => (
+                  <li key={`${f.name}-${i}`} className="flex items-center justify-between gap-2">
+                    <span className="truncate">
+                      {i + 1}. {f.name}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setFiles((prev) => prev.filter((_, idx) => idx !== i))}
+                      className="rounded p-0.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                      aria-label={`Hapus ${f.name}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {files.filter(isImageFile).length >= 2 && (
+              <p className="rounded-md bg-primary/10 px-2 py-1 text-[11px] text-primary">
+                {files.filter(isImageFile).length} foto akan digabung jadi 1 PDF saat disimpan.
+              </p>
+            )}
             <p className="text-[11px] text-muted-foreground">
-              Opsional. Bila file dilampirkan, arsip langsung berstatus <em>Terbit</em>;
-              bila kosong, arsip berstatus <em>Menunggu Bukti</em>.
+              Pilih beberapa foto sekaligus untuk surat multi-halaman, atau satu file PDF/Word.
+              Bila kosong, arsip berstatus <em>Menunggu Bukti</em>; bila ada lampiran, langsung <em>Terbit</em>.
             </p>
           </div>
 

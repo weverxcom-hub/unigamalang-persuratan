@@ -44,6 +44,7 @@ export default async function ArchivesPage() {
         role={session.role}
         sessionUnitId={session.unitId}
         sessionUserId={session.userId}
+        sessionUserName={session.name}
       />
     </div>
   );

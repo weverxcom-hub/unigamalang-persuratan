@@ -28,6 +28,7 @@ async function main() {
     { code: "SP", name: "Surat Pengantar" },
     { code: "UND", name: "Surat Undangan" },
     { code: "EDAR", name: "Surat Edaran" },
+    { code: "UMUM", name: "Umum" },
   ];
   for (const lt of letterTypes) {
     await prisma.letterType.upsert({
