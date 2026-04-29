@@ -1304,6 +1304,12 @@ function ManualArchiveDialog({
                 const picked = Array.from(e.target.files ?? []);
                 if (picked.length === 0) return;
                 setError(null);
+                const tooBig = picked.find((f) => f.size > BLOB_MAX_BYTES * 5);
+                if (tooBig) {
+                  setError(`File "${tooBig.name}" terlalu besar (>25MB).`);
+                  e.target.value = "";
+                  return;
+                }
                 setFiles((prev) => {
                   const next = [...prev, ...picked];
                   const imgs = next.filter(isImageFile).length;
