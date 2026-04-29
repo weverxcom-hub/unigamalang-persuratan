@@ -8,8 +8,8 @@ export default async function ArchivesPage() {
   if (!session) redirect("/login");
 
   const [unitsRaw, letterTypesRaw] = await Promise.all([
-    prisma.unit.findMany({ orderBy: { code: "asc" } }),
-    prisma.letterType.findMany({ orderBy: { code: "asc" } }),
+    prisma.unit.findMany({ where: { deletedAt: null }, orderBy: { code: "asc" } }),
+    prisma.letterType.findMany({ where: { deletedAt: null }, orderBy: { code: "asc" } }),
   ]);
 
   const units = unitsRaw

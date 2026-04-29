@@ -43,6 +43,8 @@ import {
   Loader2,
   FileText,
   Send,
+  Printer,
+  Download,
 } from "lucide-react";
 import type { Archive, ArchiveListItem, ArchiveStatus, Role } from "@/lib/types";
 import {
@@ -64,6 +66,41 @@ const YEAR_OPTIONS = (() => {
   const curr = new Date().getFullYear();
   return [curr, curr - 1, curr - 2, curr - 3];
 })();
+
+function buildArchiveQuery(filters: {
+  q?: string;
+  unitId?: string;
+  letterTypeId?: string;
+  year?: string;
+  direction?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}): string {
+  const params = new URLSearchParams();
+  if (filters.q) params.set("q", filters.q);
+  if (filters.unitId && filters.unitId !== "__all") params.set("unitId", filters.unitId);
+  if (filters.letterTypeId && filters.letterTypeId !== "__all")
+    params.set("letterTypeId", filters.letterTypeId);
+  if (filters.year && filters.year !== "__all") params.set("year", filters.year);
+  if (filters.direction && filters.direction !== "__all")
+    params.set("direction", filters.direction);
+  if (filters.dateFrom) params.set("dateFrom", filters.dateFrom);
+  if (filters.dateTo) params.set("dateTo", filters.dateTo);
+  return params.toString();
+}
+
+function buildPrintUrl(filters: Parameters<typeof buildArchiveQuery>[0]) {
+  const qs = buildArchiveQuery(filters);
+  return qs ? `/print/archives?${qs}` : "/print/archives";
+}
+
+function buildExportUrl(
+  filters: Parameters<typeof buildArchiveQuery>[0],
+  format: "csv" | "xlsx"
+) {
+  const qs = buildArchiveQuery(filters);
+  return `/api/archives/export?format=${format}${qs ? `&${qs}` : ""}`;
+}
 
 const STATUS_LABEL: Record<ArchiveStatus, string> = {
   DRAFT: "Draf",
@@ -194,10 +231,36 @@ export function ArchivesClient({
             <ArchiveIcon className="h-5 w-5 text-primary" />
             <CardTitle>Daftar Arsip</CardTitle>
           </div>
-          <Button onClick={() => setDialogOpen(true)} className="w-full md:w-auto">
-            <Plus className="h-4 w-4" />
-            Arsipkan Surat (Lama / Masuk)
-          </Button>
+          <div className="flex flex-wrap gap-2 md:justify-end">
+            <Button variant="outline" type="button" asChild>
+              <a
+                href={buildExportUrl({ q, unitId, letterTypeId, year, direction, dateFrom, dateTo }, "csv")}
+                rel="noreferrer"
+              >
+                <Download className="h-4 w-4" />
+                CSV
+              </a>
+            </Button>
+            <Button variant="outline" type="button" asChild>
+              <a
+                href={buildExportUrl({ q, unitId, letterTypeId, year, direction, dateFrom, dateTo }, "xlsx")}
+                rel="noreferrer"
+              >
+                <Download className="h-4 w-4" />
+                Excel
+              </a>
+            </Button>
+            <Button variant="outline" type="button" asChild>
+              <a href={buildPrintUrl({ q, unitId, letterTypeId, year, direction, dateFrom, dateTo })} target="_blank" rel="noreferrer">
+                <Printer className="h-4 w-4" />
+                Cetak
+              </a>
+            </Button>
+            <Button onClick={() => setDialogOpen(true)} className="w-full md:w-auto">
+              <Plus className="h-4 w-4" />
+              Arsipkan Surat (Lama / Masuk)
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-3 md:grid-cols-[1fr_180px_180px_140px_auto]">
@@ -835,8 +898,16 @@ function ProofViewDialog({
     };
   }, [archive]);
 
+  const isGdrive = !!dataUrl && /^https:\/\/(drive|docs)\.google\.com\//i.test(dataUrl);
+  // Drive webViewLink (`/file/d/<id>/view`) cannot be iframed, but the
+  // sibling `/preview` URL has a permissive frame policy and works for
+  // both images and PDFs.
+  const gdrivePreview = isGdrive
+    ? dataUrl!.replace(/\/view(\?[^#]*)?$/, "/preview")
+    : null;
   const isPdf =
     !!dataUrl &&
+    !isGdrive &&
     (dataUrl.startsWith("data:application/pdf") || /\.pdf(\?|#|$)/i.test(dataUrl));
 
   return (
@@ -858,7 +929,28 @@ function ProofViewDialog({
             {error}
           </p>
         ) : dataUrl ? (
-          isPdf ? (
+          isGdrive ? (
+            <div className="space-y-2">
+              <iframe
+                src={gdrivePreview!}
+                className="h-[70vh] w-full rounded-md border"
+                title="Pratinjau Google Drive"
+                allow="autoplay"
+              />
+              <p className="text-xs text-muted-foreground">
+                Tersimpan di Google Drive.{" "}
+                <a
+                  href={dataUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline hover:text-foreground"
+                >
+                  Buka di tab baru
+                </a>
+                .
+              </p>
+            </div>
+          ) : isPdf ? (
             <iframe
               src={dataUrl}
               className="h-[70vh] w-full rounded-md border"
@@ -1053,13 +1145,28 @@ function ManualArchiveDialog({
           </div>
 
           <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="m-number">Nomor Surat (manual, opsional)</Label>
+            <Label htmlFor="m-number">
+              {direction === "INCOMING"
+                ? "Nomor Surat (salin dari surat instansi pengirim)"
+                : "Nomor Surat (manual, opsional)"}
+            </Label>
             <Input
               id="m-number"
               value={manualNumber}
-              placeholder="Kosongkan untuk membuat nomor baru otomatis"
+              placeholder={
+                direction === "INCOMING"
+                  ? "Mis. 123/A.1/UND/IV/2026 (sesuai surat aslinya)"
+                  : "Kosongkan untuk membuat nomor baru otomatis"
+              }
               onChange={(e) => setManualNumber(e.target.value)}
+              required={direction === "INCOMING"}
             />
+            {direction === "INCOMING" && (
+              <p className="text-[11px] text-muted-foreground">
+                Surat masuk berasal dari instansi luar &mdash; sistem tidak meng-auto-generate nomor.
+                Salin persis nomor pada surat aslinya.
+              </p>
+            )}
           </div>
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="m-subject">Perihal</Label>

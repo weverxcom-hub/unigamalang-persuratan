@@ -115,6 +115,11 @@ export async function GET(req: Request) {
 const MAX_DATA_URL_LEN = 4 * 1024 * 1024; // ~3MB binary (base64 adds ~33%)
 const DATA_URL_PATTERN = /^data:(image\/(png|jpe?g|webp|gif)|application\/pdf);base64,/i;
 const BLOB_URL_PATTERN = /^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\//i;
+const GDRIVE_URL_PATTERN = /^https:\/\/(drive|docs)\.google\.com\//i;
+const FILE_URL_PATTERN = new RegExp(
+  `(${BLOB_URL_PATTERN.source})|(${GDRIVE_URL_PATTERN.source})`,
+  "i"
+);
 
 const createSchema = z
   .object({
@@ -129,10 +134,13 @@ const createSchema = z
     // Either an uploaded Blob URL (preferred) OR legacy inline base64.
     fileUrl: z
       .string()
-      .regex(BLOB_URL_PATTERN, { message: "fileUrl harus dari Vercel Blob" })
+      .regex(FILE_URL_PATTERN, {
+        message: "fileUrl harus dari Google Drive atau Vercel Blob",
+      })
       .nullable()
       .optional(),
     blobPathname: z.string().max(500).nullable().optional(),
+    gdriveFileId: z.string().max(120).nullable().optional(),
     fileDataUrl: z
       .string()
       .regex(DATA_URL_PATTERN, {
@@ -190,8 +198,11 @@ export async function POST(req: Request) {
     prisma.unit.findUnique({ where: { id: input.unitId } }),
     prisma.letterType.findUnique({ where: { id: input.letterTypeId } }),
   ]);
-  if (!unit || !letterType) {
-    return NextResponse.json({ error: "Unit atau jenis surat tidak ditemukan" }, { status: 400 });
+  if (!unit || unit.deletedAt) {
+    return NextResponse.json({ error: "Unit tidak ditemukan atau telah dinonaktifkan" }, { status: 400 });
+  }
+  if (!letterType || letterType.deletedAt) {
+    return NextResponse.json({ error: "Jenis surat tidak ditemukan atau telah dinonaktifkan" }, { status: 400 });
   }
 
   const isManualArchive = Boolean(input.manualNumber && input.manualNumber.trim().length > 0);
@@ -232,6 +243,7 @@ export async function POST(req: Request) {
         fileName: input.fileName ?? null,
         fileUrl: input.fileUrl ?? null,
         blobPathname: input.blobPathname ?? null,
+        gdriveFileId: input.gdriveFileId ?? null,
         fileDataUrl: input.fileUrl ? null : input.fileDataUrl ?? null,
         createdById: session.userId,
       },
@@ -266,7 +278,7 @@ export async function POST(req: Request) {
     try {
       if (archive.direction === "INCOMING") {
         const admins = await prisma.user.findMany({
-          where: { unitId: archive.unitId, role: "ADMIN_UNIT" },
+          where: { unitId: archive.unitId, role: "ADMIN_UNIT", deletedAt: null },
         });
         const dateStr = new Date(archive.date).toLocaleDateString("id-ID", {
           day: "2-digit",

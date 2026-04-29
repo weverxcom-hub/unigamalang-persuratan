@@ -4,11 +4,17 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { audit } from "@/lib/audit";
 import { deleteFromBlob } from "@/lib/blob";
+import { deleteFile as deleteGdriveFile } from "@/lib/gdrive";
 import { serialiseArchive } from "../../serialise";
 
 const MAX_DATA_URL_LEN = 4 * 1024 * 1024;
 const DATA_URL_PATTERN = /^data:(image\/(png|jpe?g|webp|gif)|application\/pdf);base64,/i;
 const BLOB_URL_PATTERN = /^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\//i;
+const GDRIVE_URL_PATTERN = /^https:\/\/(drive|docs)\.google\.com\//i;
+const FILE_URL_PATTERN = new RegExp(
+  `(${BLOB_URL_PATTERN.source})|(${GDRIVE_URL_PATTERN.source})`,
+  "i"
+);
 
 function clientIp(req: Request): string | null {
   return (
@@ -24,10 +30,13 @@ const schema = z
     // Accept either a Vercel Blob URL (preferred) or legacy inline data URL.
     fileUrl: z
       .string()
-      .regex(BLOB_URL_PATTERN, { message: "fileUrl harus dari Vercel Blob" })
+      .regex(FILE_URL_PATTERN, {
+        message: "fileUrl harus dari Google Drive atau Vercel Blob",
+      })
       .nullable()
       .optional(),
     blobPathname: z.string().max(500).nullable().optional(),
+    gdriveFileId: z.string().max(120).nullable().optional(),
     fileDataUrl: z
       .string()
       .regex(DATA_URL_PATTERN, {
@@ -93,9 +102,17 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     (session.role === "USER" && archive.createdById === session.userId);
   if (!canUpload) return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
 
-  // Capture old blob pathname so we can clean it up post-commit if it changed.
+  // Capture old storage handles so we can clean them up post-commit if they
+  // change. We never roll back the upload because of a cleanup failure.
   const previousBlobPathname = archive.blobPathname;
+  const previousGdriveFileId = archive.gdriveFileId;
   const newBlobPathname = parsed.data.blobPathname ?? null;
+  const newGdriveFileId = parsed.data.gdriveFileId ?? null;
+  const storageKind: "gdrive" | "blob" | "inline" = parsed.data.gdriveFileId
+    ? "gdrive"
+    : parsed.data.fileUrl
+      ? "blob"
+      : "inline";
 
   const updated = await prisma.$transaction(async (tx) => {
     const u = await tx.archive.update({
@@ -104,6 +121,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         fileName: parsed.data.fileName,
         fileUrl: parsed.data.fileUrl ?? null,
         blobPathname: newBlobPathname,
+        gdriveFileId: newGdriveFileId,
         fileDataUrl: parsed.data.fileUrl ? null : parsed.data.fileDataUrl ?? null,
         status: archive.status === "PENDING_PROOF" ? "ISSUED" : archive.status,
       },
@@ -118,7 +136,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         archiveId: archive.id,
         metadata: {
           fileName: parsed.data.fileName,
-          kind: parsed.data.fileUrl ? "blob" : "inline",
+          kind: storageKind,
         },
         ip: clientIp(req),
         userAgent: req.headers.get("user-agent"),
@@ -128,13 +146,23 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     return u;
   });
 
-  // Best-effort cleanup of the orphaned blob, after the DB commit. A failure
-  // here must not roll back the upload.
+  // Best-effort cleanup of orphaned storage objects, after the DB commit.
   if (previousBlobPathname && previousBlobPathname !== newBlobPathname) {
     try {
       await deleteFromBlob(previousBlobPathname);
     } catch (e) {
       console.warn("[/api/archives/[id]/proof] failed to delete old blob", previousBlobPathname, e);
+    }
+  }
+  if (previousGdriveFileId && previousGdriveFileId !== newGdriveFileId) {
+    try {
+      await deleteGdriveFile(previousGdriveFileId);
+    } catch (e) {
+      console.warn(
+        "[/api/archives/[id]/proof] failed to delete old gdrive file",
+        previousGdriveFileId,
+        e
+      );
     }
   }
 

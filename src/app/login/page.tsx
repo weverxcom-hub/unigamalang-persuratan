@@ -1,13 +1,20 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Logo } from "@/components/brand/logo";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SiteFooter } from "@/components/app/footer";
 import { LoginForm } from "./login-form";
+import { getSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  // Already-active session => skip the form. getSession also rejects
+  // soft-deleted users so they fall through to the form (and won't loop).
+  const session = await getSession();
+  if (session) redirect("/dashboard");
+
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-background via-background to-primary/5">
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-10">

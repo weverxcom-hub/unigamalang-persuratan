@@ -113,6 +113,29 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
   }
 
+  // Validate target user / unit is still active. Without this, a SUPER_ADMIN
+  // could disposisi to an account or unit that has been soft-deleted, leaving
+  // the disposition unread (no notification recipient) and creating a stale
+  // assignment.
+  if (parsed.data.toUserId) {
+    const targetUser = await prisma.user.findUnique({ where: { id: parsed.data.toUserId } });
+    if (!targetUser || targetUser.deletedAt) {
+      return NextResponse.json(
+        { error: "Pengguna tujuan tidak ditemukan atau telah dinonaktifkan" },
+        { status: 400 }
+      );
+    }
+  }
+  if (parsed.data.toUnitId) {
+    const targetUnit = await prisma.unit.findUnique({ where: { id: parsed.data.toUnitId } });
+    if (!targetUnit || targetUnit.deletedAt) {
+      return NextResponse.json(
+        { error: "Unit tujuan tidak ditemukan atau telah dinonaktifkan" },
+        { status: 400 }
+      );
+    }
+  }
+
   const disposition = await prisma.$transaction(async (tx) => {
     const d = await tx.disposition.create({
       data: {
@@ -154,10 +177,10 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         const u = await prisma.user.findUnique({
           where: { id: disposition.toUserId },
         });
-        if (u) recipients = [{ email: u.email, name: u.name }];
+        if (u && !u.deletedAt) recipients = [{ email: u.email, name: u.name }];
       } else if (disposition.toUnitId) {
         const admins = await prisma.user.findMany({
-          where: { unitId: disposition.toUnitId, role: "ADMIN_UNIT" },
+          where: { unitId: disposition.toUnitId, role: "ADMIN_UNIT", deletedAt: null },
         });
         recipients = admins.map((a) => ({ email: a.email, name: a.name }));
       }

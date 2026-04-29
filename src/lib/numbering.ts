@@ -36,8 +36,9 @@ export async function allocateNextNumber(
       c.unit.findUnique({ where: { id: unitId } }),
       c.letterType.findUnique({ where: { id: letterTypeId } }),
     ]);
-    if (!unit) throw new Error("Unit tidak ditemukan");
-    if (!letterType) throw new Error("Jenis surat tidak ditemukan");
+    if (!unit || unit.deletedAt) throw new Error("Unit tidak ditemukan atau telah dinonaktifkan");
+    if (!letterType || letterType.deletedAt)
+      throw new Error("Jenis surat tidak ditemukan atau telah dinonaktifkan");
 
     const now = new Date();
     const year = now.getFullYear();
@@ -90,7 +91,8 @@ export async function previewNextNumber(
       });
     })(),
   ]);
-  if (!unit || !letterType) return null;
+  if (!unit || unit.deletedAt) return null;
+  if (!letterType || letterType.deletedAt) return null;
 
   const now = new Date();
   const year = now.getFullYear();
