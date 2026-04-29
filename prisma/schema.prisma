@@ -127,24 +127,29 @@ model LetterType {
   // row).
   deletedAt DateTime?
 
-  archives Archive[]
+  archives  Archive[]
+  sequences NumberingSequence[]
 
   @@index([deletedAt])
 }
 
-/// Per-unit per-year sequence counter. Tracked ONLY by (unitId, year) to
-/// prevent gaps in the sequence when a unit uses multiple letter types in
-/// the same year, and to reset automatically on 1 January.
+/// Per-(unit, letterType, year) sequence counter. Each combination of unit
+/// and letter type gets its own running counter that resets every January.
+/// Reflects how UNIGA's birokrasi actually numbers letters: SK has its own
+/// stream, ST has its own, etc.
 model NumberingSequence {
-  id        String   @id @default(cuid())
-  unitId    String
-  unit      Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  year      Int
-  last      Int      @default(0)
-  updatedAt DateTime @updatedAt
+  id           String     @id @default(cuid())
+  unitId       String
+  unit         Unit       @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  letterTypeId String
+  letterType   LetterType @relation(fields: [letterTypeId], references: [id], onDelete: Cascade)
+  year         Int
+  last         Int        @default(0)
+  updatedAt    DateTime   @updatedAt
 
-  @@unique([unitId, year])
+  @@unique([unitId, letterTypeId, year])
   @@index([unitId, year])
+  @@index([letterTypeId, year])
 }
 
 model Archive {

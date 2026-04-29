@@ -13,10 +13,12 @@ export interface GeneratedNumber {
 }
 
 /**
- * Allocate the next sequence number for `(unitId, year)` atomically.
+ * Allocate the next sequence number for `(unitId, letterTypeId, year)`
+ * atomically.
  *
- *   - Sequence is scoped per-unit-per-year (all letter types share the
- *     counter for a given unit + year), with the year resetting on 1 Jan.
+ *   - Each (unit × jenis surat) pair has its own counter, reset every
+ *     1 January. SK, ST, UND, etc. each run independently so the institution
+ *     can match how their physical numbering books work.
  *   - Uses `upsert` + `increment` inside a Prisma transaction so concurrent
  *     calls never produce duplicate numbers.
  *   - The final string is rendered through the unit's `formatTemplate`.
@@ -46,8 +48,8 @@ export async function allocateNextNumber(
 
     // Atomic increment: either create (last=1) or bump existing row by 1.
     const seq = await c.numberingSequence.upsert({
-      where: { unitId_year: { unitId, year } },
-      create: { unitId, year, last: 1 },
+      where: { unitId_letterTypeId_year: { unitId, letterTypeId, year } },
+      create: { unitId, letterTypeId, year, last: 1 },
       update: { last: { increment: 1 } },
     });
     const sequence = seq.last;
@@ -87,7 +89,7 @@ export async function previewNextNumber(
     (async () => {
       const year = new Date().getFullYear();
       return prisma.numberingSequence.findUnique({
-        where: { unitId_year: { unitId, year } },
+        where: { unitId_letterTypeId_year: { unitId, letterTypeId, year } },
       });
     })(),
   ]);
