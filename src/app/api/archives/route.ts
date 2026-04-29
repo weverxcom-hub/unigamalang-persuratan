@@ -34,8 +34,23 @@ export async function GET(req: Request) {
   }
 
   archives.sort((a, b) => (a.date < b.date ? 1 : -1));
-  return NextResponse.json({ archives });
+
+  // Strip the base64 `fileDataUrl` from the list response — it can be up to ~4MB
+  // per archive and is only needed when viewing a single proof. Clients receive a
+  // `hasProof` boolean instead and fetch the actual data lazily from
+  // GET /api/archives/[id]/proof.
+  const lightweight = archives.map(({ fileDataUrl, ...rest }) => ({
+    ...rest,
+    hasProof: !!fileDataUrl,
+  }));
+
+  return NextResponse.json({ archives: lightweight });
 }
+
+// Keep these in sync with the proof-upload endpoint so both routes enforce the
+// same constraints on inline base64 payloads.
+const MAX_DATA_URL_LEN = 4 * 1024 * 1024; // ~3MB binary (base64 adds ~33% overhead)
+const DATA_URL_PATTERN = /^data:(image\/(png|jpe?g|webp|gif)|application\/pdf);base64,/i;
 
 const createSchema = z.object({
   subject: z.string().min(3, "Perihal minimal 3 karakter"),
@@ -45,8 +60,17 @@ const createSchema = z.object({
   direction: z.enum(["OUTGOING", "INCOMING"]).default("OUTGOING"),
   date: z.string().optional(),
   fileName: z.string().nullable().optional(),
+  fileDataUrl: z
+    .string()
+    .regex(DATA_URL_PATTERN, {
+      message: "Hanya gambar (PNG/JPG/WEBP/GIF) atau PDF yang diperbolehkan",
+    })
+    .max(MAX_DATA_URL_LEN, "Ukuran file terlalu besar (maks. 3MB)")
+    .nullable()
+    .optional(),
   manualNumber: z.string().nullable().optional(),
-  status: z.enum(["DRAFT", "PENDING", "APPROVED", "ISSUED"]).optional(),
+  // `status` is intentionally NOT accepted from the client here — it is always
+  // derived server-side to prevent bypassing the PENDING/PENDING_PROOF flow.
 });
 
 export async function POST(req: Request) {
@@ -80,19 +104,28 @@ export async function POST(req: Request) {
 
   let number: string;
   let sequenceNumber = 0;
+  const isManualArchive = Boolean(input.manualNumber && input.manualNumber.trim().length > 0);
 
-  if (input.manualNumber && input.manualNumber.trim().length > 0) {
-    // Manual archive (e.g. historical records).
-    number = input.manualNumber.trim();
+  if (isManualArchive) {
+    // Manual archive (e.g. historical records / incoming mail).
+    number = input.manualNumber!.trim();
   } else {
     const allocated = allocateNextNumber(input.unitId, input.letterTypeId);
     number = allocated.number;
     sequenceNumber = allocated.sequenceNumber;
   }
 
-  // Users submit drafts; Admin Unit / Super Admin issue directly.
-  const defaultStatus = session.role === "USER" ? "PENDING" : "ISSUED";
-  const status = input.status ?? defaultStatus;
+  // Status is always computed server-side so a malicious client cannot send
+  // `status: "ISSUED"` to skip the PENDING / PENDING_PROOF workflow.
+  //  - USER (any archive) -> PENDING (always needs admin approval)
+  //  - Admin, with file   -> ISSUED (proof already attached)
+  //  - Admin, no file     -> PENDING_PROOF (must upload proof before ISSUED)
+  let status: Archive["status"];
+  if (session.role === "USER") {
+    status = "PENDING";
+  } else {
+    status = input.fileDataUrl ? "ISSUED" : "PENDING_PROOF";
+  }
 
   const archive: Archive = {
     id: newArchiveId(),
@@ -106,6 +139,7 @@ export async function POST(req: Request) {
     letterTypeCode: letterType.code,
     sequenceNumber,
     fileName: input.fileName ?? null,
+    fileDataUrl: input.fileDataUrl ?? null,
     direction: input.direction,
     status,
     createdById: session.userId,

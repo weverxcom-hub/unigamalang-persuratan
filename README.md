@@ -33,14 +33,20 @@ Logika:
   Arah (Masuk/Keluar), Status.
 - Dukungan arsip manual (historis/surat masuk) dengan nomor manual opsional.
 
-### 3. Kontrol Akses Berperan
+### 3. Alur Bukti Surat (PENDING_PROOF → ISSUED)
+Setiap nomor yang dialokasikan **tidak langsung** berstatus `ISSUED`. Arsip dibuat dengan
+status `PENDING_PROOF` dan wajib disertai foto/scan/PDF surat yang sudah ditandatangani
+agar dapat ditransisikan ke `ISSUED`. Hal ini memastikan setiap nomor benar-benar
+digunakan dan dapat ditelusuri isi fisiknya.
+
+### 4. Kontrol Akses Berperan
 | Peran | Kewenangan |
 |---|---|
 | `SUPER_ADMIN` | Mengelola semua unit, kode unit, jenis surat, & arsip seluruh kampus. |
 | `ADMIN_UNIT` | Generate nomor & arsip untuk unitnya sendiri. |
 | `USER` | Ajukan draf ke Admin Unit (status `PENDING`). |
 
-### 4. Autentikasi Terbatas Domain
+### 5. Autentikasi Terbatas Domain
 Registrasi & login **hanya** untuk email `@unigamalang.ac.id`. Session berbasis JWT
 (HTTP-only cookie) dengan middleware yang melindungi seluruh rute `/dashboard`.
 
@@ -52,12 +58,21 @@ Registrasi & login **hanya** untuk email `@unigamalang.ac.id`. Session berbasis 
 - **Data layer:** JSON mock store (seeded in-memory; file-backed saat dev).
 
 ## Akun Demo (auto-seed)
+
+> ⚠️ Password demo **tidak ditampilkan di halaman login** agar tidak terlihat oleh publik.
+> Kredensial hanya tersedia di README GitHub ini untuk keperluan pengujian internal.
+
 | Peran | Email | Password |
 |---|---|---|
 | Super Admin | `superadmin@unigamalang.ac.id` | `Password123!` |
 | Admin Unit (Rektorat) | `admin.rektorat@unigamalang.ac.id` | `Password123!` |
 | Admin Unit (Yayasan) | `admin.yayasan@unigamalang.ac.id` | `Password123!` |
 | User | `staff@unigamalang.ac.id` | `Password123!` |
+
+## Panduan Pengguna (Bahasa Indonesia)
+
+Lihat [docs/panduan-pengguna.md](docs/panduan-pengguna.md) atau halaman **Panduan** di dalam
+aplikasi (setelah login: `/dashboard/panduan`).
 
 ## Menjalankan Secara Lokal
 

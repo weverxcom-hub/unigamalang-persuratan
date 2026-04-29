@@ -32,7 +32,12 @@ export interface NumberingSequence {
   lastNumber: number;
 }
 
-export type ArchiveStatus = "DRAFT" | "PENDING" | "APPROVED" | "ISSUED";
+export type ArchiveStatus =
+  | "DRAFT"
+  | "PENDING"
+  | "PENDING_PROOF"
+  | "APPROVED"
+  | "ISSUED";
 
 export interface Archive {
   id: string;
@@ -45,12 +50,19 @@ export interface Archive {
   letterTypeId: string;
   letterTypeCode: string;
   sequenceNumber: number;
-  fileName: string | null; // mock file upload
+  fileName: string | null;
+  fileDataUrl: string | null; // base64 data URL for proof image/pdf in the prototype
   direction: "OUTGOING" | "INCOMING";
   status: ArchiveStatus;
   createdById: string;
   createdAt: string;
 }
+
+/**
+ * Shape returned by GET /api/archives for list views. Omits the heavy base64
+ * `fileDataUrl` so payloads stay small, replacing it with a `hasProof` boolean.
+ */
+export type ArchiveListItem = Omit<Archive, "fileDataUrl"> & { hasProof: boolean };
 
 export interface DbShape {
   users: User[];

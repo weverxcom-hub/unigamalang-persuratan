@@ -1,5 +1,6 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,8 +30,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { formatDate } from "@/lib/utils";
-import { Archive as ArchiveIcon, Filter, Plus, Search, Trash2, X } from "lucide-react";
-import type { Archive, Role } from "@/lib/types";
+import {
+  Archive as ArchiveIcon,
+  Filter,
+  Plus,
+  Search,
+  Trash2,
+  X,
+  Eye,
+  Upload,
+  Loader2,
+} from "lucide-react";
+import type { Archive, ArchiveListItem, ArchiveStatus, Role } from "@/lib/types";
 
 interface Props {
   units: { id: string; code: string; name: string }[];
@@ -44,14 +55,50 @@ const YEAR_OPTIONS = (() => {
   return [curr, curr - 1, curr - 2, curr - 3];
 })();
 
+const STATUS_LABEL: Record<ArchiveStatus, string> = {
+  DRAFT: "Draf",
+  PENDING: "Menunggu Persetujuan",
+  PENDING_PROOF: "Menunggu Bukti",
+  APPROVED: "Disetujui",
+  ISSUED: "Terbit",
+};
+
+function statusVariant(status: ArchiveStatus): "default" | "secondary" | "success" | "warning" | "outline" {
+  switch (status) {
+    case "ISSUED":
+      return "success";
+    case "PENDING":
+    case "PENDING_PROOF":
+      return "warning";
+    case "APPROVED":
+      return "default";
+    case "DRAFT":
+    default:
+      return "secondary";
+  }
+}
+
+const MAX_PROOF_BYTES = 3 * 1024 * 1024; // 3MB
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
 export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Props) {
-  const [archives, setArchives] = useState<Archive[]>([]);
+  const [archives, setArchives] = useState<ArchiveListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [unitId, setUnitId] = useState<string>("__all");
   const [letterTypeId, setLetterTypeId] = useState<string>("__all");
   const [year, setYear] = useState<string>("__all");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [proofArchive, setProofArchive] = useState<ArchiveListItem | null>(null);
+  const [viewArchive, setViewArchive] = useState<ArchiveListItem | null>(null);
 
   const fetchArchives = useCallback(async () => {
     setLoading(true);
@@ -75,10 +122,10 @@ export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Prop
 
   const stats = useMemo(() => {
     const total = archives.length;
-    const outgoing = archives.filter((a) => a.direction === "OUTGOING").length;
-    const incoming = archives.filter((a) => a.direction === "INCOMING").length;
+    const issued = archives.filter((a) => a.status === "ISSUED").length;
+    const pendingProof = archives.filter((a) => a.status === "PENDING_PROOF").length;
     const pending = archives.filter((a) => a.status === "PENDING").length;
-    return { total, outgoing, incoming, pending };
+    return { total, issued, pendingProof, pending };
   }, [archives]);
 
   function resetFilters() {
@@ -99,12 +146,30 @@ export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Prop
     }
   }
 
+  function handleProofUploaded(updated: Archive) {
+    // Apply only the lightweight fields to the list; don't store the heavy
+    // base64 `fileDataUrl` here — the view dialog fetches it on demand.
+    setArchives((prev) =>
+      prev.map((a) =>
+        a.id === updated.id
+          ? {
+              ...a,
+              status: updated.status,
+              fileName: updated.fileName,
+              hasProof: !!updated.fileDataUrl,
+            }
+          : a
+      )
+    );
+    setProofArchive(null);
+  }
+
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
         <StatCard label="Total Arsip" value={stats.total} />
-        <StatCard label="Surat Keluar" value={stats.outgoing} />
-        <StatCard label="Surat Masuk" value={stats.incoming} />
+        <StatCard label="Terbit" value={stats.issued} />
+        <StatCard label="Menunggu Bukti" value={stats.pendingProof} />
         <StatCard label="Menunggu Persetujuan" value={stats.pending} />
       </div>
 
@@ -114,7 +179,7 @@ export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Prop
             <ArchiveIcon className="h-5 w-5 text-primary" />
             <CardTitle>Daftar Arsip</CardTitle>
           </div>
-          <Button onClick={() => setDialogOpen(true)}>
+          <Button onClick={() => setDialogOpen(true)} className="w-full md:w-auto">
             <Plus className="h-4 w-4" />
             Arsipkan Surat (Lama / Masuk)
           </Button>
@@ -175,17 +240,73 @@ export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Prop
             </Button>
           </div>
 
-          <div className="rounded-md border">
+          {/* Mobile: card list */}
+          <div className="space-y-2 md:hidden">
+            {loading ? (
+              <p className="py-8 text-center text-sm text-muted-foreground">Memuat arsip…</p>
+            ) : archives.length === 0 ? (
+              <p className="py-8 text-center text-sm text-muted-foreground">
+                <Filter className="mx-auto mb-2 h-5 w-5" />
+                Tidak ada arsip sesuai filter.
+              </p>
+            ) : (
+              archives.map((a) => (
+                <div key={a.id} className="rounded-md border bg-background p-3 text-sm">
+                  <div className="flex items-start justify-between gap-2">
+                    <code className="rounded bg-muted px-2 py-0.5 text-xs font-semibold break-all">
+                      {a.number}
+                    </code>
+                    <Badge variant={statusVariant(a.status)} className="shrink-0">
+                      {STATUS_LABEL[a.status]}
+                    </Badge>
+                  </div>
+                  <p className="mt-2 font-medium">{a.subject}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {a.direction === "OUTGOING" ? "Tujuan" : "Pengirim"}: {a.recipient}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {formatDate(a.date)} · {a.unitCode}
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {a.hasProof ? (
+                      <Button size="sm" variant="outline" onClick={() => setViewArchive(a)}>
+                        <Eye className="h-4 w-4" />
+                        Lihat Bukti
+                      </Button>
+                    ) : a.status === "PENDING_PROOF" ? (
+                      <Button size="sm" onClick={() => setProofArchive(a)}>
+                        <Upload className="h-4 w-4" />
+                        Unggah Bukti
+                      </Button>
+                    ) : a.fileName ? (
+                      <span className="text-xs italic text-muted-foreground">{a.fileName}</span>
+                    ) : null}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => onDelete(a.id)}
+                      aria-label="Hapus arsip"
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop: table */}
+          <div className="hidden overflow-x-auto rounded-md border md:block">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[120px]">Tanggal</TableHead>
                   <TableHead>Nomor Surat</TableHead>
                   <TableHead>Perihal</TableHead>
-                  <TableHead>Tujuan</TableHead>
-                  <TableHead className="w-[110px]">Unit</TableHead>
-                  <TableHead className="w-[110px]">Status</TableHead>
-                  <TableHead className="w-[120px]">Lampiran</TableHead>
+                  <TableHead>Tujuan / Pengirim</TableHead>
+                  <TableHead className="w-[90px]">Unit</TableHead>
+                  <TableHead className="w-[150px]">Status</TableHead>
+                  <TableHead className="w-[180px]">Bukti</TableHead>
                   <TableHead className="w-[60px]" />
                 </TableRow>
               </TableHeader>
@@ -210,32 +331,34 @@ export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Prop
                       <TableCell>
                         <code className="rounded bg-muted px-2 py-0.5 text-xs font-semibold">{a.number}</code>
                       </TableCell>
-                      <TableCell className="max-w-[280px] truncate font-medium" title={a.subject}>
+                      <TableCell className="max-w-[240px] truncate font-medium" title={a.subject}>
                         {a.subject}
                       </TableCell>
-                      <TableCell className="max-w-[200px] truncate text-sm" title={a.recipient}>
+                      <TableCell className="max-w-[180px] truncate text-sm" title={a.recipient}>
                         {a.recipient}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">{a.unitCode}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant={
-                            a.status === "ISSUED"
-                              ? "success"
-                              : a.status === "PENDING"
-                              ? "warning"
-                              : a.status === "APPROVED"
-                              ? "default"
-                              : "secondary"
-                          }
-                        >
-                          {a.status}
-                        </Badge>
+                        <Badge variant={statusVariant(a.status)}>{STATUS_LABEL[a.status]}</Badge>
                       </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        {a.fileName ?? <span className="italic">—</span>}
+                      <TableCell>
+                        {a.hasProof ? (
+                          <Button size="sm" variant="outline" onClick={() => setViewArchive(a)}>
+                            <Eye className="h-4 w-4" />
+                            Lihat
+                          </Button>
+                        ) : a.status === "PENDING_PROOF" ? (
+                          <Button size="sm" onClick={() => setProofArchive(a)}>
+                            <Upload className="h-4 w-4" />
+                            Unggah
+                          </Button>
+                        ) : a.fileName ? (
+                          <span className="text-xs italic text-muted-foreground">{a.fileName}</span>
+                        ) : (
+                          <span className="text-xs italic text-muted-foreground">—</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Button variant="ghost" size="icon" onClick={() => onDelete(a.id)} aria-label="Hapus arsip">
@@ -263,6 +386,14 @@ export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Prop
           fetchArchives();
         }}
       />
+
+      <ProofUploadDialog
+        archive={proofArchive}
+        onOpenChange={(open) => !open && setProofArchive(null)}
+        onUploaded={handleProofUploaded}
+      />
+
+      <ProofViewDialog archive={viewArchive} onOpenChange={(open) => !open && setViewArchive(null)} />
     </div>
   );
 }
@@ -270,11 +401,241 @@ export function ArchivesClient({ units, letterTypes, role, sessionUnitId }: Prop
 function StatCard({ label, value }: { label: string; value: number | string }) {
   return (
     <Card>
-      <CardContent className="p-4">
-        <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
-        <p className="mt-1 text-2xl font-bold">{value}</p>
+      <CardContent className="p-3 sm:p-4">
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground sm:text-xs">{label}</p>
+        <p className="mt-1 text-xl font-bold sm:text-2xl">{value}</p>
       </CardContent>
     </Card>
+  );
+}
+
+interface ProofUploadDialogProps {
+  archive: ArchiveListItem | null;
+  onOpenChange: (open: boolean) => void;
+  onUploaded: (archive: Archive) => void;
+}
+
+function ProofUploadDialog({ archive, onOpenChange, onUploaded }: ProofUploadDialogProps) {
+  const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!archive) {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setFile(null);
+      setPreviewUrl(null);
+      setError(null);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  }, [archive, previewUrl]);
+
+  function pickFile(f: File | null) {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setError(null);
+    setFile(f);
+    if (!f) {
+      setPreviewUrl(null);
+      return;
+    }
+    if (f.size > MAX_PROOF_BYTES) {
+      setError("Ukuran file melebihi 3MB. Mohon perkecil atau kompres foto.");
+      setFile(null);
+      setPreviewUrl(null);
+      return;
+    }
+    if (f.type.startsWith("image/")) {
+      setPreviewUrl(URL.createObjectURL(f));
+    } else {
+      setPreviewUrl(null);
+    }
+  }
+
+  async function onUpload() {
+    if (!archive || !file) return;
+    setUploading(true);
+    setError(null);
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      const res = await fetch(`/api/archives/${archive.id}/proof`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileName: file.name, fileDataUrl: dataUrl }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Gagal mengunggah bukti");
+        return;
+      }
+      onUploaded(data.archive);
+    } catch {
+      setError("Gagal memproses file");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  return (
+    <Dialog open={!!archive} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Unggah Bukti Surat</DialogTitle>
+          <DialogDescription>
+            Arsip <code className="rounded bg-muted px-1 py-0.5 text-xs">{archive?.number}</code> akan berubah
+            menjadi <strong>Terbit</strong> setelah bukti diunggah.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <label
+              htmlFor="proof-file"
+              className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm hover:bg-accent sm:w-auto"
+            >
+              <Upload className="h-4 w-4" />
+              Pilih / Ambil Foto
+            </label>
+            <input
+              id="proof-file"
+              ref={inputRef}
+              type="file"
+              accept="image/*,application/pdf"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
+            />
+            <span className="text-sm text-muted-foreground break-all">
+              {file ? file.name : "Belum ada file"}
+            </span>
+          </div>
+
+          {previewUrl && (
+            <div className="overflow-hidden rounded-md border">
+              <Image
+                src={previewUrl}
+                alt="Pratinjau bukti"
+                width={600}
+                height={400}
+                unoptimized
+                className="max-h-64 w-auto object-contain"
+              />
+            </div>
+          )}
+          {file && file.type === "application/pdf" && (
+            <p className="text-xs text-muted-foreground">File PDF terpilih: {file.name}</p>
+          )}
+
+          {error && (
+            <div className="rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {error}
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Batal
+          </Button>
+          <Button onClick={onUpload} disabled={!file || uploading}>
+            {uploading && <Loader2 className="h-4 w-4 animate-spin" />}
+            Unggah Bukti
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ProofViewDialog({
+  archive,
+  onOpenChange,
+}: {
+  archive: ArchiveListItem | null;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!archive) {
+      setDataUrl(null);
+      setFileName(null);
+      setError(null);
+      return;
+    }
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    fetch(`/api/archives/${archive.id}/proof`)
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (cancelled) return;
+        if (!res.ok) {
+          setError(data.error || "Gagal memuat bukti");
+          setDataUrl(null);
+          return;
+        }
+        setDataUrl(data.fileDataUrl ?? null);
+        setFileName(data.fileName ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setError("Gagal memuat bukti");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [archive]);
+
+  const isPdf = dataUrl?.startsWith("data:application/pdf");
+
+  return (
+    <Dialog open={!!archive} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Bukti Surat</DialogTitle>
+          <DialogDescription>
+            {archive?.number} &mdash; {archive?.subject}
+          </DialogDescription>
+        </DialogHeader>
+        {loading ? (
+          <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Memuat bukti…
+          </div>
+        ) : error ? (
+          <p className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+            {error}
+          </p>
+        ) : dataUrl ? (
+          isPdf ? (
+            <iframe
+              src={dataUrl}
+              className="h-[70vh] w-full rounded-md border"
+              title="Pratinjau PDF"
+            />
+          ) : (
+            <div className="overflow-auto rounded-md border bg-muted/30">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={dataUrl}
+                alt={fileName ?? "Bukti surat"}
+                className="mx-auto max-h-[70vh] w-auto"
+              />
+            </div>
+          )
+        ) : (
+          <p className="text-sm text-muted-foreground">Bukti belum diunggah.</p>
+        )}
+        {fileName && (
+          <p className="text-xs text-muted-foreground">Nama file: {fileName}</p>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -304,7 +665,7 @@ function ManualArchiveDialog({
   const [subject, setSubject] = useState("");
   const [recipient, setRecipient] = useState("");
   const [date, setDate] = useState<string>(new Date().toISOString().slice(0, 10));
-  const [fileName, setFileName] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -317,7 +678,7 @@ function ManualArchiveDialog({
       setSubject("");
       setRecipient("");
       setDate(new Date().toISOString().slice(0, 10));
-      setFileName(null);
+      setFile(null);
       setError(null);
     }
   }, [open, defaultUnitId, letterTypes]);
@@ -327,6 +688,16 @@ function ManualArchiveDialog({
     setError(null);
     setSubmitting(true);
     try {
+      let fileName: string | null = null;
+      let fileDataUrl: string | null = null;
+      if (file) {
+        if (file.size > MAX_PROOF_BYTES) {
+          setError("Ukuran file melebihi 3MB.");
+          return;
+        }
+        fileName = file.name;
+        fileDataUrl = await readFileAsDataUrl(file);
+      }
       const res = await fetch("/api/archives", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -338,8 +709,9 @@ function ManualArchiveDialog({
           recipient,
           date,
           fileName,
+          fileDataUrl,
           manualNumber: manualNumber || null,
-          status: "ISSUED",
+          // Status is computed server-side based on role + manualNumber + file.
         }),
       });
       const data = await res.json();
@@ -363,8 +735,8 @@ function ManualArchiveDialog({
             otomatis, gunakan halaman <strong>Buat Nomor Surat</strong>.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="grid grid-cols-2 gap-4">
-          <div className="space-y-2 col-span-2">
+        <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2 sm:col-span-2">
             <Label>Arah Surat</Label>
             <div className="flex gap-2">
               <Button
@@ -417,7 +789,7 @@ function ManualArchiveDialog({
             </Select>
           </div>
 
-          <div className="space-y-2 col-span-2">
+          <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="m-number">Nomor Surat (manual, opsional)</Label>
             <Input
               id="m-number"
@@ -426,11 +798,11 @@ function ManualArchiveDialog({
               onChange={(e) => setManualNumber(e.target.value)}
             />
           </div>
-          <div className="space-y-2 col-span-2">
+          <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="m-subject">Perihal</Label>
             <Input id="m-subject" value={subject} onChange={(e) => setSubject(e.target.value)} required />
           </div>
-          <div className="space-y-2 col-span-2">
+          <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="m-recipient">{direction === "INCOMING" ? "Pengirim" : "Tujuan"}</Label>
             <Input
               id="m-recipient"
@@ -444,26 +816,32 @@ function ManualArchiveDialog({
             <Input id="m-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="m-file">Lampiran</Label>
+            <Label htmlFor="m-file">Bukti / Lampiran</Label>
             <input
               id="m-file"
               type="file"
-              onChange={(e) => setFileName(e.target.files?.[0]?.name ?? null)}
+              accept="image/*,application/pdf"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
               className="block w-full text-sm file:mr-2 file:rounded-md file:border file:border-input file:bg-background file:px-3 file:py-1.5 file:text-sm"
             />
+            <p className="text-[11px] text-muted-foreground">
+              Opsional. Bila file dilampirkan, arsip langsung berstatus <em>Terbit</em>;
+              bila kosong, arsip berstatus <em>Menunggu Bukti</em>.
+            </p>
           </div>
 
           {error && (
-            <div className="col-span-2 rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            <div className="sm:col-span-2 rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
               {error}
             </div>
           )}
 
-          <DialogFooter className="col-span-2">
+          <DialogFooter className="sm:col-span-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Batal
             </Button>
             <Button type="submit" disabled={submitting}>
+              {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
               Simpan Arsip
             </Button>
           </DialogFooter>

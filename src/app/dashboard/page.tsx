@@ -126,8 +126,22 @@ export default async function DashboardHome() {
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <code className="rounded bg-muted px-2 py-0.5 text-xs font-semibold">{a.number}</code>
-                        <Badge variant={a.status === "ISSUED" ? "success" : a.status === "PENDING" ? "warning" : "secondary"}>
-                          {a.status}
+                        <Badge
+                          variant={
+                            a.status === "ISSUED"
+                              ? "success"
+                              : a.status === "PENDING" || a.status === "PENDING_PROOF"
+                              ? "warning"
+                              : "secondary"
+                          }
+                        >
+                          {a.status === "PENDING_PROOF"
+                            ? "Menunggu Bukti"
+                            : a.status === "PENDING"
+                            ? "Menunggu Persetujuan"
+                            : a.status === "ISSUED"
+                            ? "Terbit"
+                            : a.status}
                         </Badge>
                       </div>
                       <p className="mt-1 truncate text-sm font-medium">{a.subject}</p>
