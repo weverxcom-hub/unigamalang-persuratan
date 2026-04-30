@@ -9,6 +9,7 @@ import type {
   ArchiveStatus as PrismaArchiveStatus,
   DispositionStatus as PrismaDispositionStatus,
   AuditAction as PrismaAuditAction,
+  TicketStatus as PrismaTicketStatus,
 } from "@prisma/client";
 
 export type Role = PrismaRole;
@@ -16,6 +17,7 @@ export type Direction = PrismaDirection;
 export type ArchiveStatus = PrismaArchiveStatus;
 export type DispositionStatus = PrismaDispositionStatus;
 export type AuditAction = PrismaAuditAction;
+export type TicketStatus = PrismaTicketStatus;
 
 export interface User {
   id: string;
@@ -105,4 +107,25 @@ export interface SessionPayload {
   name: string;
   role: Role;
   unitId: string | null;
+}
+
+export interface Ticket {
+  id: string;
+  title: string;
+  description: string;
+  pageHint: string | null;
+  screenshotUrl: string | null;
+  status: TicketStatus;
+  responseNote: string | null;
+  createdById: string;
+  createdByName: string;
+  createdByEmail: string;
+  unitId: string | null;
+  unitCode: string | null;
+  unitName: string | null;
+  assignedToId: string | null;
+  assignedToName: string | null;
+  resolvedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
