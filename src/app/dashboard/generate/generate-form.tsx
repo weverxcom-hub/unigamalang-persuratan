@@ -85,6 +85,9 @@ export function GenerateForm({
     return `${y}-${m}-${day}`;
   }, []);
   const [letterDate, setLetterDate] = useState<string>(today);
+  // Alasan sisipan — wajib diisi minimal 5 karakter saat isInsert=true.
+  // Tersimpan ke Archive.insertReason untuk audit trail.
+  const [insertReason, setInsertReason] = useState<string>("");
 
   // Proof-upload state (shown after allocation)
   const [proofFile, setProofFile] = useState<File | null>(null);
@@ -215,6 +218,10 @@ export function GenerateForm({
         setError("Nomor sisipan harus diawali angka.");
         return;
       }
+      if (insertReason.trim().length < 5) {
+        setError("Alasan sisipan wajib diisi (minimal 5 karakter).");
+        return;
+      }
     }
     setSubmitting(true);
     try {
@@ -235,6 +242,8 @@ export function GenerateForm({
           direction: "OUTGOING",
           manualNumber,
           date: isInsert ? letterDate : undefined,
+          isInsert: isInsert || undefined,
+          insertReason: isInsert ? insertReason.trim() : undefined,
         }),
       });
       const data = await res.json();
@@ -504,23 +513,58 @@ export function GenerateForm({
         </div>
 
         {isInsert && (
-          <div className="rounded-md border border-amber-300 bg-amber-50/60 px-3 py-2.5">
-            <Label htmlFor="letter-date" className="text-xs font-semibold text-amber-900">
-              Tanggal Surat <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="letter-date"
-              type="date"
-              value={letterDate}
-              onChange={(e) => setLetterDate(e.target.value)}
-              max={today}
-              required={isInsert}
-              className="mt-1 max-w-xs"
-            />
-            <p className="mt-1.5 text-[11px] leading-relaxed text-amber-900/80">
-              Bulan Romawi dan tahun di nomor surat akan mengikuti tanggal ini, bukan tanggal hari
-              ini. Wajib diisi untuk surat sisipan.
-            </p>
+          <div className="space-y-2.5 rounded-md border border-amber-300 bg-amber-50/60 px-3 py-3">
+            <div className="flex items-start gap-2 text-[11px] leading-relaxed text-amber-900">
+              <span aria-hidden className="mt-0.5">⚠️</span>
+              <div>
+                <strong className="font-semibold">Perhatian:</strong> surat sisipan adalah override
+                manual atas nomor otomatis. Setiap penggunaan{" "}
+                <strong>tercatat permanen di audit log</strong> beserta alasannya, dan akan terlihat
+                oleh superadmin. Gunakan hanya untuk kasus yang benar-benar membutuhkan (misal surat
+                backdate karena keterlambatan administratif), bukan untuk menambal nomor yang
+                terlewat secara rutin.
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="letter-date" className="text-xs font-semibold text-amber-900">
+                Tanggal Surat <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="letter-date"
+                type="date"
+                value={letterDate}
+                onChange={(e) => setLetterDate(e.target.value)}
+                max={today}
+                required={isInsert}
+                className="mt-1 max-w-xs"
+              />
+              <p className="mt-1 text-[11px] leading-relaxed text-amber-900/80">
+                Bulan Romawi dan tahun di nomor surat akan mengikuti tanggal ini, bukan tanggal
+                hari ini.
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="insert-reason" className="text-xs font-semibold text-amber-900">
+                Alasan Sisipan <span className="text-destructive">*</span>
+              </Label>
+              <textarea
+                id="insert-reason"
+                value={insertReason}
+                onChange={(e) => setInsertReason(e.target.value)}
+                required={isInsert}
+                minLength={5}
+                maxLength={1000}
+                rows={2}
+                placeholder="Mis. SK ditandatangani 15 Maret tetapi baru diserahkan ke arsip hari ini."
+                className="mt-1 block w-full resize-y rounded-md border border-amber-300 bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+              />
+              <p className="mt-1 text-[11px] leading-relaxed text-amber-900/80">
+                Wajib diisi minimal 5 karakter. Alasan ini akan tersimpan di arsip dan terlihat
+                pada audit log + tampilan detail arsip.
+              </p>
+            </div>
           </div>
         )}
 

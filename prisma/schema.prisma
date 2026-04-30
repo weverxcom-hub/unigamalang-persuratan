@@ -288,6 +288,14 @@ model Archive {
   // status is still PENDING_PROOF. Preserved even after a late proof upload.
   overdueMarkedAt DateTime?
 
+  // Sisipan / manual-override metadata. Set by POST /api/archives when the
+  // admin supplies a manual number (instead of letting the system generate
+  // the next sequence). isInsert flags the row so it's visible to auditors,
+  // and insertReason captures the justification (e.g. "surat backdate
+  // karena keterlambatan administratif"). Required when isInsert = true.
+  isInsert     Boolean @default(false)
+  insertReason String?
+
   dispositions Disposition[]
   auditLogs    AuditLog[]
 

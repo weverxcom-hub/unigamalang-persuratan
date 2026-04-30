@@ -401,10 +401,26 @@ export function ArchivesClient({
                     <code className="rounded bg-muted px-2 py-0.5 text-xs font-semibold break-all">
                       {a.number}
                     </code>
-                    <Badge variant={statusVariant(a.status)} className="shrink-0">
-                      {STATUS_LABEL[a.status]}
-                    </Badge>
+                    <div className="flex shrink-0 flex-wrap items-center gap-1.5">
+                      {a.isInsert && (
+                        <Badge
+                          variant="outline"
+                          className="border-amber-400 bg-amber-50 text-amber-900"
+                          title={a.insertReason ?? undefined}
+                        >
+                          Sisipan
+                        </Badge>
+                      )}
+                      <Badge variant={statusVariant(a.status)}>
+                        {STATUS_LABEL[a.status]}
+                      </Badge>
+                    </div>
                   </div>
+                  {a.isInsert && a.insertReason && (
+                    <p className="mt-1.5 rounded border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] leading-relaxed text-amber-900">
+                      <span className="font-semibold">Alasan sisipan:</span> {a.insertReason}
+                    </p>
+                  )}
                   <p className="mt-2 font-medium">{a.subject}</p>
                   <p className="text-xs text-muted-foreground">
                     {a.direction === "OUTGOING" ? "Tujuan" : "Pengirim"}:{" "}
@@ -502,7 +518,18 @@ export function ArchivesClient({
                         <Badge variant="outline">{a.unitCode}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={statusVariant(a.status)}>{STATUS_LABEL[a.status]}</Badge>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <Badge variant={statusVariant(a.status)}>{STATUS_LABEL[a.status]}</Badge>
+                          {a.isInsert && (
+                            <Badge
+                              variant="outline"
+                              className="border-amber-400 bg-amber-50 text-amber-900"
+                              title={a.insertReason ?? undefined}
+                            >
+                              Sisipan
+                            </Badge>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         {a.hasProof ? (
