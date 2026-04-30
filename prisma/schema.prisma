@@ -37,6 +37,15 @@ enum ArchiveStatus {
   PENDING_PROOF // Number allocated, awaiting proof upload
   APPROVED
   ISSUED
+  // OVERDUE: PENDING_PROOF that exceeded the 14-day proof deadline. The cron
+  // at /api/cron/mark-overdue flips PENDING_PROOF → OVERDUE; an admin can
+  // still upload proof afterwards (status returns to ISSUED) — `overdueMarkedAt`
+  // remains as a permanent record of lateness.
+  OVERDUE
+  // VOID: an allocated number that was cancelled before issuance. Reason is
+  // mandatory. The number is NOT released back to the counter; it stays in
+  // the archive list with a red badge so audit trail is preserved.
+  VOID
 }
 
 enum DispositionStatus {
@@ -83,6 +92,7 @@ model User {
   deletedAt    DateTime?
 
   archives             Archive[]
+  archivesVoided       Archive[]     @relation("ArchiveVoidedBy")
   dispositionsSent     Disposition[] @relation("DispositionFrom")
   dispositionsReceived Disposition[] @relation("DispositionTo")
   auditLogs            AuditLog[]
@@ -183,6 +193,16 @@ model Archive {
   updatedAt   DateTime  @updatedAt
   // Soft delete — never hard-delete. Queries should filter deletedAt: null.
   deletedAt   DateTime?
+
+  // VOID metadata. Filled by POST /api/archives/[id]/void; immutable after.
+  voidReason  String?
+  voidedAt    DateTime?
+  voidedById  String?
+  voidedBy    User?     @relation("ArchiveVoidedBy", fields: [voidedById], references: [id], onDelete: SetNull)
+
+  // OVERDUE marker. Set by the cron once `now() - createdAt > 14 days` and
+  // status is still PENDING_PROOF. Preserved even after a late proof upload.
+  overdueMarkedAt DateTime?
 
   dispositions Disposition[]
   auditLogs    AuditLog[]

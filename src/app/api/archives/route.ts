@@ -61,7 +61,20 @@ export async function GET(req: Request) {
   }
   if (letterTypeId) where.letterTypeId = letterTypeId;
   if (direction === "OUTGOING" || direction === "INCOMING") where.direction = direction;
-  if (status) where.status = status as Prisma.ArchiveWhereInput["status"];
+  // Whitelist: silently ignore unknown status values rather than failing the
+  // request (forward-compatible with future enum additions in older clients).
+  const ALLOWED_STATUSES = new Set([
+    "DRAFT",
+    "PENDING",
+    "PENDING_PROOF",
+    "APPROVED",
+    "ISSUED",
+    "OVERDUE",
+    "VOID",
+  ]);
+  if (status && ALLOWED_STATUSES.has(status)) {
+    where.status = status as Prisma.ArchiveWhereInput["status"];
+  }
 
   if (q) {
     const tokens = q.split(/\s+/).filter(Boolean);
