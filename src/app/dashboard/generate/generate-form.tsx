@@ -246,9 +246,28 @@ export function GenerateForm({
           insertReason: isInsert ? insertReason.trim() : undefined,
         }),
       });
-      const data = await res.json();
+      // The server may return non-JSON in failure modes (e.g. a Vercel timeout
+      // page or a Next.js HTML error page when an unhandled exception bubbles
+      // up). Read raw text first so we can surface a useful diagnostic instead
+      // of swallowing the failure as "kesalahan jaringan".
+      const rawText = await res.text();
+      let data: { archive?: AllocatedArchive; error?: string } = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch {
+        // eslint-disable-next-line no-console
+        console.error("[generate] non-JSON response", res.status, rawText.slice(0, 500));
+        setError(
+          `Server mengembalikan respons tidak valid (HTTP ${res.status}). Coba ulang atau hubungi superadmin.`
+        );
+        return;
+      }
       if (!res.ok) {
-        setError(data.error || "Gagal membuat nomor surat");
+        setError(data.error || `Gagal membuat nomor surat (HTTP ${res.status})`);
+        return;
+      }
+      if (!data.archive) {
+        setError("Server mengembalikan data tidak lengkap. Coba ulang.");
         return;
       }
       setAllocated({
@@ -259,8 +278,14 @@ export function GenerateForm({
         fileName: data.archive.fileName,
         fileDataUrl: data.archive.fileDataUrl,
       });
-    } catch {
-      setError("Terjadi kesalahan jaringan");
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error("[generate] fetch failed", e);
+      setError(
+        e instanceof Error
+          ? `Terjadi kesalahan jaringan: ${e.message}`
+          : "Terjadi kesalahan jaringan"
+      );
     } finally {
       setSubmitting(false);
     }

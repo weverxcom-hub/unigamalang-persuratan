@@ -235,6 +235,18 @@ export function DashboardShell({
         <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
           {children}
         </main>
+
+        <footer className="border-t bg-muted/30 px-4 py-4 text-center text-xs text-muted-foreground sm:px-6 lg:px-8">
+          Made by{" "}
+          <a
+            href="https://weverx.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-foreground/80 transition-colors hover:text-primary hover:underline"
+          >
+            weverx.com
+          </a>
+        </footer>
       </div>
     </div>
   );

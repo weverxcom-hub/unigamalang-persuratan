@@ -213,6 +213,25 @@ const createSchema = z
   });
 
 export async function POST(req: Request) {
+  try {
+    return await postImpl(req);
+  } catch (err) {
+    // Without this catch any unhandled exception (Prisma error, missing env,
+    // etc.) bubbles up to Next.js and the runtime returns an HTML error page.
+    // The browser's `await res.json()` then throws, which the form surfaces
+    // as the generic "Terjadi kesalahan jaringan" — completely unhelpful for
+    // debugging. Log server-side and return a JSON 500 the client can read.
+    // eslint-disable-next-line no-console
+    console.error("[/api/archives POST] unhandled error", err);
+    const message = err instanceof Error ? err.message : "Kesalahan internal";
+    return NextResponse.json(
+      { error: `Kesalahan internal: ${message}` },
+      { status: 500 }
+    );
+  }
+}
+
+async function postImpl(req: Request) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
 
