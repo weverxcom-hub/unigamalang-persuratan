@@ -55,6 +55,7 @@ export function GenerateForm({
   const [recipient, setRecipient] = useState("");
   const [previewSeq, setPreviewSeq] = useState<number | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [allocated, setAllocated] = useState<AllocatedArchive | null>(null);
@@ -98,17 +99,35 @@ export function GenerateForm({
     async function loadPreview() {
       if (!unitId || !letterTypeId) {
         setPreviewSeq(null);
+        setPreviewError(null);
         return;
       }
       setLoadingPreview(true);
+      setPreviewError(null);
       try {
         const res = await fetch("/api/numbering/preview", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ unitId, letterTypeId }),
         });
-        const data = await res.json();
-        if (!cancelled && res.ok) setPreviewSeq(data.preview.sequenceNumber ?? null);
+        const data = await res.json().catch(() => ({}));
+        if (cancelled) return;
+        if (res.ok && data?.preview) {
+          setPreviewSeq(data.preview.sequenceNumber ?? null);
+        } else {
+          setPreviewSeq(null);
+          setPreviewError(
+            data?.error ||
+              (res.status === 404
+                ? "Jenis surat ini tidak tersedia untuk unit Anda. Pilih jenis lain."
+                : "Gagal memuat pratinjau nomor. Coba ganti jenis surat atau muat ulang.")
+          );
+        }
+      } catch {
+        if (!cancelled) {
+          setPreviewSeq(null);
+          setPreviewError("Tidak dapat terhubung ke server. Periksa koneksi.");
+        }
       } finally {
         if (!cancelled) setLoadingPreview(false);
       }
@@ -450,6 +469,9 @@ export function GenerateForm({
             <p className="mt-2 text-xs text-muted-foreground">
               Pratinjau lengkap: <code className="text-foreground">{previewNumber}</code>
             </p>
+          )}
+          {!isInsert && previewError && (
+            <p className="mt-2 text-xs text-destructive">{previewError}</p>
           )}
           {isInsert && (
             <p className="mt-2 text-xs text-amber-800">

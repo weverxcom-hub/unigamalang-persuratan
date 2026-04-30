@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { audit } from "@/lib/audit";
 import { fireWebhook } from "@/lib/webhook";
 import { renderDispositionEmail, sendEmail } from "@/lib/email";
+import { runAfter } from "@/lib/after";
 
 const schema = z
   .object({
@@ -41,12 +42,23 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     where: { id: params.id, deletedAt: null },
   });
   if (!archive) return NextResponse.json({ error: "Arsip tidak ditemukan" }, { status: 404 });
-  if (
-    session.role !== "SUPER_ADMIN" &&
-    session.unitId !== archive.unitId
-  ) {
-    return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
+
+  let canRead =
+    session.role === "SUPER_ADMIN" || session.unitId === archive.unitId;
+  if (!canRead) {
+    const dispo = await prisma.disposition.findFirst({
+      where: {
+        archiveId: archive.id,
+        OR: [
+          { toUserId: session.userId },
+          ...(session.unitId ? [{ toUnitId: session.unitId }] : []),
+        ],
+      },
+      select: { id: true },
+    });
+    if (dispo) canRead = true;
   }
+  if (!canRead) return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
 
   const rows = await prisma.disposition.findMany({
     where: { archiveId: archive.id },
@@ -169,65 +181,62 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     return d;
   });
 
-  // Post-commit: email + webhook (best effort).
-  (async () => {
-    try {
-      let recipients: { email: string; name: string }[] = [];
-      if (disposition.toUserId) {
-        const u = await prisma.user.findUnique({
-          where: { id: disposition.toUserId },
-        });
-        if (u && !u.deletedAt) recipients = [{ email: u.email, name: u.name }];
-      } else if (disposition.toUnitId) {
-        const admins = await prisma.user.findMany({
-          where: { unitId: disposition.toUnitId, role: "ADMIN_UNIT", deletedAt: null },
-        });
-        recipients = admins.map((a) => ({ email: a.email, name: a.name }));
-      }
-      const dueStr = disposition.dueDate
-        ? disposition.dueDate.toLocaleDateString("id-ID", {
-            day: "2-digit",
-            month: "long",
-            year: "numeric",
-          })
-        : null;
-      for (const r of recipients) {
-        const msg = renderDispositionEmail({
-          recipientName: r.name,
-          archiveNumber: archive.number,
-          subject: archive.subject,
-          fromName: session.name,
-          instructions: disposition.instructions,
-          dueDate: dueStr,
-          appUrl: appUrl(req),
-          archiveId: archive.id,
-        });
-        await sendEmail({
-          to: r.email,
-          subject: `Disposisi · ${archive.number}`,
-          html: msg.html,
-          text: msg.text,
-          tags: [{ name: "event", value: "disposition" }],
-        });
-      }
-      await fireWebhook({
-        event: "disposition.created",
-        archiveId: archive.id,
-        dispositionId: disposition.id,
+  // Post-commit: email + webhook (best effort). Wrapped in waitUntil() via
+  // runAfter so Vercel serverless does not terminate the work after the
+  // response is flushed.
+  runAfter("disposition.created", async () => {
+    let recipients: { email: string; name: string }[] = [];
+    if (disposition.toUserId) {
+      const u = await prisma.user.findUnique({
+        where: { id: disposition.toUserId },
+      });
+      if (u && !u.deletedAt) recipients = [{ email: u.email, name: u.name }];
+    } else if (disposition.toUnitId) {
+      const admins = await prisma.user.findMany({
+        where: { unitId: disposition.toUnitId, role: "ADMIN_UNIT", deletedAt: null },
+      });
+      recipients = admins.map((a) => ({ email: a.email, name: a.name }));
+    }
+    const dueStr = disposition.dueDate
+      ? disposition.dueDate.toLocaleDateString("id-ID", {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        })
+      : null;
+    for (const r of recipients) {
+      const msg = renderDispositionEmail({
+        recipientName: r.name,
         archiveNumber: archive.number,
         subject: archive.subject,
-        fromUserId: disposition.fromUserId,
-        fromUserName: session.name,
-        toUserId: disposition.toUserId,
-        toUnitId: disposition.toUnitId,
+        fromName: session.name,
         instructions: disposition.instructions,
-        dueDate: disposition.dueDate?.toISOString() ?? null,
+        dueDate: dueStr,
+        appUrl: appUrl(req),
+        archiveId: archive.id,
       });
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error("[dispositions.POST] post-commit side effects failed", e);
+      await sendEmail({
+        to: r.email,
+        subject: `Disposisi · ${archive.number}`,
+        html: msg.html,
+        text: msg.text,
+        tags: [{ name: "event", value: "disposition" }],
+      });
     }
-  })();
+    await fireWebhook({
+      event: "disposition.created",
+      archiveId: archive.id,
+      dispositionId: disposition.id,
+      archiveNumber: archive.number,
+      subject: archive.subject,
+      fromUserId: disposition.fromUserId,
+      fromUserName: session.name,
+      toUserId: disposition.toUserId,
+      toUnitId: disposition.toUnitId,
+      instructions: disposition.instructions,
+      dueDate: disposition.dueDate?.toISOString() ?? null,
+    });
+  });
 
   return NextResponse.json({ disposition: { id: disposition.id } }, { status: 201 });
 }

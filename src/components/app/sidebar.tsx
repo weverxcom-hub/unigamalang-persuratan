@@ -18,6 +18,7 @@ import {
   LogOut,
   Settings,
   UserCog,
+  Send,
 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ const PRIMARY_NAV: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/archives", label: "Pengarsipan", icon: FileStack },
   { href: "/dashboard/generate", label: "Nomor Surat", icon: Hash },
+  { href: "/dashboard/dispositions", label: "Disposisi", icon: Send },
   { href: "/dashboard/panduan", label: "Panduan", icon: BookOpen },
 ];
 
