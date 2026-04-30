@@ -170,7 +170,15 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         blobPathname: newBlobPathname,
         gdriveFileId: newGdriveFileId,
         fileDataUrl: parsed.data.fileUrl ? null : parsed.data.fileDataUrl ?? null,
-        status: archive.status === "PENDING_PROOF" ? "ISSUED" : archive.status,
+        // PENDING_PROOF and OVERDUE both flip to ISSUED once a proof is
+        // attached. `overdueMarkedAt` is preserved deliberately so the
+        // lateness record stays visible (TechSpec 2.4: "catatan keterlambatan
+        // tetap tersimpan"). VOID is terminal and stays VOID even if a file
+        // is uploaded — the upload is just stored.
+        status:
+          archive.status === "PENDING_PROOF" || archive.status === "OVERDUE"
+            ? "ISSUED"
+            : archive.status,
       },
     });
     await audit(

@@ -62,6 +62,10 @@ export interface Archive {
   createdById: string;
   createdAt: string;
   deletedAt: string | null;
+  voidReason: string | null;
+  voidedAt: string | null;
+  voidedById: string | null;
+  overdueMarkedAt: string | null;
 }
 
 /** List-view projection: no heavy binary data, just a `hasProof` flag. */
