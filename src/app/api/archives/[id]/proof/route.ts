@@ -106,6 +106,49 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     (session.role === "USER" && archive.createdById === session.userId);
   if (!canUpload) return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
 
+  // Storage-identifier ownership check (mirrors /api/archives POST). Without
+  // this, a hostile caller could attach another archive's blobPathname /
+  // gdriveFileId here, which would later be deleted on archive soft-delete.
+  if (parsed.data.blobPathname) {
+    const expectedPrefix = `persuratan/${session.userId}/`;
+    if (!parsed.data.blobPathname.startsWith(expectedPrefix)) {
+      return NextResponse.json(
+        { error: "Path file Blob tidak diizinkan" },
+        { status: 403 }
+      );
+    }
+    const dup = await prisma.archive.findFirst({
+      where: {
+        blobPathname: parsed.data.blobPathname,
+        deletedAt: null,
+        NOT: { id: archive.id },
+      },
+      select: { id: true },
+    });
+    if (dup) {
+      return NextResponse.json(
+        { error: "File Blob ini sudah terkait arsip lain" },
+        { status: 409 }
+      );
+    }
+  }
+  if (parsed.data.gdriveFileId) {
+    const dup = await prisma.archive.findFirst({
+      where: {
+        gdriveFileId: parsed.data.gdriveFileId,
+        deletedAt: null,
+        NOT: { id: archive.id },
+      },
+      select: { id: true },
+    });
+    if (dup) {
+      return NextResponse.json(
+        { error: "File Drive ini sudah terkait arsip lain" },
+        { status: 409 }
+      );
+    }
+  }
+
   // Capture old storage handles so we can clean them up post-commit if they
   // change. We never roll back the upload because of a cleanup failure.
   const previousBlobPathname = archive.blobPathname;
