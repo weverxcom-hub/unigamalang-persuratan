@@ -166,6 +166,12 @@ const createSchema = z
       .nullable()
       .optional(),
     manualNumber: z.string().nullable().optional(),
+    // Sisipan / manual-override flag. When true, the admin is intentionally
+    // bypassing the auto-allocator (e.g. issuing a backdated number that
+    // doesn't advance the counter). Distinct from INCOMING which uses
+    // manualNumber to record the external sender's existing number.
+    isInsert: z.boolean().optional(),
+    insertReason: z.string().trim().max(1000).optional().nullable(),
   })
   .superRefine((val, ctx) => {
     // INCOMING letters must carry a sender and must have a manual number.
@@ -182,6 +188,25 @@ const createSchema = z
           code: z.ZodIssueCode.custom,
           message: "Nomor surat masuk wajib diisi (salin dari surat aslinya)",
           path: ["manualNumber"],
+        });
+      }
+    }
+    // Sisipan (OUTGOING with isInsert=true) requires a documented reason so
+    // every manual-override has an audit trail. The reason has to be at
+    // least 5 characters of trimmed text.
+    if (val.direction !== "INCOMING" && val.isInsert) {
+      if (!val.manualNumber || val.manualNumber.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Nomor sisipan wajib diisi",
+          path: ["manualNumber"],
+        });
+      }
+      if (!val.insertReason || val.insertReason.trim().length < 5) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Alasan sisipan wajib diisi (minimal 5 karakter)",
+          path: ["insertReason"],
         });
       }
     }
@@ -277,6 +302,11 @@ export async function POST(req: Request) {
   }
 
   const isManualArchive = Boolean(input.manualNumber && input.manualNumber.trim().length > 0);
+  // OUTGOING + manual number + caller flagged isInsert = audit row as a
+  // sisipan. INCOMING also uses manualNumber but isn't a sisipan, so we
+  // only set the flag for OUTGOING.
+  const isInsertArchive =
+    input.direction !== "INCOMING" && isManualArchive && Boolean(input.isInsert);
   const hasFile = Boolean(input.fileUrl || input.fileDataUrl);
 
   // Status is always derived server-side.
@@ -317,6 +347,8 @@ export async function POST(req: Request) {
         gdriveFileId: input.gdriveFileId ?? null,
         fileDataUrl: input.fileUrl ? null : input.fileDataUrl ?? null,
         createdById: session.userId,
+        isInsert: isInsertArchive,
+        insertReason: isInsertArchive ? input.insertReason!.trim() : null,
       },
     });
 
@@ -334,6 +366,8 @@ export async function POST(req: Request) {
           status: created.status,
           unitCode: created.unitCode,
           letterTypeCode: created.letterTypeCode,
+          isInsert: created.isInsert,
+          insertReason: created.insertReason,
         },
         ip: clientIp(req),
         userAgent: req.headers.get("user-agent"),

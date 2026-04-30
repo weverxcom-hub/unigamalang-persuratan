@@ -91,6 +91,8 @@ export interface Archive {
   voidedAt: string | null;
   voidedById: string | null;
   overdueMarkedAt: string | null;
+  isInsert: boolean;
+  insertReason: string | null;
 }
 
 /** List-view projection: no heavy binary data, just a `hasProof` flag. */

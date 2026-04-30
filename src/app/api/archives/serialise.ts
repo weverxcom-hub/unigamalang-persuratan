@@ -26,6 +26,8 @@ export function serialiseArchive(a: PrismaArchive): Archive {
     voidedAt: a.voidedAt ? a.voidedAt.toISOString() : null,
     voidedById: a.voidedById,
     overdueMarkedAt: a.overdueMarkedAt ? a.overdueMarkedAt.toISOString() : null,
+    isInsert: a.isInsert,
+    insertReason: a.insertReason,
   };
 }
 
@@ -55,6 +57,8 @@ export function serialiseArchiveList(a: PrismaArchive): ArchiveListItem {
     voidedAt: a.voidedAt ? a.voidedAt.toISOString() : null,
     voidedById: a.voidedById,
     overdueMarkedAt: a.overdueMarkedAt ? a.overdueMarkedAt.toISOString() : null,
+    isInsert: a.isInsert,
+    insertReason: a.insertReason,
     hasProof,
   };
 }
