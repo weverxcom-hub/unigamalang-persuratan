@@ -18,12 +18,15 @@ import {
   LogOut,
   Settings,
   UserCog,
+  LifeBuoy,
+  Inbox,
   Send,
 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { SessionPayload } from "@/lib/types";
+import { ReportIssueDialog } from "@/components/app/report-issue-dialog";
 
 interface NavItem {
   href: string;
@@ -41,6 +44,7 @@ const PRIMARY_NAV: NavItem[] = [
 
 const ACCOUNT_NAV: NavItem[] = [
   { href: "/dashboard/profile", label: "Profil Saya", icon: UserCog },
+  { href: "/dashboard/my-tickets", label: "Laporan Saya", icon: LifeBuoy },
 ];
 
 // Items shown only to ADMIN_UNIT (not SUPER_ADMIN, who has the full ADMIN_NAV).
@@ -57,6 +61,7 @@ const ADMIN_NAV: NavItem[] = [
   { href: "/dashboard/units", label: "Unit", icon: Building2 },
   { href: "/dashboard/letter-types", label: "Jenis Surat", icon: FileType },
   { href: "/dashboard/audit", label: "Audit Log", icon: History },
+  { href: "/dashboard/tickets", label: "Tiket Laporan", icon: Inbox },
 ];
 
 const COLLAPSED_KEY = "uniga.sidebar.collapsed";
@@ -200,6 +205,11 @@ export function DashboardShell({
                 {roleLabel(session.role)}
               </p>
             </div>
+            {/* PR-E (3.4): "Laporkan Masalah" — present on every page so users
+                can submit a bug report from where they hit it. Icon-only on
+                mobile/tablet to save the topbar real estate. */}
+            <ReportIssueDialog session={session} className="hidden sm:inline-flex" />
+            <ReportIssueDialog session={session} iconOnly className="sm:hidden" />
             <Button
               variant="outline"
               size="sm"

@@ -73,6 +73,15 @@ enum WebhookDeliveryStatus {
   FAILED
 }
 
+/// Help-desk ticket lifecycle. Created by any authenticated user via the
+/// in-app "Laporkan Masalah" form; managed by SUPER_ADMIN.
+enum TicketStatus {
+  NEW          // baru masuk, belum disentuh
+  IN_PROGRESS  // sedang ditangani superadmin
+  RESOLVED     // sudah selesai dengan respons
+  CLOSED       // ditutup tanpa tindakan / duplikat
+}
+
 enum LetterTypeScope {
   // GLOBAL: dropdown muncul di semua unit. Default untuk semua jenis surat
   // standar (SK, ST, INT, MOU, EKS) yang sudah ada sebelum PR-D.
@@ -111,6 +120,8 @@ model User {
   dispositionsSent     Disposition[] @relation("DispositionFrom")
   dispositionsReceived Disposition[] @relation("DispositionTo")
   auditLogs            AuditLog[]
+  ticketsCreated       Ticket[]      @relation("TicketCreator")
+  ticketsAssigned      Ticket[]      @relation("TicketAssignee")
   letterTypeRequestsRequested LetterTypeRequest[] @relation("LetterTypeRequestRequestedBy")
   letterTypeRequestsReviewed  LetterTypeRequest[] @relation("LetterTypeRequestReviewedBy")
 
@@ -140,6 +151,7 @@ model Unit {
   archives     Archive[]
   sequences    NumberingSequence[]
   dispositions Disposition[]
+  tickets      Ticket[]
   letterTypes  LetterTypeUnit[]
   letterTypeRequestsSent     LetterTypeRequest[] @relation("LetterTypeRequestUnit")
 
@@ -354,5 +366,52 @@ model WebhookDelivery {
 
   @@index([status])
   @@index([archiveId])
+  @@index([createdAt])
+}
+
+/// Help-desk ticket / error report submitted from the in-app
+/// "Laporkan Masalah" button. Visible to the reporter via /dashboard/my-tickets
+/// and to SUPER_ADMIN via /dashboard/tickets.
+model Ticket {
+  id                 String       @id @default(cuid())
+  title              String
+  description        String       @db.Text
+  // Optional free-text label for the page/feature being reported (e.g.
+  // "/dashboard/generate" or "Form Buat Nomor Surat"). Lets the reporter
+  // give superadmin a hint about where the issue is, without forcing them
+  // to remember exact paths.
+  pageHint           String?
+  // Optional screenshot. Reuses the same Vercel Blob upload flow as archive
+  // proofs (path prefix `persuratan/{userId}/tickets/...`). Stored as both
+  // a public URL (for inline preview) and a pathname (for delete on cleanup).
+  screenshotUrl      String?
+  screenshotPathname String?
+
+  status       TicketStatus @default(NEW)
+  // Optional follow-up note from the superadmin reviewing the ticket.
+  // Visible to the reporter on /dashboard/my-tickets.
+  responseNote String?      @db.Text
+
+  createdById String
+  createdBy   User    @relation("TicketCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  // Denormalised reporter unit so superadmin can filter / aggregate without
+  // joining through User. Nullable because USER role accounts may not have a
+  // unit.
+  unitId      String?
+  unit        Unit?   @relation(fields: [unitId], references: [id], onDelete: SetNull)
+
+  // Optional explicit owner among superadmins; for now it's free-form so
+  // multiple superadmins can collaborate.
+  assignedToId String?
+  assignedTo   User?   @relation("TicketAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  resolvedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([status])
+  @@index([createdById])
+  @@index([assignedToId])
+  @@index([unitId])
   @@index([createdAt])
 }
