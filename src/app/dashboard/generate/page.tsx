@@ -38,8 +38,8 @@ export default async function GeneratePage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Penomoran Surat Otomatis</h1>
         <p className="text-sm text-muted-foreground">
-          Format default: <code className="rounded bg-muted px-1.5 py-0.5">[NO]/[UNIT_CODE]/[TYPE_CODE]/[ROMAN_MONTH]/[YEAR]</code>
-          &nbsp;&mdash; contoh: <strong>001/UNIGA/SK/{toRoman(month)}/{year}</strong>. Format dapat dikustomisasi per unit; nomor urut reset ke 001 setiap 1 Januari.
+          Format default: <code className="rounded bg-muted px-1.5 py-0.5">[NO]/[TYPE_CODE]/[UNIT_CODE]/[ROMAN_MONTH]/[YEAR]</code>
+          &nbsp;&mdash; contoh: <strong>001/SK/UNIGA/{toRoman(month)}/{year}</strong>. Format dapat dikustomisasi per unit; nomor urut reset ke 001 setiap 1 Januari.
         </p>
       </div>
 
