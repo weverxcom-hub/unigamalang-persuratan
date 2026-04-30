@@ -47,6 +47,15 @@ const ACCOUNT_NAV: NavItem[] = [
   { href: "/dashboard/my-tickets", label: "Laporan Saya", icon: LifeBuoy },
 ];
 
+// Items shown only to ADMIN_UNIT (not SUPER_ADMIN, who has the full ADMIN_NAV).
+const ADMIN_UNIT_NAV: NavItem[] = [
+  {
+    href: "/dashboard/letter-type-requests",
+    label: "Pengajuan Jenis Surat",
+    icon: FileType,
+  },
+];
+
 const ADMIN_NAV: NavItem[] = [
   { href: "/dashboard/users", label: "Akun Pengguna", icon: Users },
   { href: "/dashboard/units", label: "Unit", icon: Building2 },
@@ -84,6 +93,7 @@ export function DashboardShell({
   const [mobileOpen, setMobileOpen] = useState(false);
   const router = useRouter();
   const canManage = session.role === "SUPER_ADMIN";
+  const isAdminUnit = session.role === "ADMIN_UNIT";
 
   // Load persisted collapsed state once on mount.
   useEffect(() => {
@@ -151,6 +161,15 @@ export function DashboardShell({
               icon={Settings}
               collapsed={collapsed}
               items={ADMIN_NAV}
+              onNavigate={() => setMobileOpen(false)}
+            />
+          )}
+          {isAdminUnit && (
+            <SidebarSection
+              title="Unit Saya"
+              icon={Settings}
+              collapsed={collapsed}
+              items={ADMIN_UNIT_NAV}
               onNavigate={() => setMobileOpen(false)}
             />
           )}

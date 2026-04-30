@@ -75,6 +75,15 @@ export async function POST(req: Request) {
     );
   }
   if (screenshotPathname) {
+    // Symmetric check: a pathname without a URL is also rejected so the
+    // contract "both or neither" is enforced server-side regardless of which
+    // field the caller chose to omit.
+    if (!screenshotUrl) {
+      return NextResponse.json(
+        { error: "screenshotUrl wajib diisi jika screenshotPathname ada" },
+        { status: 400 }
+      );
+    }
     const expectedPrefix = `persuratan/${session.userId}/`;
     if (!screenshotPathname.startsWith(expectedPrefix)) {
       return NextResponse.json(

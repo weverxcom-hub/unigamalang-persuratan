@@ -22,6 +22,10 @@ export function serialiseArchive(a: PrismaArchive): Archive {
     createdById: a.createdById,
     createdAt: a.createdAt.toISOString(),
     deletedAt: a.deletedAt ? a.deletedAt.toISOString() : null,
+    voidReason: a.voidReason,
+    voidedAt: a.voidedAt ? a.voidedAt.toISOString() : null,
+    voidedById: a.voidedById,
+    overdueMarkedAt: a.overdueMarkedAt ? a.overdueMarkedAt.toISOString() : null,
   };
 }
 
@@ -47,6 +51,10 @@ export function serialiseArchiveList(a: PrismaArchive): ArchiveListItem {
     createdById: a.createdById,
     createdAt: a.createdAt.toISOString(),
     deletedAt: a.deletedAt ? a.deletedAt.toISOString() : null,
+    voidReason: a.voidReason,
+    voidedAt: a.voidedAt ? a.voidedAt.toISOString() : null,
+    voidedById: a.voidedById,
+    overdueMarkedAt: a.overdueMarkedAt ? a.overdueMarkedAt.toISOString() : null,
     hasProof,
   };
 }

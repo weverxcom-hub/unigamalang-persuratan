@@ -22,7 +22,23 @@ const TOKENS: Record<string, (ctx: FormatContext) => string> = {
   "[YEAR]": (c) => String(c.year),
 };
 
+/**
+ * Default format template for letter numbering.
+ *
+ * History:
+ *   - Pre-April 2026: `[NO]/[UNIT_CODE]/[TYPE_CODE]/[ROMAN_MONTH]/[YEAR]`
+ *   - April 2026 onwards: `[NO]/[TYPE_CODE]/[UNIT_CODE]/[ROMAN_MONTH]/[YEAR]`
+ *     (TYPE_CODE before UNIT_CODE — required by BAU UNIGA TechSpec). Existing
+ *     archive numbers are NOT migrated; only newly allocated numbers and the
+ *     `Unit.formatTemplate` default are updated.
+ */
 export const DEFAULT_FORMAT_TEMPLATE =
+  "[NO]/[TYPE_CODE]/[UNIT_CODE]/[ROMAN_MONTH]/[YEAR]";
+
+/** The pre-April 2026 default. Used by the migration to identify units that
+ * still use the old default (so we can flip them to the new one) without
+ * touching admins' custom templates. */
+export const LEGACY_DEFAULT_FORMAT_TEMPLATE =
   "[NO]/[UNIT_CODE]/[TYPE_CODE]/[ROMAN_MONTH]/[YEAR]";
 
 export function renderFormat(template: string, ctx: FormatContext): string {

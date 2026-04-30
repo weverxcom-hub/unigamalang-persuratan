@@ -13,7 +13,7 @@ Postgres**, **Tailwind CSS** + **shadcn/ui**, **Vercel Blob**, **Resend**, dan
 
 ### 1. Penomoran Dinamis per Unit
 Setiap unit memiliki `formatTemplate` sendiri (contoh
-`[NO]/[UNIT_CODE]/[TYPE_CODE]/[ROMAN_MONTH]/[YEAR]`). Token yang didukung:
+`[NO]/[TYPE_CODE]/[UNIT_CODE]/[ROMAN_MONTH]/[YEAR]`). Token yang didukung:
 
 | Token | Nilai |
 |---|---|

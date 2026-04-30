@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,6 +45,7 @@ import {
   Send,
   Printer,
   Download,
+  Ban,
 } from "lucide-react";
 import type { Archive, ArchiveListItem, ArchiveStatus, Role } from "@/lib/types";
 import {
@@ -74,6 +76,7 @@ function buildArchiveQuery(filters: {
   letterTypeId?: string;
   year?: string;
   direction?: string;
+  status?: string;
   dateFrom?: string;
   dateTo?: string;
 }): string {
@@ -85,6 +88,7 @@ function buildArchiveQuery(filters: {
   if (filters.year && filters.year !== "__all") params.set("year", filters.year);
   if (filters.direction && filters.direction !== "__all")
     params.set("direction", filters.direction);
+  if (filters.status && filters.status !== "__all") params.set("status", filters.status);
   if (filters.dateFrom) params.set("dateFrom", filters.dateFrom);
   if (filters.dateTo) params.set("dateTo", filters.dateTo);
   return params.toString();
@@ -109,15 +113,22 @@ const STATUS_LABEL: Record<ArchiveStatus, string> = {
   PENDING_PROOF: "Menunggu Bukti",
   APPROVED: "Disetujui",
   ISSUED: "Terbit",
+  OVERDUE: "Melewati Batas",
+  VOID: "Dibatalkan",
 };
 
-function statusVariant(status: ArchiveStatus): "default" | "secondary" | "success" | "warning" | "outline" {
+function statusVariant(
+  status: ArchiveStatus
+): "default" | "secondary" | "success" | "warning" | "outline" | "destructive" {
   switch (status) {
     case "ISSUED":
       return "success";
     case "PENDING":
     case "PENDING_PROOF":
       return "warning";
+    case "OVERDUE":
+    case "VOID":
+      return "destructive";
     case "APPROVED":
       return "default";
     case "DRAFT":
@@ -143,10 +154,19 @@ export function ArchivesClient({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [proofArchive, setProofArchive] = useState<ArchiveListItem | null>(null);
   const [viewArchive, setViewArchive] = useState<ArchiveListItem | null>(null);
+  // Allow deep-links like /dashboard/archives?status=OVERDUE (used by the
+  // dashboard overdue banner) to pre-apply the status filter on first paint.
+  const searchParams = useSearchParams();
+  const initialStatus = (() => {
+    const s = searchParams?.get("status");
+    return s && ["PENDING_PROOF", "ISSUED", "OVERDUE", "VOID"].includes(s) ? s : "__all";
+  })();
   const [direction, setDirection] = useState<string>("__all");
+  const [statusFilter, setStatusFilter] = useState<string>(initialStatus);
   const [dateFrom, setDateFrom] = useState<string>("");
   const [dateTo, setDateTo] = useState<string>("");
   const [disposeArchive, setDisposeArchive] = useState<ArchiveListItem | null>(null);
+  const [voidArchive, setVoidArchive] = useState<ArchiveListItem | null>(null);
 
   const fetchArchives = useCallback(async () => {
     setLoading(true);
@@ -157,6 +177,7 @@ export function ArchivesClient({
       if (letterTypeId !== "__all") params.set("letterTypeId", letterTypeId);
       if (year !== "__all") params.set("year", year);
       if (direction !== "__all") params.set("direction", direction);
+      if (statusFilter !== "__all") params.set("status", statusFilter);
       if (dateFrom) params.set("dateFrom", dateFrom);
       if (dateTo) params.set("dateTo", dateTo);
       const res = await fetch(`/api/archives?${params.toString()}`);
@@ -165,7 +186,7 @@ export function ArchivesClient({
     } finally {
       setLoading(false);
     }
-  }, [q, unitId, letterTypeId, year, direction, dateFrom, dateTo]);
+  }, [q, unitId, letterTypeId, year, direction, statusFilter, dateFrom, dateTo]);
 
   useEffect(() => {
     fetchArchives();
@@ -185,6 +206,7 @@ export function ArchivesClient({
     setLetterTypeId("__all");
     setYear("__all");
     setDirection("__all");
+    setStatusFilter("__all");
     setDateFrom("");
     setDateTo("");
   }
@@ -236,7 +258,7 @@ export function ArchivesClient({
           <div className="flex flex-wrap gap-2 md:justify-end">
             <Button variant="outline" type="button" asChild>
               <a
-                href={buildExportUrl({ q, unitId, letterTypeId, year, direction, dateFrom, dateTo }, "csv")}
+                href={buildExportUrl({ q, unitId, letterTypeId, year, direction, status: statusFilter, dateFrom, dateTo }, "csv")}
                 rel="noreferrer"
               >
                 <Download className="h-4 w-4" />
@@ -245,7 +267,7 @@ export function ArchivesClient({
             </Button>
             <Button variant="outline" type="button" asChild>
               <a
-                href={buildExportUrl({ q, unitId, letterTypeId, year, direction, dateFrom, dateTo }, "xlsx")}
+                href={buildExportUrl({ q, unitId, letterTypeId, year, direction, status: statusFilter, dateFrom, dateTo }, "xlsx")}
                 rel="noreferrer"
               >
                 <Download className="h-4 w-4" />
@@ -253,7 +275,7 @@ export function ArchivesClient({
               </a>
             </Button>
             <Button variant="outline" type="button" asChild>
-              <a href={buildPrintUrl({ q, unitId, letterTypeId, year, direction, dateFrom, dateTo })} target="_blank" rel="noreferrer">
+              <a href={buildPrintUrl({ q, unitId, letterTypeId, year, direction, status: statusFilter, dateFrom, dateTo })} target="_blank" rel="noreferrer">
                 <Printer className="h-4 w-4" />
                 Cetak
               </a>
@@ -319,7 +341,7 @@ export function ArchivesClient({
               Reset
             </Button>
           </div>
-          <div className="grid gap-3 md:grid-cols-[180px_180px_180px_1fr]">
+          <div className="grid gap-3 md:grid-cols-[180px_180px_180px_180px_1fr]">
             <Select value={direction} onValueChange={setDirection}>
               <SelectTrigger>
                 <SelectValue placeholder="Arah" />
@@ -328,6 +350,18 @@ export function ArchivesClient({
                 <SelectItem value="__all">Semua Arah</SelectItem>
                 <SelectItem value="OUTGOING">Surat Keluar</SelectItem>
                 <SelectItem value="INCOMING">Surat Masuk</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all">Semua Status</SelectItem>
+                <SelectItem value="PENDING_PROOF">Menunggu Bukti</SelectItem>
+                <SelectItem value="ISSUED">Terbit</SelectItem>
+                <SelectItem value="OVERDUE">Melewati Batas</SelectItem>
+                <SelectItem value="VOID">Dibatalkan</SelectItem>
               </SelectContent>
             </Select>
             <div>
@@ -385,7 +419,7 @@ export function ArchivesClient({
                         <Eye className="h-4 w-4" />
                         Lihat Bukti
                       </Button>
-                    ) : a.status === "PENDING_PROOF" ? (
+                    ) : a.status === "PENDING_PROOF" || a.status === "OVERDUE" ? (
                       <Button size="sm" onClick={() => setProofArchive(a)}>
                         <Upload className="h-4 w-4" />
                         Unggah Bukti
@@ -393,6 +427,18 @@ export function ArchivesClient({
                     ) : a.fileName ? (
                       <span className="text-xs italic text-muted-foreground">{a.fileName}</span>
                     ) : null}
+                    {role !== "USER" &&
+                      (a.status === "PENDING_PROOF" || a.status === "OVERDUE") && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setVoidArchive(a)}
+                          aria-label="Batalkan nomor (VOID)"
+                        >
+                          <Ban className="h-4 w-4 text-destructive" />
+                          Batalkan
+                        </Button>
+                      )}
                     <Button
                       size="sm"
                       variant="ghost"
@@ -464,7 +510,7 @@ export function ArchivesClient({
                             <Eye className="h-4 w-4" />
                             Lihat
                           </Button>
-                        ) : a.status === "PENDING_PROOF" ? (
+                        ) : a.status === "PENDING_PROOF" || a.status === "OVERDUE" ? (
                           <Button size="sm" onClick={() => setProofArchive(a)}>
                             <Upload className="h-4 w-4" />
                             Unggah
@@ -503,6 +549,18 @@ export function ArchivesClient({
                               )}
                             </>
                           )}
+                          {role !== "USER" &&
+                            (a.status === "PENDING_PROOF" || a.status === "OVERDUE") && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label="Batalkan nomor (VOID)"
+                                title="Batalkan nomor (VOID)"
+                                onClick={() => setVoidArchive(a)}
+                              >
+                                <Ban className="h-4 w-4 text-destructive" />
+                              </Button>
+                            )}
                           <Button variant="ghost" size="icon" onClick={() => onDelete(a.id)} aria-label="Hapus arsip">
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
@@ -550,7 +608,130 @@ export function ArchivesClient({
         onOpenChange={(open) => !open && setDisposeArchive(null)}
         onCreated={() => setDisposeArchive(null)}
       />
+
+      <VoidArchiveDialog
+        archive={voidArchive}
+        onOpenChange={(open) => !open && setVoidArchive(null)}
+        onVoided={(updated) => {
+          setVoidArchive(null);
+          setArchives((prev) =>
+            prev.map((a) =>
+              a.id === updated.id
+                ? {
+                    ...a,
+                    status: updated.status,
+                    voidReason: updated.voidReason,
+                    voidedAt: updated.voidedAt,
+                    voidedById: updated.voidedById,
+                  }
+                : a
+            )
+          );
+        }}
+      />
     </div>
+  );
+}
+
+function VoidArchiveDialog({
+  archive,
+  onOpenChange,
+  onVoided,
+}: {
+  archive: ArchiveListItem | null;
+  onOpenChange: (open: boolean) => void;
+  onVoided: (updated: Archive) => void;
+}) {
+  const [reason, setReason] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Reset on close so the next open starts blank.
+  useEffect(() => {
+    if (!archive) {
+      setReason("");
+      setError(null);
+      setSubmitting(false);
+    }
+  }, [archive]);
+
+  async function onSubmit() {
+    if (!archive) return;
+    if (reason.trim().length < 5) {
+      setError("Alasan pembatalan minimal 5 karakter.");
+      return;
+    }
+    setSubmitting(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/archives/${archive.id}/void`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: reason.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data?.error ?? "Gagal membatalkan nomor.");
+        return;
+      }
+      onVoided(data.archive as Archive);
+    } catch {
+      setError("Tidak dapat terhubung ke server.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Dialog open={!!archive} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Batalkan Nomor Surat</DialogTitle>
+          <DialogDescription>
+            {archive ? (
+              <>
+                Membatalkan nomor <code className="rounded bg-muted px-1 py-0.5">{archive.number}</code>.
+                Tindakan ini tidak dapat diurungkan dan nomor TIDAK akan dikembalikan ke counter.
+                Status arsip akan menjadi <strong>Dibatalkan</strong> dan tetap tampil dengan badge merah
+                untuk keperluan audit.
+              </>
+            ) : (
+              "Membatalkan nomor surat."
+            )}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          <Label htmlFor="void-reason">
+            Alasan Pembatalan <span className="text-destructive">*</span>
+          </Label>
+          <textarea
+            id="void-reason"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            rows={4}
+            disabled={submitting}
+            placeholder="Contoh: nomor dialokasikan dua kali untuk perihal yang sama; surat tidak jadi diterbitkan"
+            className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          />
+          <p className="text-xs text-muted-foreground">
+            Minimal 5 karakter. Alasan akan disimpan permanen di audit log dan ditampilkan kepada
+            admin lain yang melihat arsip ini.
+          </p>
+          {error && (
+            <p className="rounded-md bg-destructive/10 px-3 py-2 text-xs text-destructive">{error}</p>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+            Batal
+          </Button>
+          <Button variant="destructive" onClick={onSubmit} disabled={submitting}>
+            {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Ban className="h-4 w-4" />}
+            Batalkan Nomor
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
