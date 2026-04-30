@@ -1,15 +1,32 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
-import { getDb } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { ArchivesClient } from "./archives-client";
 
 export default async function ArchivesPage() {
   const session = await getSession();
   if (!session) redirect("/login");
-  const db = getDb();
 
-  const visibleUnits =
-    session.role === "SUPER_ADMIN" ? db.units : db.units.filter((u) => u.id === session.unitId);
+  const [unitsRaw, letterTypesRaw] = await Promise.all([
+    prisma.unit.findMany({ where: { deletedAt: null }, orderBy: { code: "asc" } }),
+    prisma.letterType.findMany({ where: { deletedAt: null }, orderBy: { code: "asc" } }),
+  ]);
+
+  const units = unitsRaw
+    .filter((u) => session.role === "SUPER_ADMIN" || u.id === session.unitId)
+    .map((u) => ({
+      id: u.id,
+      code: u.code,
+      name: u.name,
+      formatTemplate: u.formatTemplate,
+      createdAt: u.createdAt.toISOString(),
+    }));
+  const letterTypes = letterTypesRaw.map((lt) => ({
+    id: lt.id,
+    code: lt.code,
+    name: lt.name,
+    createdAt: lt.createdAt.toISOString(),
+  }));
 
   return (
     <div className="space-y-6">
@@ -22,10 +39,12 @@ export default async function ArchivesPage() {
         </p>
       </div>
       <ArchivesClient
-        units={visibleUnits}
-        letterTypes={db.letterTypes}
+        units={units}
+        letterTypes={letterTypes}
         role={session.role}
         sessionUnitId={session.unitId}
+        sessionUserId={session.userId}
+        sessionUserName={session.name}
       />
     </div>
   );

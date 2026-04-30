@@ -1,11 +1,29 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
-import { getDb, saveDb, uid } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-  const db = getDb();
-  return NextResponse.json({ letterTypes: db.letterTypes });
+  const letterTypes = await prisma.letterType.findMany({
+    where: { deletedAt: null },
+    orderBy: { code: "asc" },
+  });
+  // Letter types are tiny + change rarely. 30s browser cache.
+  return NextResponse.json(
+    {
+      letterTypes: letterTypes.map((lt) => ({
+        id: lt.id,
+        code: lt.code,
+        name: lt.name,
+        createdAt: lt.createdAt.toISOString(),
+      })),
+    },
+    {
+      headers: {
+        "Cache-Control": "private, max-age=30, stale-while-revalidate=120",
+      },
+    }
+  );
 }
 
 const schema = z.object({
@@ -31,17 +49,28 @@ export async function POST(req: Request) {
       { status: 400 }
     );
   }
-  const db = getDb();
-  if (db.letterTypes.some((lt) => lt.code === parsed.data.code)) {
+  const existing = await prisma.letterType.findUnique({ where: { code: parsed.data.code } });
+  if (existing) {
+    if (existing.deletedAt) {
+      return NextResponse.json(
+        { error: "Kode pernah dipakai (jenis dinonaktifkan). Aktifkan kembali alih-alih membuat baru." },
+        { status: 409 }
+      );
+    }
     return NextResponse.json({ error: "Kode jenis surat sudah digunakan" }, { status: 409 });
   }
-  const letterType = {
-    id: uid("lt"),
-    code: parsed.data.code,
-    name: parsed.data.name,
-    createdAt: new Date().toISOString(),
-  };
-  db.letterTypes.push(letterType);
-  saveDb(db);
-  return NextResponse.json({ letterType }, { status: 201 });
+  const letterType = await prisma.letterType.create({
+    data: { code: parsed.data.code, name: parsed.data.name },
+  });
+  return NextResponse.json(
+    {
+      letterType: {
+        id: letterType.id,
+        code: letterType.code,
+        name: letterType.name,
+        createdAt: letterType.createdAt.toISOString(),
+      },
+    },
+    { status: 201 }
+  );
 }

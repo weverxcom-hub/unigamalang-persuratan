@@ -1,6 +1,6 @@
-import { getDb, saveDb, uid } from "./db";
-import { pad3, toRoman } from "./utils";
-import type { NumberingSequence } from "./types";
+import { prisma } from "./prisma";
+import { renderFormat } from "./format";
+import type { Prisma } from "@prisma/client";
 
 export interface GeneratedNumber {
   number: string;
@@ -9,68 +9,111 @@ export interface GeneratedNumber {
   month: number;
   unitCode: string;
   letterTypeCode: string;
+  unitFormatTemplate: string;
 }
 
 /**
- * Allocates the next sequence number for (unit, letterType, year) combination.
- * Sequence resets to 1 at the start of each calendar year.
+ * Allocate the next sequence number for `(unitId, letterTypeId, year)`
+ * atomically.
+ *
+ *   - Each (unit × jenis surat) pair has its own counter, reset every
+ *     1 January. SK, ST, UND, etc. each run independently so the institution
+ *     can match how their physical numbering books work.
+ *   - Uses `upsert` + `increment` inside a Prisma transaction so concurrent
+ *     calls never produce duplicate numbers.
+ *   - The final string is rendered through the unit's `formatTemplate`.
+ *
+ * Pass an optional transactional client when this is called from inside an
+ * existing `prisma.$transaction(async tx => ...)` block; otherwise a new
+ * transaction is opened automatically.
  */
-export function allocateNextNumber(unitId: string, letterTypeId: string): GeneratedNumber {
-  const db = getDb();
-  const unit = db.units.find((u) => u.id === unitId);
-  const letterType = db.letterTypes.find((lt) => lt.id === letterTypeId);
-  if (!unit) throw new Error("Unit tidak ditemukan");
-  if (!letterType) throw new Error("Jenis surat tidak ditemukan");
+export async function allocateNextNumber(
+  unitId: string,
+  letterTypeId: string,
+  tx?: Prisma.TransactionClient
+): Promise<GeneratedNumber> {
+  const client = tx ?? prisma;
+  const run = async (c: Prisma.TransactionClient) => {
+    const [unit, letterType] = await Promise.all([
+      c.unit.findUnique({ where: { id: unitId } }),
+      c.letterType.findUnique({ where: { id: letterTypeId } }),
+    ]);
+    if (!unit || unit.deletedAt) throw new Error("Unit tidak ditemukan atau telah dinonaktifkan");
+    if (!letterType || letterType.deletedAt)
+      throw new Error("Jenis surat tidak ditemukan atau telah dinonaktifkan");
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+
+    // Atomic increment: either create (last=1) or bump existing row by 1.
+    const seq = await c.numberingSequence.upsert({
+      where: { unitId_letterTypeId_year: { unitId, letterTypeId, year } },
+      create: { unitId, letterTypeId, year, last: 1 },
+      update: { last: { increment: 1 } },
+    });
+    const sequence = seq.last;
+
+    return {
+      number: renderFormat(unit.formatTemplate, {
+        sequence,
+        unitCode: unit.code,
+        letterTypeCode: letterType.code,
+        month,
+        year,
+      }),
+      sequenceNumber: sequence,
+      year,
+      month,
+      unitCode: unit.code,
+      letterTypeCode: letterType.code,
+      unitFormatTemplate: unit.formatTemplate,
+    } satisfies GeneratedNumber;
+  };
+
+  if (tx) return run(client as Prisma.TransactionClient);
+  return prisma.$transaction(run);
+}
+
+/**
+ * Non-mutating preview of what `allocateNextNumber` would produce. The
+ * sequence table is NOT touched.
+ */
+export async function previewNextNumber(
+  unitId: string,
+  letterTypeId: string
+): Promise<GeneratedNumber | null> {
+  const [unit, letterType, seq] = await Promise.all([
+    prisma.unit.findUnique({ where: { id: unitId } }),
+    prisma.letterType.findUnique({ where: { id: letterTypeId } }),
+    (async () => {
+      const year = new Date().getFullYear();
+      return prisma.numberingSequence.findUnique({
+        where: { unitId_letterTypeId_year: { unitId, letterTypeId, year } },
+      });
+    })(),
+  ]);
+  if (!unit || unit.deletedAt) return null;
+  if (!letterType || letterType.deletedAt) return null;
 
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth() + 1;
-  const seqId = `${unitId}:${letterTypeId}:${year}`;
-
-  let seq: NumberingSequence | undefined = db.sequences.find((s) => s.id === seqId);
-  if (!seq) {
-    seq = { id: seqId, unitId, letterTypeId, year, lastNumber: 0 };
-    db.sequences.push(seq);
-  }
-  seq.lastNumber += 1;
-
-  const nextNumber = seq.lastNumber;
-  const formatted = `${pad3(nextNumber)}/${unit.code}/${letterType.code}/${toRoman(month)}/${year}`;
-
-  saveDb(db);
+  const sequence = (seq?.last ?? 0) + 1;
 
   return {
-    number: formatted,
-    sequenceNumber: nextNumber,
+    number: renderFormat(unit.formatTemplate, {
+      sequence,
+      unitCode: unit.code,
+      letterTypeCode: letterType.code,
+      month,
+      year,
+    }),
+    sequenceNumber: sequence,
     year,
     month,
     unitCode: unit.code,
     letterTypeCode: letterType.code,
+    unitFormatTemplate: unit.formatTemplate,
   };
-}
-
-/** Preview the next number without allocating it (does not mutate DB). */
-export function previewNextNumber(unitId: string, letterTypeId: string): GeneratedNumber | null {
-  const db = getDb();
-  const unit = db.units.find((u) => u.id === unitId);
-  const letterType = db.letterTypes.find((lt) => lt.id === letterTypeId);
-  if (!unit || !letterType) return null;
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
-  const seqId = `${unitId}:${letterTypeId}:${year}`;
-  const seq = db.sequences.find((s) => s.id === seqId);
-  const next = (seq?.lastNumber ?? 0) + 1;
-  return {
-    number: `${pad3(next)}/${unit.code}/${letterType.code}/${toRoman(month)}/${year}`,
-    sequenceNumber: next,
-    year,
-    month,
-    unitCode: unit.code,
-    letterTypeCode: letterType.code,
-  };
-}
-
-export function newArchiveId() {
-  return uid("arc");
 }

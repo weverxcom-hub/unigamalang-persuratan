@@ -10,8 +10,8 @@ export function toRoman(month: number): string {
   return romans[month - 1] ?? "";
 }
 
-export function formatDate(iso: string): string {
-  const d = new Date(iso);
+export function formatDate(iso: string | Date): string {
+  const d = iso instanceof Date ? iso : new Date(iso);
   return d.toLocaleDateString("id-ID", { year: "numeric", month: "short", day: "2-digit" });
 }
 
