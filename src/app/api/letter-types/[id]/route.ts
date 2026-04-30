@@ -52,15 +52,31 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
   // Determine the post-edit scope so we know whether to require unit ids.
   const nextScope = parsed.data.scope ?? existing.scope;
-  if (
-    nextScope === "UNIT_SPECIFIC" &&
-    parsed.data.allowedUnitIds !== undefined &&
-    parsed.data.allowedUnitIds.length === 0
-  ) {
-    return NextResponse.json(
-      { error: "Jenis surat per-unit harus mencantumkan minimal satu unit" },
-      { status: 400 }
-    );
+  if (nextScope === "UNIT_SPECIFIC") {
+    // If the caller explicitly sent an empty array, that's always invalid.
+    if (
+      parsed.data.allowedUnitIds !== undefined &&
+      parsed.data.allowedUnitIds.length === 0
+    ) {
+      return NextResponse.json(
+        { error: "Jenis surat per-unit harus mencantumkan minimal satu unit" },
+        { status: 400 }
+      );
+    }
+    // If the caller is switching to UNIT_SPECIFIC (or staying UNIT_SPECIFIC
+    // with no existing allowlist) without supplying allowedUnitIds, the type
+    // would end up invisible to every unit -- reject. The client UI always
+    // sends allowedUnitIds, so this only fires for direct API callers.
+    const willHaveUnits =
+      parsed.data.allowedUnitIds !== undefined
+        ? parsed.data.allowedUnitIds.length > 0
+        : existing.units.length > 0;
+    if (!willHaveUnits) {
+      return NextResponse.json(
+        { error: "Jenis surat per-unit harus mencantumkan minimal satu unit" },
+        { status: 400 }
+      );
+    }
   }
 
   // Apply edits in a transaction so scope + units are consistent.
