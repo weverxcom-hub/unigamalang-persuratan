@@ -56,6 +56,11 @@ export function ReportIssueDialog({
   const [pageHint, setPageHint] = useState(pathname || "");
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Non-fatal warning shown alongside the success state when something
+  // partial happened (e.g. screenshot upload failed but ticket creation
+  // succeeded). Tracked separately from `error` so reset() doesn't wipe it
+  // out before the user has a chance to read it.
+  const [warning, setWarning] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -66,6 +71,7 @@ export function ReportIssueDialog({
     if (open) {
       setPageHint(pathname || "");
       setSuccess(false);
+      setWarning(null);
     }
   }, [open, pathname]);
 
@@ -76,6 +82,8 @@ export function ReportIssueDialog({
     setError(null);
     setSuccess(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
+    // NOTE: intentionally do NOT clear `warning` here — it survives so the
+    // success view can surface partial-success info (e.g. attachment dropped).
   }
 
   async function uploadScreenshot(
@@ -119,20 +127,27 @@ export function ReportIssueDialog({
       return;
     }
     setSubmitting(true);
+    setWarning(null);
     try {
       let screenshotUrl: string | null = null;
       let screenshotPathname: string | null = null;
+      let attachmentWarning: string | null = null;
       if (screenshot) {
         try {
           const uploaded = await uploadScreenshot(screenshot);
           if (uploaded) {
             screenshotUrl = uploaded.url;
             screenshotPathname = uploaded.pathname;
+          } else {
+            // Storage unavailable — ticket still goes through, but the user
+            // needs to know their attachment was not stored.
+            attachmentWarning =
+              "Vercel Blob belum dikonfigurasi — laporan dikirim tanpa lampiran screenshot.";
           }
         } catch (uploadErr) {
           const msg =
             uploadErr instanceof Error ? uploadErr.message : "Gagal mengunggah screenshot.";
-          setError(`Lampiran gagal: ${msg}. Laporan tetap dikirim tanpa lampiran.`);
+          attachmentWarning = `Lampiran gagal: ${msg}. Laporan dikirim tanpa lampiran.`;
         }
       }
 
@@ -150,11 +165,16 @@ export function ReportIssueDialog({
       if (!res.ok) {
         const data = (await res.json().catch(() => null)) as { error?: string } | null;
         setError(data?.error ?? "Gagal mengirim laporan.");
+        // Surface the attachment warning even on a hard failure so the user
+        // understands they'd be re-uploading the screenshot if they retry.
+        if (attachmentWarning) setWarning(attachmentWarning);
         return;
       }
       // Success: reset form, show confirmation, refresh route so any badges
-      // (e.g. superadmin's pending counter) update on next render.
+      // (e.g. superadmin's pending counter) update on next render. Promote
+      // any attachment warning into the success view so it isn't silently lost.
       reset();
+      if (attachmentWarning) setWarning(attachmentWarning);
       setSuccess(true);
       router.refresh();
     } finally {
@@ -195,6 +215,11 @@ export function ReportIssueDialog({
             <p className="rounded-md bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-400">
               Laporan berhasil dikirim. Pantau status di halaman <strong>Laporan Saya</strong>.
             </p>
+            {warning && (
+              <p className="rounded-md bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+                {warning}
+              </p>
+            )}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                 Tutup
@@ -273,6 +298,11 @@ export function ReportIssueDialog({
                 </div>
               )}
             </div>
+            {warning && (
+              <p className="rounded-md bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+                {warning}
+              </p>
+            )}
             {error && (
               <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
                 {error}
