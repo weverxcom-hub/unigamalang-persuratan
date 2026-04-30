@@ -400,12 +400,12 @@ function SidebarSection({
                 {!collapsed && (
                   <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
                     <span className="truncate">{item.label}</span>
-                    {item.badge && item.badge > 0 ? (
+                    {item.badge != null && item.badge > 0 ? (
                       <NotificationBadge count={item.badge} />
                     ) : null}
                   </span>
                 )}
-                {collapsed && item.badge && item.badge > 0 ? (
+                {collapsed && item.badge != null && item.badge > 0 ? (
                   <span
                     className="absolute right-1 top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold leading-none text-destructive-foreground"
                     aria-label={`${item.badge} notifikasi belum diproses`}
