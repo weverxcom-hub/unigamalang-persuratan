@@ -102,7 +102,7 @@ model Unit {
   //   [ROMAN_MONTH] current month in Roman numerals (I..XII)
   //   [MONTH]       current month (1..12)
   //   [YEAR]        current 4-digit year
-  formatTemplate String    @default("[NO]/[UNIT_CODE]/[TYPE_CODE]/[ROMAN_MONTH]/[YEAR]")
+  formatTemplate String    @default("[NO]/[TYPE_CODE]/[UNIT_CODE]/[ROMAN_MONTH]/[YEAR]")
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   // Soft delete — never hard-delete (Archive.unit / User.unit / sequences
