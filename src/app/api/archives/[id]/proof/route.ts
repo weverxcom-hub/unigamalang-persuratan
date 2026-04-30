@@ -161,26 +161,44 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       ? "blob"
       : "inline";
 
+  const fileFields = {
+    fileName: parsed.data.fileName,
+    fileUrl: parsed.data.fileUrl ?? null,
+    blobPathname: newBlobPathname,
+    gdriveFileId: newGdriveFileId,
+    fileDataUrl: parsed.data.fileUrl ? null : parsed.data.fileDataUrl ?? null,
+  };
+
+  // The status flip from PENDING_PROOF/OVERDUE → ISSUED must be atomic with
+  // a fresh status check; otherwise a concurrent VOID could be silently
+  // overwritten back to ISSUED (TOCTOU). Pattern mirrors void route's
+  // updateMany guard. We try the flip first; if the row count comes back 0
+  // it means the status changed under us (most likely VOID), in which case
+  // we still persist the uploaded file but DO NOT flip the status.
   const updated = await prisma.$transaction(async (tx) => {
-    const u = await tx.archive.update({
-      where: { id: archive.id },
+    const flip = await tx.archive.updateMany({
+      where: {
+        id: archive.id,
+        status: { in: ["PENDING_PROOF", "OVERDUE"] },
+      },
       data: {
-        fileName: parsed.data.fileName,
-        fileUrl: parsed.data.fileUrl ?? null,
-        blobPathname: newBlobPathname,
-        gdriveFileId: newGdriveFileId,
-        fileDataUrl: parsed.data.fileUrl ? null : parsed.data.fileDataUrl ?? null,
-        // PENDING_PROOF and OVERDUE both flip to ISSUED once a proof is
-        // attached. `overdueMarkedAt` is preserved deliberately so the
-        // lateness record stays visible (TechSpec 2.4: "catatan keterlambatan
-        // tetap tersimpan"). VOID is terminal and stays VOID even if a file
-        // is uploaded — the upload is just stored.
-        status:
-          archive.status === "PENDING_PROOF" || archive.status === "OVERDUE"
-            ? "ISSUED"
-            : archive.status,
+        ...fileFields,
+        // overdueMarkedAt is preserved deliberately so the lateness record
+        // stays visible (TechSpec 2.4: "catatan keterlambatan tetap tersimpan").
+        status: "ISSUED",
       },
     });
+    if (flip.count === 0) {
+      // Status moved out of voidable-to-ISSUED range between findFirst() and
+      // here. Could be: already ISSUED (idempotent re-upload), VOID (race
+      // with void route), or PENDING (USER role workflow). Persist the file
+      // metadata so the upload isn't lost, but leave status alone.
+      await tx.archive.update({
+        where: { id: archive.id },
+        data: fileFields,
+      });
+    }
+    const u = await tx.archive.findUniqueOrThrow({ where: { id: archive.id } });
     await audit(
       {
         action: "UPLOAD",
@@ -192,6 +210,10 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         metadata: {
           fileName: parsed.data.fileName,
           kind: storageKind,
+          // Surface in audit log whether the status actually flipped, so a
+          // race-loss is debuggable post-hoc.
+          statusFlippedToIssued: flip.count > 0,
+          finalStatus: u.status,
         },
         ip: clientIp(req),
         userAgent: req.headers.get("user-agent"),
