@@ -20,12 +20,25 @@ export default async function ReceiptPage({ params }: { params: { id: string } }
   });
   if (!archive) notFound();
 
-  if (
-    session.role !== "SUPER_ADMIN" &&
-    session.unitId !== archive.unitId
-  ) {
-    redirect("/dashboard");
+  // Same-unit + super admin can always read. A user that has been disposed
+  // to (directly or via their unit) also gets read access — without this,
+  // cross-unit dispositions are unreachable for the recipient.
+  let canRead =
+    session.role === "SUPER_ADMIN" || session.unitId === archive.unitId;
+  if (!canRead) {
+    const dispo = await prisma.disposition.findFirst({
+      where: {
+        archiveId: archive.id,
+        OR: [
+          { toUserId: session.userId },
+          ...(session.unitId ? [{ toUnitId: session.unitId }] : []),
+        ],
+      },
+      select: { id: true },
+    });
+    if (dispo) canRead = true;
   }
+  if (!canRead) redirect("/dashboard");
 
   const isIncoming = archive.direction === "INCOMING";
   const dateStr = formatDate(archive.date);

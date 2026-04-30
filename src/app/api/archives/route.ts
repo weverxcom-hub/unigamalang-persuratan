@@ -10,6 +10,7 @@ import { sendEmail, renderIncomingLetterEmail } from "@/lib/email";
 import { renameFile as renameGdriveFile } from "@/lib/gdrive";
 import { buildArchiveFilename } from "@/lib/archive-filename";
 import type { ArchiveListItem } from "@/lib/types";
+import { runAfter } from "@/lib/after";
 import { serialiseArchive, serialiseArchiveList } from "./serialise";
 
 function clientIp(req: Request): string | null {
@@ -207,6 +208,46 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Jenis surat tidak ditemukan atau telah dinonaktifkan" }, { status: 400 });
   }
 
+  // Storage identifiers (blobPathname, gdriveFileId) are received from the
+  // client and used later for storage cleanup on archive delete. Without
+  // ownership validation, a hostile client could attach another archive's
+  // identifier and trigger cross-archive file deletion when they later soft-
+  // delete their own archive (IDOR). Defences:
+  //   1. blobPathname must live under the caller's own user prefix (matches
+  //      the contract enforced by /api/blob/upload onBeforeGenerateToken).
+  //   2. Both identifiers must not already be linked to another archive.
+  if (input.blobPathname) {
+    const expectedPrefix = `persuratan/${session.userId}/`;
+    if (!input.blobPathname.startsWith(expectedPrefix)) {
+      return NextResponse.json(
+        { error: "Path file Blob tidak diizinkan" },
+        { status: 403 }
+      );
+    }
+    const dup = await prisma.archive.findFirst({
+      where: { blobPathname: input.blobPathname, deletedAt: null },
+      select: { id: true },
+    });
+    if (dup) {
+      return NextResponse.json(
+        { error: "File Blob ini sudah terkait arsip lain" },
+        { status: 409 }
+      );
+    }
+  }
+  if (input.gdriveFileId) {
+    const dup = await prisma.archive.findFirst({
+      where: { gdriveFileId: input.gdriveFileId, deletedAt: null },
+      select: { id: true },
+    });
+    if (dup) {
+      return NextResponse.json(
+        { error: "File Drive ini sudah terkait arsip lain" },
+        { status: 409 }
+      );
+    }
+  }
+
   const isManualArchive = Boolean(input.manualNumber && input.manualNumber.trim().length > 0);
   const hasFile = Boolean(input.fileUrl || input.fileDataUrl);
 
@@ -275,73 +316,71 @@ export async function POST(req: Request) {
     return created;
   });
 
-  // Post-commit side effects (email + webhook) must not fail the request.
-  (async () => {
-    try {
-      if (archive.direction === "INCOMING") {
-        const admins = await prisma.user.findMany({
-          where: { unitId: archive.unitId, role: "ADMIN_UNIT", deletedAt: null },
-        });
-        const dateStr = new Date(archive.date).toLocaleDateString("id-ID", {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-        });
-        for (const a of admins) {
-          const msg = renderIncomingLetterEmail({
-            recipientName: a.name,
-            number: archive.number,
-            subject: archive.subject,
-            sender: archive.externalSender ?? archive.recipient,
-            date: dateStr,
-            appUrl: appUrl(req),
-            archiveId: archive.id,
-          });
-          await sendEmail({
-            to: a.email,
-            subject: `Surat masuk baru · ${archive.number}`,
-            html: msg.html,
-            text: msg.text,
-            tags: [{ name: "event", value: "incoming" }],
-          });
-        }
-      }
-      await fireWebhook({
-        event: "archive.created",
-        archiveId: archive.id,
-        number: archive.number,
-        subject: archive.subject,
-        direction: archive.direction,
-        status: archive.status,
-        unitCode: archive.unitCode,
-        letterTypeCode: archive.letterTypeCode,
-        externalSender: archive.externalSender,
-        recipient: archive.recipient,
-        date: archive.date.toISOString(),
-        createdAt: archive.createdAt.toISOString(),
+  // Post-commit side effects (email + webhook + Drive rename). Use
+  // waitUntil() so the Vercel serverless runtime keeps the function alive
+  // until they settle — a fire-and-forget IIFE without it gets terminated
+  // when the response is flushed and the work silently disappears.
+  runAfter("archive.created", async () => {
+    if (archive.direction === "INCOMING") {
+      const admins = await prisma.user.findMany({
+        where: { unitId: archive.unitId, role: "ADMIN_UNIT", deletedAt: null },
       });
-      // Auto-rename the Drive file to `{nomor}_{subject_slug}.{ext}` so
-      // operators browsing the Shared Drive directly can find letters by
-      // filename. Best-effort: failure does not affect the archive record.
-      if (archive.gdriveFileId) {
-        const newName = buildArchiveFilename({
+      const dateStr = new Date(archive.date).toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      });
+      for (const a of admins) {
+        const msg = renderIncomingLetterEmail({
+          recipientName: a.name,
           number: archive.number,
           subject: archive.subject,
-          originalFilename: archive.fileName,
+          sender: archive.externalSender ?? archive.recipient,
+          date: dateStr,
+          appUrl: appUrl(req),
+          archiveId: archive.id,
         });
-        const ok = await renameGdriveFile(archive.gdriveFileId, newName);
-        if (ok) {
-          await prisma.archive.update({
-            where: { id: archive.id },
-            data: { fileName: newName },
-          });
-        }
+        await sendEmail({
+          to: a.email,
+          subject: `Surat masuk baru · ${archive.number}`,
+          html: msg.html,
+          text: msg.text,
+          tags: [{ name: "event", value: "incoming" }],
+        });
       }
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error("[archives.POST] post-commit side effects failed", e);
     }
-  })();
+    await fireWebhook({
+      event: "archive.created",
+      archiveId: archive.id,
+      number: archive.number,
+      subject: archive.subject,
+      direction: archive.direction,
+      status: archive.status,
+      unitCode: archive.unitCode,
+      letterTypeCode: archive.letterTypeCode,
+      externalSender: archive.externalSender,
+      recipient: archive.recipient,
+      date: archive.date.toISOString(),
+      createdAt: archive.createdAt.toISOString(),
+    });
+    // Auto-rename the Drive file to `{nomor}_{subject_slug}.{ext}` so
+    // operators browsing the Shared Drive directly can find letters by
+    // filename. Best-effort: failure does not affect the archive record.
+    if (archive.gdriveFileId) {
+      const newName = buildArchiveFilename({
+        number: archive.number,
+        subject: archive.subject,
+        originalFilename: archive.fileName,
+      });
+      const ok = await renameGdriveFile(archive.gdriveFileId, newName);
+      if (ok) {
+        await prisma.archive.update({
+          where: { id: archive.id },
+          data: { fileName: newName },
+        });
+      }
+    }
+  });
 
   return NextResponse.json({ archive: serialiseArchive(archive) }, { status: 201 });
 }
