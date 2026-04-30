@@ -61,7 +61,20 @@ export async function GET(req: Request) {
   }
   if (letterTypeId) where.letterTypeId = letterTypeId;
   if (direction === "OUTGOING" || direction === "INCOMING") where.direction = direction;
-  if (status) where.status = status as Prisma.ArchiveWhereInput["status"];
+  // Whitelist: silently ignore unknown status values rather than failing the
+  // request (forward-compatible with future enum additions in older clients).
+  const ALLOWED_STATUSES = new Set([
+    "DRAFT",
+    "PENDING",
+    "PENDING_PROOF",
+    "APPROVED",
+    "ISSUED",
+    "OVERDUE",
+    "VOID",
+  ]);
+  if (status && ALLOWED_STATUSES.has(status)) {
+    where.status = status as Prisma.ArchiveWhereInput["status"];
+  }
 
   if (q) {
     const tokens = q.split(/\s+/).filter(Boolean);
@@ -199,13 +212,28 @@ export async function POST(req: Request) {
 
   const [unit, letterType] = await Promise.all([
     prisma.unit.findUnique({ where: { id: input.unitId } }),
-    prisma.letterType.findUnique({ where: { id: input.letterTypeId } }),
+    prisma.letterType.findUnique({
+      where: { id: input.letterTypeId },
+      include: { units: { where: { unitId: input.unitId }, select: { unitId: true } } },
+    }),
   ]);
   if (!unit || unit.deletedAt) {
     return NextResponse.json({ error: "Unit tidak ditemukan atau telah dinonaktifkan" }, { status: 400 });
   }
   if (!letterType || letterType.deletedAt) {
     return NextResponse.json({ error: "Jenis surat tidak ditemukan atau telah dinonaktifkan" }, { status: 400 });
+  }
+  // TechSpec 3.1: a UNIT_SPECIFIC letter type is only usable by units in its
+  // allowlist. The frontend filters the dropdown but defence-in-depth requires
+  // the API to reject the combination too.
+  if (letterType.scope === "UNIT_SPECIFIC" && letterType.units.length === 0) {
+    return NextResponse.json(
+      {
+        error:
+          "Jenis surat ini tidak diizinkan untuk unit tersebut. Mintakan akses ke superadmin terlebih dahulu.",
+      },
+      { status: 403 }
+    );
   }
 
   // Storage identifiers (blobPathname, gdriveFileId) are received from the

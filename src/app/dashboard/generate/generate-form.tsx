@@ -22,11 +22,23 @@ interface UnitOption {
   code: string;
   name: string;
   formatTemplate: string;
+  // Optional: ids of UNIT_SPECIFIC letter types this unit is allowlisted for
+  // (TechSpec 3.1). When present we filter the dropdown so only GLOBAL +
+  // allowlisted types appear when this unit is selected.
+  allowedLetterTypeIds?: string[];
 }
+
+type LetterTypeOption = {
+  id: string;
+  code: string;
+  name: string;
+  // Optional for backward-compat: missing = treat as GLOBAL.
+  scope?: "GLOBAL" | "UNIT_SPECIFIC";
+};
 
 interface GenerateFormProps {
   units: UnitOption[];
-  letterTypes: { id: string; code: string; name: string }[];
+  letterTypes: LetterTypeOption[];
   defaultUnitId: string;
   isUser: boolean;
   sessionUserId: string;
@@ -63,6 +75,16 @@ export function GenerateForm({
   // Surat Sisipan / manual override (does NOT increment the counter).
   const [isInsert, setIsInsert] = useState(false);
   const [manualNo, setManualNo] = useState("");
+  // Tanggal Surat — only meaningful for surat sisipan / backdate. Stored as a
+  // YYYY-MM-DD string from the <input type="date"> element.
+  const today = useMemo(() => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }, []);
+  const [letterDate, setLetterDate] = useState<string>(today);
 
   // Proof-upload state (shown after allocation)
   const [proofFile, setProofFile] = useState<File | null>(null);
@@ -74,23 +96,60 @@ export function GenerateForm({
   const isPdf = useMemo(() => proofFile?.type === "application/pdf", [proofFile]);
 
   const selectedUnit = useMemo(() => units.find((u) => u.id === unitId), [units, unitId]);
+
+  // TechSpec 3.1: dropdown shows only GLOBAL letter types + the UNIT_SPECIFIC
+  // ones explicitly allowlisted for the currently-selected unit.
+  const visibleLetterTypes = useMemo<LetterTypeOption[]>(() => {
+    const allowed = new Set(selectedUnit?.allowedLetterTypeIds ?? []);
+    return letterTypes.filter(
+      (lt) => (lt.scope ?? "GLOBAL") === "GLOBAL" || allowed.has(lt.id)
+    );
+  }, [letterTypes, selectedUnit]);
+
+  // Reset the letter-type selection if it disappears after the user changes
+  // unit (e.g. moving from a faculty that has "SKR" to one that doesn't).
+  useEffect(() => {
+    if (visibleLetterTypes.length === 0) {
+      if (letterTypeId) setLetterTypeId("");
+      return;
+    }
+    if (!visibleLetterTypes.some((lt) => lt.id === letterTypeId)) {
+      setLetterTypeId(visibleLetterTypes[0].id);
+    }
+  }, [visibleLetterTypes, letterTypeId]);
+
   const selectedLetterType = useMemo(
-    () => letterTypes.find((lt) => lt.id === letterTypeId),
-    [letterTypes, letterTypeId]
+    () => visibleLetterTypes.find((lt) => lt.id === letterTypeId),
+    [visibleLetterTypes, letterTypeId]
   );
 
   // Split the unit's template into the static prefix/suffix around [NO].
-  // Re-rendered whenever unit or letter type changes.
+  // For surat sisipan we use the user-entered Tanggal Surat (so a March
+  // backdate filed in April still renders "III/2026" in the number); for the
+  // normal allocation flow we use the current date because that path is
+  // server-rendered with `now()` anyway.
   const templateSplit = useMemo(() => {
     if (!selectedUnit || !selectedLetterType) return { prefix: "…", suffix: "" };
-    const now = new Date();
+    let monthYear: { month: number; year: number };
+    if (isInsert && letterDate) {
+      const [y, m] = letterDate.split("-").map((n) => parseInt(n, 10));
+      if (Number.isFinite(y) && Number.isFinite(m)) {
+        monthYear = { month: m, year: y };
+      } else {
+        const now = new Date();
+        monthYear = { month: now.getMonth() + 1, year: now.getFullYear() };
+      }
+    } else {
+      const now = new Date();
+      monthYear = { month: now.getMonth() + 1, year: now.getFullYear() };
+    }
     return splitTemplate(selectedUnit.formatTemplate, {
       unitCode: selectedUnit.code,
       letterTypeCode: selectedLetterType.code,
-      month: now.getMonth() + 1,
-      year: now.getFullYear(),
+      month: monthYear.month,
+      year: monthYear.year,
     });
-  }, [selectedUnit, selectedLetterType]);
+  }, [selectedUnit, selectedLetterType, isInsert, letterDate]);
 
   useEffect(() => {
     if (allocated) return; // don't refresh preview while in proof step
@@ -162,6 +221,9 @@ export function GenerateForm({
       const manualNumber = isInsert
         ? `${templateSplit.prefix}${manualNo.trim()}${templateSplit.suffix}`
         : undefined;
+      // For surat sisipan the user-entered Tanggal Surat IS the letter date;
+      // for the regular allocation flow we leave `date` out so the server
+      // stamps it with the allocation moment.
       const res = await fetch("/api/archives", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -172,6 +234,7 @@ export function GenerateForm({
           recipient,
           direction: "OUTGOING",
           manualNumber,
+          date: isInsert ? letterDate : undefined,
         }),
       });
       const data = await res.json();
@@ -406,7 +469,7 @@ export function GenerateForm({
             <SelectValue placeholder="Pilih jenis surat" />
           </SelectTrigger>
           <SelectContent>
-            {letterTypes.map((lt) => (
+            {visibleLetterTypes.map((lt) => (
               <SelectItem key={lt.id} value={lt.id}>
                 {lt.code} — {lt.name}
               </SelectItem>
@@ -439,6 +502,27 @@ export function GenerateForm({
             </span>
           </Label>
         </div>
+
+        {isInsert && (
+          <div className="rounded-md border border-amber-300 bg-amber-50/60 px-3 py-2.5">
+            <Label htmlFor="letter-date" className="text-xs font-semibold text-amber-900">
+              Tanggal Surat <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="letter-date"
+              type="date"
+              value={letterDate}
+              onChange={(e) => setLetterDate(e.target.value)}
+              max={today}
+              required={isInsert}
+              className="mt-1 max-w-xs"
+            />
+            <p className="mt-1.5 text-[11px] leading-relaxed text-amber-900/80">
+              Bulan Romawi dan tahun di nomor surat akan mengikuti tanggal ini, bukan tanggal hari
+              ini. Wajib diisi untuk surat sisipan.
+            </p>
+          </div>
+        )}
 
         <div className="rounded-lg border border-dashed bg-muted/40 px-4 py-3">
           <div className="mb-1.5 flex items-center gap-2 text-xs text-muted-foreground">

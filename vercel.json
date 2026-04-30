@@ -4,5 +4,11 @@
   "buildCommand": "prisma migrate deploy && next build",
   "installCommand": "npm install",
   "outputDirectory": ".next",
-  "regions": ["sin1"]
+  "regions": ["sin1"],
+  "crons": [
+    {
+      "path": "/api/cron/mark-overdue",
+      "schedule": "0 1 * * *"
+    }
+  ]
 }

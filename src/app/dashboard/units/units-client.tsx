@@ -29,7 +29,7 @@ interface Props {
   initialInactive?: Unit[];
 }
 
-const DEFAULT_TEMPLATE = "[NO]/[UNIT_CODE]/[TYPE_CODE]/[ROMAN_MONTH]/[YEAR]";
+const DEFAULT_TEMPLATE = "[NO]/[TYPE_CODE]/[UNIT_CODE]/[ROMAN_MONTH]/[YEAR]";
 
 export function UnitsClient({ initialUnits, initialInactive = [] }: Props) {
   const [units, setUnits] = useState<Unit[]>(initialUnits);

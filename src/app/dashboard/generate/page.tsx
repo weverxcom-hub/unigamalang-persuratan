@@ -9,9 +9,21 @@ export default async function GeneratePage() {
   const session = await getSession();
   if (!session) redirect("/login");
 
+  // For per-unit letter types (TechSpec 3.1) we need to know each unit's
+  // allowlist so the form can switch the dropdown when the selected unit
+  // changes — without an extra round-trip per change. Fetch units + their
+  // allowlist of UNIT_SPECIFIC letter types, plus all GLOBAL types, in one
+  // server roundtrip; then partition on the client.
   const [unitsRaw, letterTypesRaw] = await Promise.all([
-    prisma.unit.findMany({ where: { deletedAt: null }, orderBy: { code: "asc" } }),
-    prisma.letterType.findMany({ where: { deletedAt: null }, orderBy: { code: "asc" } }),
+    prisma.unit.findMany({
+      where: { deletedAt: null },
+      orderBy: { code: "asc" },
+      include: { letterTypes: { select: { letterTypeId: true } } },
+    }),
+    prisma.letterType.findMany({
+      where: { deletedAt: null },
+      orderBy: { code: "asc" },
+    }),
   ]);
   const visibleUnits = unitsRaw
     .filter((u) => session.role === "SUPER_ADMIN" || u.id === session.unitId)
@@ -20,12 +32,16 @@ export default async function GeneratePage() {
       code: u.code,
       name: u.name,
       formatTemplate: u.formatTemplate,
+      // Set of letter type ids this unit is explicitly allowlisted for.
+      // GLOBAL letter types are not listed here — the form merges them in.
+      allowedLetterTypeIds: u.letterTypes.map((lt) => lt.letterTypeId),
       createdAt: u.createdAt.toISOString(),
     }));
   const letterTypes = letterTypesRaw.map((lt) => ({
     id: lt.id,
     code: lt.code,
     name: lt.name,
+    scope: lt.scope,
     createdAt: lt.createdAt.toISOString(),
   }));
 
@@ -38,8 +54,8 @@ export default async function GeneratePage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Penomoran Surat Otomatis</h1>
         <p className="text-sm text-muted-foreground">
-          Format default: <code className="rounded bg-muted px-1.5 py-0.5">[NO]/[UNIT_CODE]/[TYPE_CODE]/[ROMAN_MONTH]/[YEAR]</code>
-          &nbsp;&mdash; contoh: <strong>001/UNIGA/SK/{toRoman(month)}/{year}</strong>. Format dapat dikustomisasi per unit; nomor urut reset ke 001 setiap 1 Januari.
+          Format default: <code className="rounded bg-muted px-1.5 py-0.5">[NO]/[TYPE_CODE]/[UNIT_CODE]/[ROMAN_MONTH]/[YEAR]</code>
+          &nbsp;&mdash; contoh: <strong>001/SK/UNIGA/{toRoman(month)}/{year}</strong>. Format dapat dikustomisasi per unit; nomor urut reset ke 001 setiap 1 Januari.
         </p>
       </div>
 
