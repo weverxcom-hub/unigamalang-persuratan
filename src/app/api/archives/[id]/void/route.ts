@@ -76,9 +76,17 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   const reason = parsed.data.reason;
   const now = new Date();
 
+  // Re-assert the voidable status atomically inside the transaction. Without
+  // this, a concurrent proof upload could flip status PENDING_PROOF -> ISSUED
+  // between the findFirst() above and this update, and we'd silently void an
+  // ISSUED archive (TechSpec 2.3 forbids that). Pattern mirrors
+  // /api/cron/mark-overdue which uses updateMany with a status filter.
   const updated = await prisma.$transaction(async (tx) => {
-    const u = await tx.archive.update({
-      where: { id: archive.id },
+    const result = await tx.archive.updateMany({
+      where: {
+        id: archive.id,
+        status: { in: ["PENDING_PROOF", "OVERDUE"] },
+      },
       data: {
         status: "VOID",
         voidReason: reason,
@@ -86,6 +94,12 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         voidedById: session.userId,
       },
     });
+    if (result.count === 0) {
+      // Status changed under us (e.g. someone uploaded proof first). Throw
+      // to abort the transaction; caller below maps this to a 409.
+      throw new Error("ARCHIVE_NOT_VOIDABLE");
+    }
+    const u = await tx.archive.findUniqueOrThrow({ where: { id: archive.id } });
     await audit(
       {
         action: "UPDATE",
@@ -105,7 +119,22 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       tx
     );
     return u;
+  }).catch((e: unknown) => {
+    if (e instanceof Error && e.message === "ARCHIVE_NOT_VOIDABLE") {
+      return null;
+    }
+    throw e;
   });
+
+  if (!updated) {
+    return NextResponse.json(
+      {
+        error:
+          "Status arsip berubah di tengah proses (mungkin bukti baru saja diunggah). Silakan muat ulang dan coba lagi.",
+      },
+      { status: 409 }
+    );
+  }
 
   runAfter("archive.voided", async () => {
     await fireWebhook({
