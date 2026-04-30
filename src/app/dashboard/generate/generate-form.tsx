@@ -332,6 +332,13 @@ export function GenerateForm({
     setRecipient("");
     setError(null);
     setUploadError(null);
+    // Reset sisipan state too — the next submission must reflect a fresh
+    // override decision + justification, not silently reuse the previous
+    // one. Audit-trail correctness depends on this.
+    setIsInsert(false);
+    setManualNo("");
+    setInsertReason("");
+    setLetterDate(today);
   }
 
   if (allocated) {
