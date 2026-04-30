@@ -221,11 +221,19 @@ export async function POST(req: Request) {
     // The browser's `await res.json()` then throws, which the form surfaces
     // as the generic "Terjadi kesalahan jaringan" — completely unhelpful for
     // debugging. Log server-side and return a JSON 500 the client can read.
+    //
+    // Security: log the full error message to Vercel logs only. Do NOT echo
+    // err.message to the response body — Prisma errors leak schema details
+    // (constraint names, model names, table names), and connection errors
+    // can leak DB host:port. Return a generic message and rely on superadmin
+    // checking server logs for diagnosis.
     // eslint-disable-next-line no-console
     console.error("[/api/archives POST] unhandled error", err);
-    const message = err instanceof Error ? err.message : "Kesalahan internal";
     return NextResponse.json(
-      { error: `Kesalahan internal: ${message}` },
+      {
+        error:
+          "Kesalahan internal pada server. Silakan coba lagi atau hubungi superadmin.",
+      },
       { status: 500 }
     );
   }
