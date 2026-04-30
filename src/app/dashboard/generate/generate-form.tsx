@@ -22,11 +22,23 @@ interface UnitOption {
   code: string;
   name: string;
   formatTemplate: string;
+  // Optional: ids of UNIT_SPECIFIC letter types this unit is allowlisted for
+  // (TechSpec 3.1). When present we filter the dropdown so only GLOBAL +
+  // allowlisted types appear when this unit is selected.
+  allowedLetterTypeIds?: string[];
 }
+
+type LetterTypeOption = {
+  id: string;
+  code: string;
+  name: string;
+  // Optional for backward-compat: missing = treat as GLOBAL.
+  scope?: "GLOBAL" | "UNIT_SPECIFIC";
+};
 
 interface GenerateFormProps {
   units: UnitOption[];
-  letterTypes: { id: string; code: string; name: string }[];
+  letterTypes: LetterTypeOption[];
   defaultUnitId: string;
   isUser: boolean;
   sessionUserId: string;
@@ -84,9 +96,31 @@ export function GenerateForm({
   const isPdf = useMemo(() => proofFile?.type === "application/pdf", [proofFile]);
 
   const selectedUnit = useMemo(() => units.find((u) => u.id === unitId), [units, unitId]);
+
+  // TechSpec 3.1: dropdown shows only GLOBAL letter types + the UNIT_SPECIFIC
+  // ones explicitly allowlisted for the currently-selected unit.
+  const visibleLetterTypes = useMemo<LetterTypeOption[]>(() => {
+    const allowed = new Set(selectedUnit?.allowedLetterTypeIds ?? []);
+    return letterTypes.filter(
+      (lt) => (lt.scope ?? "GLOBAL") === "GLOBAL" || allowed.has(lt.id)
+    );
+  }, [letterTypes, selectedUnit]);
+
+  // Reset the letter-type selection if it disappears after the user changes
+  // unit (e.g. moving from a faculty that has "SKR" to one that doesn't).
+  useEffect(() => {
+    if (visibleLetterTypes.length === 0) {
+      if (letterTypeId) setLetterTypeId("");
+      return;
+    }
+    if (!visibleLetterTypes.some((lt) => lt.id === letterTypeId)) {
+      setLetterTypeId(visibleLetterTypes[0].id);
+    }
+  }, [visibleLetterTypes, letterTypeId]);
+
   const selectedLetterType = useMemo(
-    () => letterTypes.find((lt) => lt.id === letterTypeId),
-    [letterTypes, letterTypeId]
+    () => visibleLetterTypes.find((lt) => lt.id === letterTypeId),
+    [visibleLetterTypes, letterTypeId]
   );
 
   // Split the unit's template into the static prefix/suffix around [NO].
@@ -435,7 +469,7 @@ export function GenerateForm({
             <SelectValue placeholder="Pilih jenis surat" />
           </SelectTrigger>
           <SelectContent>
-            {letterTypes.map((lt) => (
+            {visibleLetterTypes.map((lt) => (
               <SelectItem key={lt.id} value={lt.id}>
                 {lt.code} — {lt.name}
               </SelectItem>

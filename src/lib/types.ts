@@ -39,7 +39,30 @@ export interface LetterType {
   id: string;
   code: string;
   name: string;
+  // PR-D: visibility scope.
+  //   GLOBAL         → muncul di semua unit (default).
+  //   UNIT_SPECIFIC  → hanya unit yang ada di `allowedUnitIds`.
+  // Field optional supaya client lama yang belum tahu scope tetap kompatibel.
+  scope?: "GLOBAL" | "UNIT_SPECIFIC";
+  // Hanya relevan saat scope = UNIT_SPECIFIC.
+  allowedUnitIds?: string[];
   createdAt: string;
+}
+
+export interface LetterTypeRequest {
+  id: string;
+  proposedCode: string;
+  proposedName: string;
+  reason: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  unit: { id: string; code: string; name: string };
+  requestedBy: { id: string; name: string; email: string };
+  reviewedBy: { id: string; name: string; email: string } | null;
+  reviewedAt: string | null;
+  reviewNote: string | null;
+  letterTypeId: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Archive {

@@ -9,9 +9,21 @@ export default async function GeneratePage() {
   const session = await getSession();
   if (!session) redirect("/login");
 
+  // For per-unit letter types (TechSpec 3.1) we need to know each unit's
+  // allowlist so the form can switch the dropdown when the selected unit
+  // changes — without an extra round-trip per change. Fetch units + their
+  // allowlist of UNIT_SPECIFIC letter types, plus all GLOBAL types, in one
+  // server roundtrip; then partition on the client.
   const [unitsRaw, letterTypesRaw] = await Promise.all([
-    prisma.unit.findMany({ where: { deletedAt: null }, orderBy: { code: "asc" } }),
-    prisma.letterType.findMany({ where: { deletedAt: null }, orderBy: { code: "asc" } }),
+    prisma.unit.findMany({
+      where: { deletedAt: null },
+      orderBy: { code: "asc" },
+      include: { letterTypes: { select: { letterTypeId: true } } },
+    }),
+    prisma.letterType.findMany({
+      where: { deletedAt: null },
+      orderBy: { code: "asc" },
+    }),
   ]);
   const visibleUnits = unitsRaw
     .filter((u) => session.role === "SUPER_ADMIN" || u.id === session.unitId)
@@ -20,12 +32,16 @@ export default async function GeneratePage() {
       code: u.code,
       name: u.name,
       formatTemplate: u.formatTemplate,
+      // Set of letter type ids this unit is explicitly allowlisted for.
+      // GLOBAL letter types are not listed here — the form merges them in.
+      allowedLetterTypeIds: u.letterTypes.map((lt) => lt.letterTypeId),
       createdAt: u.createdAt.toISOString(),
     }));
   const letterTypes = letterTypesRaw.map((lt) => ({
     id: lt.id,
     code: lt.code,
     name: lt.name,
+    scope: lt.scope,
     createdAt: lt.createdAt.toISOString(),
   }));
 

@@ -73,6 +73,21 @@ enum WebhookDeliveryStatus {
   FAILED
 }
 
+enum LetterTypeScope {
+  // GLOBAL: dropdown muncul di semua unit. Default untuk semua jenis surat
+  // standar (SK, ST, INT, MOU, EKS) yang sudah ada sebelum PR-D.
+  GLOBAL
+  // UNIT_SPECIFIC: jenis hanya muncul di unit-unit yang ter-allowlist via
+  // tabel join LetterTypeUnit. Disetujui oleh SUPER_ADMIN dari LetterTypeRequest.
+  UNIT_SPECIFIC
+}
+
+enum LetterTypeRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 // -------------------------------------------------------------------------
 //  Core entities
 // -------------------------------------------------------------------------
@@ -96,6 +111,8 @@ model User {
   dispositionsSent     Disposition[] @relation("DispositionFrom")
   dispositionsReceived Disposition[] @relation("DispositionTo")
   auditLogs            AuditLog[]
+  letterTypeRequestsRequested LetterTypeRequest[] @relation("LetterTypeRequestRequestedBy")
+  letterTypeRequestsReviewed  LetterTypeRequest[] @relation("LetterTypeRequestReviewedBy")
 
   @@index([unitId])
   @@index([deletedAt])
@@ -123,24 +140,79 @@ model Unit {
   archives     Archive[]
   sequences    NumberingSequence[]
   dispositions Disposition[]
+  letterTypes  LetterTypeUnit[]
+  letterTypeRequestsSent     LetterTypeRequest[] @relation("LetterTypeRequestUnit")
 
   @@index([deletedAt])
 }
 
 model LetterType {
-  id        String    @id @default(cuid())
-  code      String    @unique // e.g. "SK", "ST"
+  id        String          @id @default(cuid())
+  code      String          @unique // e.g. "SK", "ST"
   name      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  // GLOBAL = dropdown di semua unit. UNIT_SPECIFIC = hanya unit yang
+  // tercantum di LetterTypeUnit. Default GLOBAL untuk backward-compat.
+  scope     LetterTypeScope @default(GLOBAL)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
   // Soft delete — never hard-delete (Archive.letterType references this
   // row).
   deletedAt DateTime?
 
   archives  Archive[]
   sequences NumberingSequence[]
+  units     LetterTypeUnit[]
 
   @@index([deletedAt])
+}
+
+/// Join table: which units are allowed to use a UNIT_SPECIFIC letter type.
+/// Ignored for GLOBAL letter types (they're available to every unit).
+model LetterTypeUnit {
+  letterTypeId String
+  letterType   LetterType @relation(fields: [letterTypeId], references: [id], onDelete: Cascade)
+  unitId       String
+  unit         Unit       @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@id([letterTypeId, unitId])
+  @@index([unitId])
+}
+
+/// Request from an ADMIN_UNIT for a new UNIT_SPECIFIC letter type. Goes into
+/// a queue that SUPER_ADMIN approves or rejects from the letter-types page.
+/// On approval the SUPER_ADMIN picks which units the new type is available to.
+model LetterTypeRequest {
+  id            String                  @id @default(cuid())
+  // Proposed code & name. After approval the SUPER_ADMIN may tweak these
+  // before creating the LetterType, but we store what the requester asked
+  // for as audit trail.
+  proposedCode  String
+  proposedName  String
+  // Free-form rationale ("Untuk surat tugas spesifik fakultas teknik").
+  reason        String
+  status        LetterTypeRequestStatus @default(PENDING)
+  // Who asked for it. unitId is required because UNIT_SPECIFIC types are
+  // always scoped to one or more units; the requester's home unit is the
+  // default allowlist when a SUPER_ADMIN approves.
+  requestedById String
+  requestedBy   User                    @relation("LetterTypeRequestRequestedBy", fields: [requestedById], references: [id], onDelete: Cascade)
+  unitId        String
+  unit          Unit                    @relation("LetterTypeRequestUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  // Filled when SUPER_ADMIN approves/rejects.
+  reviewedById  String?
+  reviewedBy    User?                   @relation("LetterTypeRequestReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt    DateTime?
+  reviewNote    String?
+  // If approved, the LetterType row that was created (so we can link the
+  // request → the actual letter type for audit).
+  letterTypeId  String?
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+
+  @@index([status, createdAt])
+  @@index([requestedById])
+  @@index([unitId])
 }
 
 /// Per-(unit, letterType, year) sequence counter. Each combination of unit
