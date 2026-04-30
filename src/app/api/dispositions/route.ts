@@ -44,6 +44,11 @@ export async function GET(req: Request) {
     where.status = status;
   }
 
+  // Filter deleted archives at the DB level so the take(200) limit cannot be
+  // consumed by rows that we would later drop in JS — that path could leave
+  // a user's inbox blank even when valid older dispositions exist.
+  where.archive = { deletedAt: null };
+
   const rows = await prisma.disposition.findMany({
     where,
     orderBy: { createdAt: "desc" },
@@ -57,7 +62,6 @@ export async function GET(req: Request) {
           direction: true,
           unitCode: true,
           externalSender: true,
-          deletedAt: true,
         },
       },
       fromUser: { select: { id: true, name: true, email: true } },
@@ -67,9 +71,7 @@ export async function GET(req: Request) {
   });
 
   return NextResponse.json({
-    dispositions: rows
-      .filter((r) => !r.archive.deletedAt)
-      .map((r) => ({
+    dispositions: rows.map((r) => ({
         id: r.id,
         archiveId: r.archive.id,
         archiveNumber: r.archive.number,
