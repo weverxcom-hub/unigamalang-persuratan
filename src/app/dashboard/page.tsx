@@ -274,6 +274,8 @@ export default async function DashboardHome() {
                               ? "success"
                               : a.status === "PENDING" || a.status === "PENDING_PROOF"
                               ? "warning"
+                              : a.status === "OVERDUE" || a.status === "VOID"
+                              ? "destructive"
                               : "secondary"
                           }
                         >
@@ -283,6 +285,14 @@ export default async function DashboardHome() {
                             ? "Menunggu Persetujuan"
                             : a.status === "ISSUED"
                             ? "Terbit"
+                            : a.status === "OVERDUE"
+                            ? "Melewati Batas"
+                            : a.status === "VOID"
+                            ? "Dibatalkan"
+                            : a.status === "APPROVED"
+                            ? "Disetujui"
+                            : a.status === "DRAFT"
+                            ? "Draf"
                             : a.status}
                         </Badge>
                       </div>
