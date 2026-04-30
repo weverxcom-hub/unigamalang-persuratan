@@ -13,7 +13,7 @@ Postgres**, **Tailwind CSS** + **shadcn/ui**, **Vercel Blob**, **Resend**, dan
 
 ### 1. Penomoran Dinamis per Unit
 Setiap unit memiliki `formatTemplate` sendiri (contoh
-`[NO]/[UNIT_CODE]/[TYPE_CODE]/[ROMAN_MONTH]/[YEAR]`). Token yang didukung:
+`[NO]/[TYPE_CODE]/[UNIT_CODE]/[ROMAN_MONTH]/[YEAR]`). Token yang didukung:
 
 | Token | Nilai |
 |---|---|
@@ -76,6 +76,15 @@ Tabel arsip mendukung:
 ### 7. Kontrol Akses & Domain Guard
 - `SUPER_ADMIN`, `ADMIN_UNIT`, `USER` — lihat `prisma/schema.prisma:Role`.
 - Registrasi & login **hanya** untuk email `@unigamalang.ac.id`.
+
+### 8. Help Desk / Laporan Masalah Pengguna
+Tombol **Laporkan Masalah** ditampilkan di topbar setiap halaman dashboard
+sehingga pengguna dapat menyampaikan kendala atau bug langsung dari konteksnya.
+Form mendukung judul, deskripsi, halaman/fitur yang bermasalah (otomatis terisi
+dengan path saat ini), dan lampiran screenshot opsional (PNG/JPG/WEBP, ≤5MB).
+Tiket masuk ke antrian `SUPER_ADMIN` di **/dashboard/tickets** dengan filter
+status (Baru / Sedang Ditangani / Selesai / Ditutup) dan ruang respons. Pelapor
+dapat memantau status di **/dashboard/my-tickets**.
 
 ## Arsitektur
 

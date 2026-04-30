@@ -12,6 +12,8 @@ const STATUS_LABEL: Record<string, string> = {
   PENDING_PROOF: "Menunggu Bukti",
   APPROVED: "Disetujui",
   ISSUED: "Terbit",
+  OVERDUE: "Melewati Batas",
+  VOID: "Dibatalkan",
 };
 
 const DIRECTION_LABEL: Record<string, string> = {

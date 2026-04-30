@@ -18,11 +18,15 @@ import {
   LogOut,
   Settings,
   UserCog,
+  LifeBuoy,
+  Inbox,
+  Send,
 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { SessionPayload } from "@/lib/types";
+import { ReportIssueDialog } from "@/components/app/report-issue-dialog";
 
 interface NavItem {
   href: string;
@@ -34,11 +38,22 @@ const PRIMARY_NAV: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/archives", label: "Pengarsipan", icon: FileStack },
   { href: "/dashboard/generate", label: "Nomor Surat", icon: Hash },
+  { href: "/dashboard/dispositions", label: "Disposisi", icon: Send },
   { href: "/dashboard/panduan", label: "Panduan", icon: BookOpen },
 ];
 
 const ACCOUNT_NAV: NavItem[] = [
   { href: "/dashboard/profile", label: "Profil Saya", icon: UserCog },
+  { href: "/dashboard/my-tickets", label: "Laporan Saya", icon: LifeBuoy },
+];
+
+// Items shown only to ADMIN_UNIT (not SUPER_ADMIN, who has the full ADMIN_NAV).
+const ADMIN_UNIT_NAV: NavItem[] = [
+  {
+    href: "/dashboard/letter-type-requests",
+    label: "Pengajuan Jenis Surat",
+    icon: FileType,
+  },
 ];
 
 const ADMIN_NAV: NavItem[] = [
@@ -46,6 +61,7 @@ const ADMIN_NAV: NavItem[] = [
   { href: "/dashboard/units", label: "Unit", icon: Building2 },
   { href: "/dashboard/letter-types", label: "Jenis Surat", icon: FileType },
   { href: "/dashboard/audit", label: "Audit Log", icon: History },
+  { href: "/dashboard/tickets", label: "Tiket Laporan", icon: Inbox },
 ];
 
 const COLLAPSED_KEY = "uniga.sidebar.collapsed";
@@ -77,6 +93,7 @@ export function DashboardShell({
   const [mobileOpen, setMobileOpen] = useState(false);
   const router = useRouter();
   const canManage = session.role === "SUPER_ADMIN";
+  const isAdminUnit = session.role === "ADMIN_UNIT";
 
   // Load persisted collapsed state once on mount.
   useEffect(() => {
@@ -147,6 +164,15 @@ export function DashboardShell({
               onNavigate={() => setMobileOpen(false)}
             />
           )}
+          {isAdminUnit && (
+            <SidebarSection
+              title="Unit Saya"
+              icon={Settings}
+              collapsed={collapsed}
+              items={ADMIN_UNIT_NAV}
+              onNavigate={() => setMobileOpen(false)}
+            />
+          )}
         </nav>
         <SidebarFooter
           session={session}
@@ -179,6 +205,11 @@ export function DashboardShell({
                 {roleLabel(session.role)}
               </p>
             </div>
+            {/* PR-E (3.4): "Laporkan Masalah" — present on every page so users
+                can submit a bug report from where they hit it. Icon-only on
+                mobile/tablet to save the topbar real estate. */}
+            <ReportIssueDialog session={session} className="hidden sm:inline-flex" />
+            <ReportIssueDialog session={session} iconOnly className="sm:hidden" />
             <Button
               variant="outline"
               size="sm"

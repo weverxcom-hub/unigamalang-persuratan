@@ -9,6 +9,7 @@ import type {
   ArchiveStatus as PrismaArchiveStatus,
   DispositionStatus as PrismaDispositionStatus,
   AuditAction as PrismaAuditAction,
+  TicketStatus as PrismaTicketStatus,
 } from "@prisma/client";
 
 export type Role = PrismaRole;
@@ -16,6 +17,7 @@ export type Direction = PrismaDirection;
 export type ArchiveStatus = PrismaArchiveStatus;
 export type DispositionStatus = PrismaDispositionStatus;
 export type AuditAction = PrismaAuditAction;
+export type TicketStatus = PrismaTicketStatus;
 
 export interface User {
   id: string;
@@ -39,7 +41,30 @@ export interface LetterType {
   id: string;
   code: string;
   name: string;
+  // PR-D: visibility scope.
+  //   GLOBAL         → muncul di semua unit (default).
+  //   UNIT_SPECIFIC  → hanya unit yang ada di `allowedUnitIds`.
+  // Field optional supaya client lama yang belum tahu scope tetap kompatibel.
+  scope?: "GLOBAL" | "UNIT_SPECIFIC";
+  // Hanya relevan saat scope = UNIT_SPECIFIC.
+  allowedUnitIds?: string[];
   createdAt: string;
+}
+
+export interface LetterTypeRequest {
+  id: string;
+  proposedCode: string;
+  proposedName: string;
+  reason: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  unit: { id: string; code: string; name: string };
+  requestedBy: { id: string; name: string; email: string };
+  reviewedBy: { id: string; name: string; email: string } | null;
+  reviewedAt: string | null;
+  reviewNote: string | null;
+  letterTypeId: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Archive {
@@ -62,6 +87,12 @@ export interface Archive {
   createdById: string;
   createdAt: string;
   deletedAt: string | null;
+  voidReason: string | null;
+  voidedAt: string | null;
+  voidedById: string | null;
+  overdueMarkedAt: string | null;
+  isInsert: boolean;
+  insertReason: string | null;
 }
 
 /** List-view projection: no heavy binary data, just a `hasProof` flag. */
@@ -105,4 +136,25 @@ export interface SessionPayload {
   name: string;
   role: Role;
   unitId: string | null;
+}
+
+export interface Ticket {
+  id: string;
+  title: string;
+  description: string;
+  pageHint: string | null;
+  screenshotUrl: string | null;
+  status: TicketStatus;
+  responseNote: string | null;
+  createdById: string;
+  createdByName: string;
+  createdByEmail: string;
+  unitId: string | null;
+  unitCode: string | null;
+  unitName: string | null;
+  assignedToId: string | null;
+  assignedToName: string | null;
+  resolvedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }

@@ -14,6 +14,11 @@ const patchSchema = z.object({
   name: z.string().min(3).optional(),
   // Reactivate a soft-deleted letter type (clear deletedAt).
   reactivate: z.boolean().optional(),
+  // PR-D: change visibility scope. When set to UNIT_SPECIFIC, allowedUnitIds
+  // must be a non-empty array. When set to GLOBAL, the existing LetterTypeUnit
+  // rows are wiped (the join becomes irrelevant).
+  scope: z.enum(["GLOBAL", "UNIT_SPECIFIC"]).optional(),
+  allowedUnitIds: z.array(z.string().min(1)).optional(),
 });
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
@@ -30,7 +35,10 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       { status: 400 }
     );
   }
-  const existing = await prisma.letterType.findUnique({ where: { id: params.id } });
+  const existing = await prisma.letterType.findUnique({
+    where: { id: params.id },
+    include: { units: { select: { unitId: true } } },
+  });
   if (!existing) {
     return NextResponse.json({ error: "Jenis surat tidak ditemukan" }, { status: 404 });
   }
@@ -41,14 +49,67 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     const dup = await prisma.letterType.findUnique({ where: { code: parsed.data.code } });
     if (dup) return NextResponse.json({ error: "Kode jenis surat sudah digunakan" }, { status: 409 });
   }
-  const updated = await prisma.letterType.update({
-    where: { id: params.id },
-    data: {
-      code: parsed.data.code,
-      name: parsed.data.name,
-      ...(parsed.data.reactivate ? { deletedAt: null } : {}),
-    },
+
+  // Determine the post-edit scope so we know whether to require unit ids.
+  const nextScope = parsed.data.scope ?? existing.scope;
+  if (nextScope === "UNIT_SPECIFIC") {
+    // If the caller explicitly sent an empty array, that's always invalid.
+    if (
+      parsed.data.allowedUnitIds !== undefined &&
+      parsed.data.allowedUnitIds.length === 0
+    ) {
+      return NextResponse.json(
+        { error: "Jenis surat per-unit harus mencantumkan minimal satu unit" },
+        { status: 400 }
+      );
+    }
+    // If the caller is switching to UNIT_SPECIFIC (or staying UNIT_SPECIFIC
+    // with no existing allowlist) without supplying allowedUnitIds, the type
+    // would end up invisible to every unit -- reject. The client UI always
+    // sends allowedUnitIds, so this only fires for direct API callers.
+    const willHaveUnits =
+      parsed.data.allowedUnitIds !== undefined
+        ? parsed.data.allowedUnitIds.length > 0
+        : existing.units.length > 0;
+    if (!willHaveUnits) {
+      return NextResponse.json(
+        { error: "Jenis surat per-unit harus mencantumkan minimal satu unit" },
+        { status: 400 }
+      );
+    }
+  }
+
+  // Apply edits in a transaction so scope + units are consistent.
+  const updated = await prisma.$transaction(async (tx) => {
+    const t = await tx.letterType.update({
+      where: { id: params.id },
+      data: {
+        code: parsed.data.code,
+        name: parsed.data.name,
+        scope: parsed.data.scope,
+        ...(parsed.data.reactivate ? { deletedAt: null } : {}),
+      },
+    });
+    // If the caller specified allowedUnitIds, replace the join wholesale.
+    // If switching to GLOBAL, also wipe the join (it's irrelevant).
+    if (parsed.data.allowedUnitIds !== undefined || nextScope === "GLOBAL") {
+      await tx.letterTypeUnit.deleteMany({ where: { letterTypeId: t.id } });
+      if (nextScope === "UNIT_SPECIFIC" && parsed.data.allowedUnitIds) {
+        await tx.letterTypeUnit.createMany({
+          data: parsed.data.allowedUnitIds.map((unitId) => ({
+            letterTypeId: t.id,
+            unitId,
+          })),
+          skipDuplicates: true,
+        });
+      }
+    }
+    return tx.letterType.findUniqueOrThrow({
+      where: { id: t.id },
+      include: { units: { select: { unitId: true } } },
+    });
   });
+
   await audit({
     action: "UPDATE",
     actorId: session.userId,
@@ -56,8 +117,18 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     targetType: "LetterType",
     targetId: updated.id,
     metadata: {
-      before: { code: existing.code, name: existing.name },
-      after: { code: updated.code, name: updated.name },
+      before: {
+        code: existing.code,
+        name: existing.name,
+        scope: existing.scope,
+        allowedUnitIds: existing.units.map((u) => u.unitId),
+      },
+      after: {
+        code: updated.code,
+        name: updated.name,
+        scope: updated.scope,
+        allowedUnitIds: updated.units.map((u) => u.unitId),
+      },
       reactivated: !!parsed.data.reactivate,
     },
   });
@@ -66,6 +137,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       id: updated.id,
       code: updated.code,
       name: updated.name,
+      scope: updated.scope,
+      allowedUnitIds: updated.units.map((u) => u.unitId),
       createdAt: updated.createdAt.toISOString(),
     },
   });

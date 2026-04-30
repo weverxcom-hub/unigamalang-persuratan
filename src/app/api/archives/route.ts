@@ -10,6 +10,7 @@ import { sendEmail, renderIncomingLetterEmail } from "@/lib/email";
 import { renameFile as renameGdriveFile } from "@/lib/gdrive";
 import { buildArchiveFilename } from "@/lib/archive-filename";
 import type { ArchiveListItem } from "@/lib/types";
+import { runAfter } from "@/lib/after";
 import { serialiseArchive, serialiseArchiveList } from "./serialise";
 
 function clientIp(req: Request): string | null {
@@ -60,7 +61,20 @@ export async function GET(req: Request) {
   }
   if (letterTypeId) where.letterTypeId = letterTypeId;
   if (direction === "OUTGOING" || direction === "INCOMING") where.direction = direction;
-  if (status) where.status = status as Prisma.ArchiveWhereInput["status"];
+  // Whitelist: silently ignore unknown status values rather than failing the
+  // request (forward-compatible with future enum additions in older clients).
+  const ALLOWED_STATUSES = new Set([
+    "DRAFT",
+    "PENDING",
+    "PENDING_PROOF",
+    "APPROVED",
+    "ISSUED",
+    "OVERDUE",
+    "VOID",
+  ]);
+  if (status && ALLOWED_STATUSES.has(status)) {
+    where.status = status as Prisma.ArchiveWhereInput["status"];
+  }
 
   if (q) {
     const tokens = q.split(/\s+/).filter(Boolean);
@@ -152,6 +166,12 @@ const createSchema = z
       .nullable()
       .optional(),
     manualNumber: z.string().nullable().optional(),
+    // Sisipan / manual-override flag. When true, the admin is intentionally
+    // bypassing the auto-allocator (e.g. issuing a backdated number that
+    // doesn't advance the counter). Distinct from INCOMING which uses
+    // manualNumber to record the external sender's existing number.
+    isInsert: z.boolean().optional(),
+    insertReason: z.string().trim().max(1000).optional().nullable(),
   })
   .superRefine((val, ctx) => {
     // INCOMING letters must carry a sender and must have a manual number.
@@ -168,6 +188,25 @@ const createSchema = z
           code: z.ZodIssueCode.custom,
           message: "Nomor surat masuk wajib diisi (salin dari surat aslinya)",
           path: ["manualNumber"],
+        });
+      }
+    }
+    // Sisipan (OUTGOING with isInsert=true) requires a documented reason so
+    // every manual-override has an audit trail. The reason has to be at
+    // least 5 characters of trimmed text.
+    if (val.direction !== "INCOMING" && val.isInsert) {
+      if (!val.manualNumber || val.manualNumber.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Nomor sisipan wajib diisi",
+          path: ["manualNumber"],
+        });
+      }
+      if (!val.insertReason || val.insertReason.trim().length < 5) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Alasan sisipan wajib diisi (minimal 5 karakter)",
+          path: ["insertReason"],
         });
       }
     }
@@ -198,7 +237,10 @@ export async function POST(req: Request) {
 
   const [unit, letterType] = await Promise.all([
     prisma.unit.findUnique({ where: { id: input.unitId } }),
-    prisma.letterType.findUnique({ where: { id: input.letterTypeId } }),
+    prisma.letterType.findUnique({
+      where: { id: input.letterTypeId },
+      include: { units: { where: { unitId: input.unitId }, select: { unitId: true } } },
+    }),
   ]);
   if (!unit || unit.deletedAt) {
     return NextResponse.json({ error: "Unit tidak ditemukan atau telah dinonaktifkan" }, { status: 400 });
@@ -206,8 +248,65 @@ export async function POST(req: Request) {
   if (!letterType || letterType.deletedAt) {
     return NextResponse.json({ error: "Jenis surat tidak ditemukan atau telah dinonaktifkan" }, { status: 400 });
   }
+  // TechSpec 3.1: a UNIT_SPECIFIC letter type is only usable by units in its
+  // allowlist. The frontend filters the dropdown but defence-in-depth requires
+  // the API to reject the combination too.
+  if (letterType.scope === "UNIT_SPECIFIC" && letterType.units.length === 0) {
+    return NextResponse.json(
+      {
+        error:
+          "Jenis surat ini tidak diizinkan untuk unit tersebut. Mintakan akses ke superadmin terlebih dahulu.",
+      },
+      { status: 403 }
+    );
+  }
+
+  // Storage identifiers (blobPathname, gdriveFileId) are received from the
+  // client and used later for storage cleanup on archive delete. Without
+  // ownership validation, a hostile client could attach another archive's
+  // identifier and trigger cross-archive file deletion when they later soft-
+  // delete their own archive (IDOR). Defences:
+  //   1. blobPathname must live under the caller's own user prefix (matches
+  //      the contract enforced by /api/blob/upload onBeforeGenerateToken).
+  //   2. Both identifiers must not already be linked to another archive.
+  if (input.blobPathname) {
+    const expectedPrefix = `persuratan/${session.userId}/`;
+    if (!input.blobPathname.startsWith(expectedPrefix)) {
+      return NextResponse.json(
+        { error: "Path file Blob tidak diizinkan" },
+        { status: 403 }
+      );
+    }
+    const dup = await prisma.archive.findFirst({
+      where: { blobPathname: input.blobPathname, deletedAt: null },
+      select: { id: true },
+    });
+    if (dup) {
+      return NextResponse.json(
+        { error: "File Blob ini sudah terkait arsip lain" },
+        { status: 409 }
+      );
+    }
+  }
+  if (input.gdriveFileId) {
+    const dup = await prisma.archive.findFirst({
+      where: { gdriveFileId: input.gdriveFileId, deletedAt: null },
+      select: { id: true },
+    });
+    if (dup) {
+      return NextResponse.json(
+        { error: "File Drive ini sudah terkait arsip lain" },
+        { status: 409 }
+      );
+    }
+  }
 
   const isManualArchive = Boolean(input.manualNumber && input.manualNumber.trim().length > 0);
+  // OUTGOING + manual number + caller flagged isInsert = audit row as a
+  // sisipan. INCOMING also uses manualNumber but isn't a sisipan, so we
+  // only set the flag for OUTGOING.
+  const isInsertArchive =
+    input.direction !== "INCOMING" && isManualArchive && Boolean(input.isInsert);
   const hasFile = Boolean(input.fileUrl || input.fileDataUrl);
 
   // Status is always derived server-side.
@@ -248,6 +347,8 @@ export async function POST(req: Request) {
         gdriveFileId: input.gdriveFileId ?? null,
         fileDataUrl: input.fileUrl ? null : input.fileDataUrl ?? null,
         createdById: session.userId,
+        isInsert: isInsertArchive,
+        insertReason: isInsertArchive ? input.insertReason!.trim() : null,
       },
     });
 
@@ -265,6 +366,8 @@ export async function POST(req: Request) {
           status: created.status,
           unitCode: created.unitCode,
           letterTypeCode: created.letterTypeCode,
+          isInsert: created.isInsert,
+          insertReason: created.insertReason,
         },
         ip: clientIp(req),
         userAgent: req.headers.get("user-agent"),
@@ -275,73 +378,71 @@ export async function POST(req: Request) {
     return created;
   });
 
-  // Post-commit side effects (email + webhook) must not fail the request.
-  (async () => {
-    try {
-      if (archive.direction === "INCOMING") {
-        const admins = await prisma.user.findMany({
-          where: { unitId: archive.unitId, role: "ADMIN_UNIT", deletedAt: null },
-        });
-        const dateStr = new Date(archive.date).toLocaleDateString("id-ID", {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-        });
-        for (const a of admins) {
-          const msg = renderIncomingLetterEmail({
-            recipientName: a.name,
-            number: archive.number,
-            subject: archive.subject,
-            sender: archive.externalSender ?? archive.recipient,
-            date: dateStr,
-            appUrl: appUrl(req),
-            archiveId: archive.id,
-          });
-          await sendEmail({
-            to: a.email,
-            subject: `Surat masuk baru · ${archive.number}`,
-            html: msg.html,
-            text: msg.text,
-            tags: [{ name: "event", value: "incoming" }],
-          });
-        }
-      }
-      await fireWebhook({
-        event: "archive.created",
-        archiveId: archive.id,
-        number: archive.number,
-        subject: archive.subject,
-        direction: archive.direction,
-        status: archive.status,
-        unitCode: archive.unitCode,
-        letterTypeCode: archive.letterTypeCode,
-        externalSender: archive.externalSender,
-        recipient: archive.recipient,
-        date: archive.date.toISOString(),
-        createdAt: archive.createdAt.toISOString(),
+  // Post-commit side effects (email + webhook + Drive rename). Use
+  // waitUntil() so the Vercel serverless runtime keeps the function alive
+  // until they settle — a fire-and-forget IIFE without it gets terminated
+  // when the response is flushed and the work silently disappears.
+  runAfter("archive.created", async () => {
+    if (archive.direction === "INCOMING") {
+      const admins = await prisma.user.findMany({
+        where: { unitId: archive.unitId, role: "ADMIN_UNIT", deletedAt: null },
       });
-      // Auto-rename the Drive file to `{nomor}_{subject_slug}.{ext}` so
-      // operators browsing the Shared Drive directly can find letters by
-      // filename. Best-effort: failure does not affect the archive record.
-      if (archive.gdriveFileId) {
-        const newName = buildArchiveFilename({
+      const dateStr = new Date(archive.date).toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      });
+      for (const a of admins) {
+        const msg = renderIncomingLetterEmail({
+          recipientName: a.name,
           number: archive.number,
           subject: archive.subject,
-          originalFilename: archive.fileName,
+          sender: archive.externalSender ?? archive.recipient,
+          date: dateStr,
+          appUrl: appUrl(req),
+          archiveId: archive.id,
         });
-        const ok = await renameGdriveFile(archive.gdriveFileId, newName);
-        if (ok) {
-          await prisma.archive.update({
-            where: { id: archive.id },
-            data: { fileName: newName },
-          });
-        }
+        await sendEmail({
+          to: a.email,
+          subject: `Surat masuk baru · ${archive.number}`,
+          html: msg.html,
+          text: msg.text,
+          tags: [{ name: "event", value: "incoming" }],
+        });
       }
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error("[archives.POST] post-commit side effects failed", e);
     }
-  })();
+    await fireWebhook({
+      event: "archive.created",
+      archiveId: archive.id,
+      number: archive.number,
+      subject: archive.subject,
+      direction: archive.direction,
+      status: archive.status,
+      unitCode: archive.unitCode,
+      letterTypeCode: archive.letterTypeCode,
+      externalSender: archive.externalSender,
+      recipient: archive.recipient,
+      date: archive.date.toISOString(),
+      createdAt: archive.createdAt.toISOString(),
+    });
+    // Auto-rename the Drive file to `{nomor}_{subject_slug}.{ext}` so
+    // operators browsing the Shared Drive directly can find letters by
+    // filename. Best-effort: failure does not affect the archive record.
+    if (archive.gdriveFileId) {
+      const newName = buildArchiveFilename({
+        number: archive.number,
+        subject: archive.subject,
+        originalFilename: archive.fileName,
+      });
+      const ok = await renameGdriveFile(archive.gdriveFileId, newName);
+      if (ok) {
+        await prisma.archive.update({
+          where: { id: archive.id },
+          data: { fileName: newName },
+        });
+      }
+    }
+  });
 
   return NextResponse.json({ archive: serialiseArchive(archive) }, { status: 201 });
 }

@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate, toRoman } from "@/lib/utils";
-import { ArrowRight, FileStack, Hash, Building2, Users2, Inbox, Send, Clock } from "lucide-react";
+import { ArrowRight, FileStack, Hash, Building2, Users2, Inbox, Send, Clock, AlertTriangle } from "lucide-react";
 import { redirect } from "next/navigation";
 
 export default async function DashboardHome() {
@@ -71,6 +71,23 @@ export default async function DashboardHome() {
     prisma.unit.count({ where: { deletedAt: null } }),
     prisma.user.count({ where: { deletedAt: null } }),
   ]);
+
+  // Overdue (TechSpec 2.4): PENDING_PROOF that exceeded the 14-day window has
+  // already been auto-flipped to OVERDUE by the cron, but admins still need a
+  // banner so they don't have to scan the table to find them.
+  const overdueArchives = await prisma.archive.findMany({
+    where: { ...archiveScope, status: "OVERDUE" },
+    select: {
+      id: true,
+      number: true,
+      subject: true,
+      unitCode: true,
+      createdAt: true,
+      overdueMarkedAt: true,
+    },
+    orderBy: { createdAt: "asc" },
+    take: 10,
+  });
 
   const archivesByType = new Map<string, number>(
     typeBreakdown.map((b) => [b.letterTypeCode, b._count._all] as const)
@@ -149,6 +166,53 @@ export default async function DashboardHome() {
         </div>
       </div>
 
+      {overdueArchives.length > 0 && (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+            <div className="flex-1">
+              <h2 className="text-sm font-semibold text-destructive">
+                {overdueArchives.length} surat melewati batas 14 hari unggah bukti
+              </h2>
+              <p className="mt-0.5 text-xs text-destructive/90">
+                {session.role === "SUPER_ADMIN"
+                  ? "Surat-surat berikut sudah lewat batas waktu tanpa bukti. Tindak lanjuti unit terkait."
+                  : "Segera unggah bukti atau batalkan nomor (VOID). Status keterlambatan tetap tersimpan walaupun bukti diunggah belakangan."}
+              </p>
+              <ul className="mt-2 space-y-1 text-xs">
+                {overdueArchives.slice(0, 5).map((a) => (
+                  <li key={a.id} className="flex flex-wrap items-center gap-2">
+                    <code className="rounded bg-background px-1.5 py-0.5 font-semibold">{a.number}</code>
+                    <span className="text-muted-foreground">·</span>
+                    <span className="truncate">{a.subject}</span>
+                    {session.role === "SUPER_ADMIN" && (
+                      <>
+                        <span className="text-muted-foreground">·</span>
+                        <Badge variant="outline" className="font-normal">
+                          {a.unitCode}
+                        </Badge>
+                      </>
+                    )}
+                    <span className="text-muted-foreground">· dialokasikan {formatDate(a.createdAt)}</span>
+                  </li>
+                ))}
+                {overdueArchives.length > 5 && (
+                  <li className="italic text-muted-foreground">
+                    …dan {overdueArchives.length - 5} surat lain dengan status melewati batas.
+                  </li>
+                )}
+              </ul>
+              <Button asChild size="sm" variant="outline" className="mt-3">
+                <Link href="/dashboard/archives?status=OVERDUE">
+                  Buka daftar arsip melewati batas
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((s) => (
           <Card key={s.label}>
@@ -210,6 +274,8 @@ export default async function DashboardHome() {
                               ? "success"
                               : a.status === "PENDING" || a.status === "PENDING_PROOF"
                               ? "warning"
+                              : a.status === "OVERDUE" || a.status === "VOID"
+                              ? "destructive"
                               : "secondary"
                           }
                         >
@@ -219,6 +285,14 @@ export default async function DashboardHome() {
                             ? "Menunggu Persetujuan"
                             : a.status === "ISSUED"
                             ? "Terbit"
+                            : a.status === "OVERDUE"
+                            ? "Melewati Batas"
+                            : a.status === "VOID"
+                            ? "Dibatalkan"
+                            : a.status === "APPROVED"
+                            ? "Disetujui"
+                            : a.status === "DRAFT"
+                            ? "Draf"
                             : a.status}
                         </Badge>
                       </div>

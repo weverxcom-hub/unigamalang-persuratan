@@ -23,9 +23,27 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   });
   if (!archive) return NextResponse.json({ error: "Arsip tidak ditemukan" }, { status: 404 });
 
-  const canRead =
+  // Same-unit users can always read. Additionally, a user can read an
+  // archive that belongs to a different unit if they are a disposition
+  // recipient (either directly via toUserId, or via toUnitId == their unit)
+  // — without this, dispositions that cross unit boundaries are
+  // effectively unreachable for the recipient.
+  let canRead =
     session.role === "SUPER_ADMIN" ||
     (session.unitId && session.unitId === archive.unitId);
+  if (!canRead) {
+    const dispo = await prisma.disposition.findFirst({
+      where: {
+        archiveId: archive.id,
+        OR: [
+          { toUserId: session.userId },
+          ...(session.unitId ? [{ toUnitId: session.unitId }] : []),
+        ],
+      },
+      select: { id: true },
+    });
+    if (dispo) canRead = true;
+  }
   if (!canRead) return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
 
   return NextResponse.json({ archive: serialiseArchive(archive) });
