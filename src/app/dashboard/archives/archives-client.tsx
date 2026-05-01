@@ -52,7 +52,7 @@ import {
   uploadProofAsset,
   assetToProofBody,
   UploadError,
-  BLOB_MAX_BYTES,
+  GDRIVE_MAX_BYTES,
 } from "@/lib/upload-client";
 import { bundleProofFiles, isImageFile } from "@/lib/proof-bundle";
 
@@ -953,7 +953,7 @@ function ProofUploadDialog({
     // Reject any single file that exceeds the upload cap up front. The bundle
     // step (multi-image -> PDF) usually shrinks JPGs further, but we still
     // protect against absurd inputs.
-    const tooBig = incoming.find((f) => f.size > BLOB_MAX_BYTES * 5);
+    const tooBig = incoming.find((f) => f.size > GDRIVE_MAX_BYTES);
     if (tooBig) {
       setError(`File "${tooBig.name}" terlalu besar (>25MB).`);
       return;
@@ -1512,7 +1512,7 @@ function ManualArchiveDialog({
                 const picked = Array.from(e.target.files ?? []);
                 if (picked.length === 0) return;
                 setError(null);
-                const tooBig = picked.find((f) => f.size > BLOB_MAX_BYTES * 5);
+                const tooBig = picked.find((f) => f.size > GDRIVE_MAX_BYTES);
                 if (tooBig) {
                   setError(`File "${tooBig.name}" terlalu besar (>25MB).`);
                   e.target.value = "";
