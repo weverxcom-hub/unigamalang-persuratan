@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { SessionPayload } from "@/lib/types";
 import { ReportIssueDialog } from "@/components/app/report-issue-dialog";
+import { ThemeToggle } from "@/components/app/theme-toggle";
 
 interface NavItem {
   href: string;
@@ -208,6 +209,7 @@ export function DashboardShell({
             {/* PR-E (3.4): "Laporkan Masalah" — present on every page so users
                 can submit a bug report from where they hit it. Icon-only on
                 mobile/tablet to save the topbar real estate. */}
+            <ThemeToggle />
             <ReportIssueDialog session={session} className="hidden sm:inline-flex" />
             <ReportIssueDialog session={session} iconOnly className="sm:hidden" />
             <Button
