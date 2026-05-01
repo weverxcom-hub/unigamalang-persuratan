@@ -26,6 +26,7 @@ import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { SessionPayload } from "@/lib/types";
+import type { SidebarBadges } from "@/lib/sidebar-badges";
 import { ReportIssueDialog } from "@/components/app/report-issue-dialog";
 import { ThemeToggle } from "@/components/app/theme-toggle";
 
@@ -33,19 +34,29 @@ interface NavItem {
   href: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
+  /** Optional notification count rendered as a small red badge. Suppressed
+   *  when 0/undefined so the navigation looks clean for empty states. */
+  badge?: number;
 }
 
+// Reorganized into 3 logical groups (April 2026):
+//   1. "Aktivitas" — daily-use surat workflow (paling sering dipakai)
+//   2. "Akun" — info pribadi user + panduan
+//   3. "Pengaturan" / "Unit Saya" — admin-only management
+//
+// Panduan dipindah ke grup Akun karena lebih natural sebagai "hal pribadi"
+// (referensi user) ketimbang aktivitas operasional.
 const PRIMARY_NAV: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard/generate", label: "Buat Nomor Surat", icon: Hash },
   { href: "/dashboard/archives", label: "Pengarsipan", icon: FileStack },
-  { href: "/dashboard/generate", label: "Nomor Surat", icon: Hash },
   { href: "/dashboard/dispositions", label: "Disposisi", icon: Send },
-  { href: "/dashboard/panduan", label: "Panduan", icon: BookOpen },
 ];
 
 const ACCOUNT_NAV: NavItem[] = [
   { href: "/dashboard/profile", label: "Profil Saya", icon: UserCog },
   { href: "/dashboard/my-tickets", label: "Laporan Saya", icon: LifeBuoy },
+  { href: "/dashboard/panduan", label: "Panduan", icon: BookOpen },
 ];
 
 // Items shown only to ADMIN_UNIT (not SUPER_ADMIN, who has the full ADMIN_NAV).
@@ -57,13 +68,45 @@ const ADMIN_UNIT_NAV: NavItem[] = [
   },
 ];
 
-const ADMIN_NAV: NavItem[] = [
-  { href: "/dashboard/users", label: "Akun Pengguna", icon: Users },
+// Superadmin pengaturan, dipisah lagi jadi 2 sub-grup:
+//   - Master Data: Unit, Jenis Surat, Akun Pengguna
+//   - Sistem: Audit Log, Tiket Laporan
+// Tapi karena SidebarSection cuma 1-level, kita render dengan label yang
+// berbeda untuk visual grouping.
+const MASTER_DATA_NAV: NavItem[] = [
   { href: "/dashboard/units", label: "Unit", icon: Building2 },
   { href: "/dashboard/letter-types", label: "Jenis Surat", icon: FileType },
-  { href: "/dashboard/audit", label: "Audit Log", icon: History },
-  { href: "/dashboard/tickets", label: "Tiket Laporan", icon: Inbox },
+  { href: "/dashboard/users", label: "Akun Pengguna", icon: Users },
 ];
+
+const SYSTEM_NAV: NavItem[] = [
+  { href: "/dashboard/tickets", label: "Tiket Laporan", icon: Inbox },
+  { href: "/dashboard/audit", label: "Audit Log", icon: History },
+];
+
+// Apply notification badges from server-fetched counters to the nav items by
+// matching href. Returns a new array; doesn't mutate the source.
+function applyBadges(
+  items: NavItem[],
+  badges: SidebarBadges,
+  session: SessionPayload
+): NavItem[] {
+  const isSuper = session.role === "SUPER_ADMIN";
+  return items.map((it) => {
+    switch (it.href) {
+      case "/dashboard/archives":
+        return { ...it, badge: badges.pendingArchives };
+      case "/dashboard/dispositions":
+        return { ...it, badge: badges.pendingDispositions };
+      case "/dashboard/tickets":
+        return isSuper ? { ...it, badge: badges.openTickets } : it;
+      case "/dashboard/my-tickets":
+        return !isSuper ? { ...it, badge: badges.openTickets } : it;
+      default:
+        return it;
+    }
+  });
+}
 
 const COLLAPSED_KEY = "uniga.sidebar.collapsed";
 
@@ -85,11 +128,23 @@ function isItemActive(pathname: string, href: string): boolean {
 
 export function DashboardShell({
   session,
+  badges,
   children,
 }: {
   session: SessionPayload;
+  badges?: SidebarBadges;
   children: React.ReactNode;
 }) {
+  const safeBadges: SidebarBadges = badges ?? {
+    pendingArchives: 0,
+    pendingDispositions: 0,
+    openTickets: 0,
+  };
+  const primaryNav = applyBadges(PRIMARY_NAV, safeBadges, session);
+  const accountNav = applyBadges(ACCOUNT_NAV, safeBadges, session);
+  const adminUnitNav = applyBadges(ADMIN_UNIT_NAV, safeBadges, session);
+  const masterDataNav = applyBadges(MASTER_DATA_NAV, safeBadges, session);
+  const systemNav = applyBadges(SYSTEM_NAV, safeBadges, session);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const router = useRouter();
@@ -148,29 +203,43 @@ export function DashboardShell({
       >
         <SidebarHeader collapsed={collapsed} onClose={() => setMobileOpen(false)} />
         <nav className="flex-1 overflow-y-auto px-2 py-3">
-          <SidebarSection collapsed={collapsed} items={PRIMARY_NAV} onNavigate={() => setMobileOpen(false)} />
+          <SidebarSection
+            title="Aktivitas"
+            collapsed={collapsed}
+            items={primaryNav}
+            onNavigate={() => setMobileOpen(false)}
+          />
           <SidebarSection
             title="Akun"
             icon={UserCog}
             collapsed={collapsed}
-            items={ACCOUNT_NAV}
+            items={accountNav}
             onNavigate={() => setMobileOpen(false)}
           />
           {canManage && (
-            <SidebarSection
-              title="Pengaturan"
-              icon={Settings}
-              collapsed={collapsed}
-              items={ADMIN_NAV}
-              onNavigate={() => setMobileOpen(false)}
-            />
+            <>
+              <SidebarSection
+                title="Master Data"
+                icon={Settings}
+                collapsed={collapsed}
+                items={masterDataNav}
+                onNavigate={() => setMobileOpen(false)}
+              />
+              <SidebarSection
+                title="Sistem"
+                icon={Settings}
+                collapsed={collapsed}
+                items={systemNav}
+                onNavigate={() => setMobileOpen(false)}
+              />
+            </>
           )}
           {isAdminUnit && (
             <SidebarSection
               title="Unit Saya"
               icon={Settings}
               collapsed={collapsed}
-              items={ADMIN_UNIT_NAV}
+              items={adminUnitNav}
               onNavigate={() => setMobileOpen(false)}
             />
           )}
@@ -242,6 +311,17 @@ export function DashboardShell({
   );
 }
 
+function NotificationBadge({ count }: { count: number }) {
+  return (
+    <span
+      className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-semibold leading-none text-destructive-foreground"
+      aria-label={`${count} notifikasi belum diproses`}
+    >
+      {count > 99 ? "99+" : count}
+    </span>
+  );
+}
+
 function SidebarHeader({ collapsed, onClose }: { collapsed: boolean; onClose: () => void }) {
   return (
     <div className="flex h-14 items-center gap-2 border-b px-3">
@@ -310,7 +390,7 @@ function SidebarSection({
                 href={item.href}
                 onClick={onNavigate}
                 className={cn(
-                  "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  "group relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                   collapsed && "justify-center px-2",
                   active
                     ? "bg-primary/10 text-primary"
@@ -319,7 +399,22 @@ function SidebarSection({
                 title={collapsed ? item.label : undefined}
               >
                 <Icon className="h-4 w-4 flex-shrink-0" />
-                {!collapsed && <span className="truncate">{item.label}</span>}
+                {!collapsed && (
+                  <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
+                    <span className="truncate">{item.label}</span>
+                    {item.badge != null && item.badge > 0 ? (
+                      <NotificationBadge count={item.badge} />
+                    ) : null}
+                  </span>
+                )}
+                {collapsed && item.badge != null && item.badge > 0 ? (
+                  <span
+                    className="absolute right-1 top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold leading-none text-destructive-foreground"
+                    aria-label={`${item.badge} notifikasi belum diproses`}
+                  >
+                    {item.badge > 99 ? "99+" : item.badge}
+                  </span>
+                ) : null}
               </Link>
             </li>
           );
