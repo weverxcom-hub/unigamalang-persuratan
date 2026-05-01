@@ -5,7 +5,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { upload } from "@vercel/blob/client";
-import { LifeBuoy, Loader2, X } from "lucide-react";
+import { CheckCircle2, LifeBuoy, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -211,16 +211,40 @@ export function ReportIssueDialog({
           </DialogDescription>
         </DialogHeader>
         {success ? (
-          <div className="space-y-3 py-4">
-            <p className="rounded-md bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-400">
-              Laporan berhasil dikirim. Pantau status di halaman <strong>Laporan Saya</strong>.
-            </p>
+          // Awam-friendly confirmation: jangan auto-close, beri ikon besar dan
+          // copy yang eksplisit supaya user awam tidak ragu apakah laporan
+          // sudah masuk. Mereka harus klik tombol "Tutup" sendiri untuk
+          // menutup dialog (tidak ada timeout).
+          <div className="space-y-4 py-6">
+            <div className="flex flex-col items-center gap-3 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/15">
+                <CheckCircle2 className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-lg font-semibold text-emerald-700 dark:text-emerald-400">
+                  Laporan berhasil dikirim ke superadmin
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Tim akan meninjau laporan Anda. Anda dapat memantau status
+                  balasan kapan saja di halaman <strong>Laporan Saya</strong>.
+                </p>
+              </div>
+            </div>
             {warning && (
               <p className="rounded-md bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
                 {warning}
               </p>
             )}
-            <DialogFooter>
+            <DialogFooter className="sm:justify-center">
+              <Button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  router.push("/dashboard/my-tickets");
+                }}
+              >
+                Buka Laporan Saya
+              </Button>
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                 Tutup
               </Button>
