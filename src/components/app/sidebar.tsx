@@ -21,6 +21,7 @@ import {
   LifeBuoy,
   Inbox,
   Send,
+  FileBarChart2,
 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,7 @@ const PRIMARY_NAV: NavItem[] = [
   { href: "/dashboard/generate", label: "Buat Nomor Surat", icon: Hash },
   { href: "/dashboard/archives", label: "Pengarsipan", icon: FileStack },
   { href: "/dashboard/dispositions", label: "Disposisi", icon: Send },
+  { href: "/dashboard/reports", label: "Laporan", icon: FileBarChart2 },
 ];
 
 const ACCOUNT_NAV: NavItem[] = [
