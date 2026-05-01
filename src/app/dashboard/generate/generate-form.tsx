@@ -12,7 +12,7 @@ import {
   uploadProofAsset,
   assetToProofBody,
   UploadError,
-  BLOB_MAX_BYTES,
+  GDRIVE_MAX_BYTES,
 } from "@/lib/upload-client";
 import { splitTemplate } from "@/lib/format";
 import { pad3 } from "@/lib/utils";
@@ -274,8 +274,15 @@ export function GenerateForm({
       setProofPreviewUrl(null);
       return;
     }
-    if (file.size > BLOB_MAX_BYTES) {
-      setUploadError("Ukuran file melebihi 5MB. Mohon perkecil atau kompres foto.");
+    // Pipeline upload mencoba Google Drive dulu (cap 25MB), baru fallback
+    // ke Vercel Blob (cap 5MB) jika Drive tidak terkonfigurasi. Form gating
+    // pakai cap Drive supaya kamera HP modern (foto 8-15MB) bisa diunggah.
+    // Kalau ternyata Drive tidak aktif dan file > 5MB, upload-client akan
+    // throw runtime error yang lebih spesifik.
+    if (file.size > GDRIVE_MAX_BYTES) {
+      setUploadError(
+        `Ukuran file melebihi ${Math.floor(GDRIVE_MAX_BYTES / 1024 / 1024)}MB. Mohon perkecil atau kompres foto.`
+      );
       setProofFile(null);
       setProofPreviewUrl(null);
       return;
@@ -387,7 +394,7 @@ export function GenerateForm({
             </div>
             <p className="text-sm text-muted-foreground">
               Ambil foto atau unggah scan surat yang sudah ditandatangani. File gambar (PNG/JPG/WEBP) atau PDF,
-              maksimal 5MB.
+              maksimal 25MB.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <label
