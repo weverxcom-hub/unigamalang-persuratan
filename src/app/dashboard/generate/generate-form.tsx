@@ -12,7 +12,7 @@ import {
   uploadProofAsset,
   assetToProofBody,
   UploadError,
-  BLOB_MAX_BYTES,
+  GDRIVE_MAX_BYTES,
 } from "@/lib/upload-client";
 import { splitTemplate } from "@/lib/format";
 import { pad3 } from "@/lib/utils";
@@ -246,9 +246,28 @@ export function GenerateForm({
           insertReason: isInsert ? insertReason.trim() : undefined,
         }),
       });
-      const data = await res.json();
+      // The server may return non-JSON in failure modes (e.g. a Vercel timeout
+      // page or a Next.js HTML error page when an unhandled exception bubbles
+      // up). Read raw text first so we can surface a useful diagnostic instead
+      // of swallowing the failure as "kesalahan jaringan".
+      const rawText = await res.text();
+      let data: { archive?: AllocatedArchive; error?: string } = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch {
+        // eslint-disable-next-line no-console
+        console.error("[generate] non-JSON response", res.status, rawText.slice(0, 500));
+        setError(
+          `Server mengembalikan respons tidak valid (HTTP ${res.status}). Coba ulang atau hubungi superadmin.`
+        );
+        return;
+      }
       if (!res.ok) {
-        setError(data.error || "Gagal membuat nomor surat");
+        setError(data.error || `Gagal membuat nomor surat (HTTP ${res.status})`);
+        return;
+      }
+      if (!data.archive) {
+        setError("Server mengembalikan data tidak lengkap. Coba ulang.");
         return;
       }
       setAllocated({
@@ -259,8 +278,14 @@ export function GenerateForm({
         fileName: data.archive.fileName,
         fileDataUrl: data.archive.fileDataUrl,
       });
-    } catch {
-      setError("Terjadi kesalahan jaringan");
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error("[generate] fetch failed", e);
+      setError(
+        e instanceof Error
+          ? `Terjadi kesalahan jaringan: ${e.message}`
+          : "Terjadi kesalahan jaringan"
+      );
     } finally {
       setSubmitting(false);
     }
@@ -274,8 +299,15 @@ export function GenerateForm({
       setProofPreviewUrl(null);
       return;
     }
-    if (file.size > BLOB_MAX_BYTES) {
-      setUploadError("Ukuran file melebihi 5MB. Mohon perkecil atau kompres foto.");
+    // Pipeline upload mencoba Google Drive dulu (cap 25MB), baru fallback
+    // ke Vercel Blob (cap 5MB) jika Drive tidak terkonfigurasi. Form gating
+    // pakai cap Drive supaya kamera HP modern (foto 8-15MB) bisa diunggah.
+    // Kalau ternyata Drive tidak aktif dan file > 5MB, upload-client akan
+    // throw runtime error yang lebih spesifik.
+    if (file.size > GDRIVE_MAX_BYTES) {
+      setUploadError(
+        `Ukuran file melebihi ${Math.floor(GDRIVE_MAX_BYTES / 1024 / 1024)}MB. Mohon perkecil atau kompres foto.`
+      );
       setProofFile(null);
       setProofPreviewUrl(null);
       return;
@@ -387,7 +419,7 @@ export function GenerateForm({
             </div>
             <p className="text-sm text-muted-foreground">
               Ambil foto atau unggah scan surat yang sudah ditandatangani. File gambar (PNG/JPG/WEBP) atau PDF,
-              maksimal 5MB.
+              maksimal 25MB.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <label
