@@ -5,15 +5,29 @@ import { Logo } from "@/components/brand/logo";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SiteFooter } from "@/components/app/footer";
 import { LoginForm } from "./login-form";
+import { SSOButton } from "./sso-button";
 import { getSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
+
+function getSSOLoginUrl(): string | null {
+  const baseUrl = process.env.SSO_BASE_URL;
+  const clientId = process.env.SSO_CLIENT_ID;
+  const redirectUri = process.env.SSO_REDIRECT_URI;
+  if (!baseUrl || !clientId || !redirectUri) return null;
+  const url = new URL("/authorize", baseUrl);
+  url.searchParams.set("client_id", clientId);
+  url.searchParams.set("redirect_uri", redirectUri);
+  return url.toString();
+}
 
 export default async function LoginPage() {
   // Already-active session => skip the form. getSession also rejects
   // soft-deleted users so they fall through to the form (and won't loop).
   const session = await getSession();
   if (session) redirect("/dashboard");
+
+  const ssoUrl = getSSOLoginUrl();
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-background via-background to-primary/5">
@@ -32,6 +46,19 @@ export default async function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {ssoUrl && (
+              <>
+                <SSOButton ssoUrl={ssoUrl} />
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">atau login langsung</span>
+                  </div>
+                </div>
+              </>
+            )}
             <Suspense fallback={<div className="h-40" />}>
               <LoginForm />
             </Suspense>
