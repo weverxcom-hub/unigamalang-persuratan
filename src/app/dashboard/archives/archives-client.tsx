@@ -58,8 +58,8 @@ import { bundleProofFiles, isImageFile } from "@/lib/proof-bundle";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface Props {
-  units: { id: string; code: string; name: string; formatTemplate?: string }[];
-  letterTypes: { id: string; code: string; name: string }[];
+  units: { id: string; code: string; name: string; formatTemplate?: string; allowedLetterTypeIds?: string[] }[];
+  letterTypes: { id: string; code: string; name: string; scope?: "GLOBAL" | "UNIT_SPECIFIC" }[];
   role: Role;
   sessionUnitId: string | null;
   sessionUserId: string;
@@ -1303,8 +1303,8 @@ function ProofViewDialog({
 interface DialogProps {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  units: { id: string; code: string; name: string }[];
-  letterTypes: { id: string; code: string; name: string }[];
+  units: { id: string; code: string; name: string; allowedLetterTypeIds?: string[] }[];
+  letterTypes: { id: string; code: string; name: string; scope?: "GLOBAL" | "UNIT_SPECIFIC" }[];
   defaultUnitId: string;
   canChooseUnit: boolean;
   sessionUserId: string;
@@ -1335,14 +1335,35 @@ function ManualArchiveDialog({
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // TechSpec 3.1: filter letter types by unit scope. GLOBAL letter types are
+  // always visible; UNIT_SPECIFIC types only appear when the selected unit is
+  // in the letter type's allowlist.
+  const selectedUnit = useMemo(() => units.find((u) => u.id === unitId), [units, unitId]);
+  const visibleLetterTypes = useMemo(() => {
+    const allowed = new Set(selectedUnit?.allowedLetterTypeIds ?? []);
+    return letterTypes.filter(
+      (lt) => (lt.scope ?? "GLOBAL") === "GLOBAL" || allowed.has(lt.id)
+    );
+  }, [letterTypes, selectedUnit]);
+
+  // Reset letter type selection when unit changes and current selection is no
+  // longer visible (e.g. UNIT_SPECIFIC type not available for new unit).
+  useEffect(() => {
+    if (visibleLetterTypes.length > 0 && !visibleLetterTypes.some((lt) => lt.id === letterTypeId)) {
+      const preferredCodes = ["UMUM", "SP", "UND"];
+      const preferred = visibleLetterTypes.find((lt) => preferredCodes.includes(lt.code));
+      setLetterTypeId(preferred?.id ?? visibleLetterTypes[0].id);
+    }
+  }, [visibleLetterTypes, letterTypeId]);
+
   useEffect(() => {
     if (open) {
       setUnitId(defaultUnitId);
       // Default to a "generic" letter type if one exists (UMUM/UND/SP) so
       // INCOMING tidak memaksa user memilih klasifikasi yang tidak mereka tahu.
       const preferredCodes = ["UMUM", "SP", "UND"];
-      const preferred = letterTypes.find((lt) => preferredCodes.includes(lt.code));
-      setLetterTypeId(preferred?.id ?? letterTypes[0]?.id ?? "");
+      const preferred = visibleLetterTypes.find((lt) => preferredCodes.includes(lt.code));
+      setLetterTypeId(preferred?.id ?? visibleLetterTypes[0]?.id ?? "");
       setManualNumber("");
       setDirection("INCOMING");
       setSubject("");
@@ -1354,7 +1375,7 @@ function ManualArchiveDialog({
       setFiles([]);
       setError(null);
     }
-  }, [open, defaultUnitId, letterTypes, defaultRecipientLabel]);
+  }, [open, defaultUnitId, visibleLetterTypes, defaultRecipientLabel]);
 
   // When user toggles direction, reset recipient to a sensible default.
   useEffect(() => {
@@ -1564,7 +1585,7 @@ function ManualArchiveDialog({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {letterTypes.map((lt) => (
+                    {visibleLetterTypes.map((lt) => (
                       <SelectItem key={lt.id} value={lt.id}>
                         {lt.code} &mdash; {lt.name}
                       </SelectItem>
