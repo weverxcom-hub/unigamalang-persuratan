@@ -1,16 +1,36 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { ALLOWED_EMAIL_DOMAIN, isAllowedEmail, registerUser, setSessionCookie, toSessionPayload } from "@/lib/auth";
+import { checkRegisterRate, rateLimitResponse } from "@/lib/rate-limit";
+import { PASSWORD_REGEX, PASSWORD_HINT } from "@/lib/password-policy";
 
 const schema = z.object({
   name: z.string().min(2, "Nama minimal 2 karakter"),
   email: z.string().email(),
-  password: z.string().min(8, "Kata sandi minimal 8 karakter"),
+  password: z.string().min(8, "Kata sandi minimal 8 karakter").regex(PASSWORD_REGEX, PASSWORD_HINT),
   // Empty string => null so an unselected unit picker doesn't trip FK P2003.
   unitId: z.preprocess((v) => (v === "" ? null : v), z.string().nullable().optional()),
 });
 
+/**
+ * Self-registration can be disabled by setting REGISTRATION_DISABLED=true
+ * in the environment. When disabled, only Super Admin can create accounts
+ * (via /api/users POST). This is the recommended setting for production.
+ */
+const REGISTRATION_DISABLED = process.env.REGISTRATION_DISABLED === "true";
+
 export async function POST(req: Request) {
+  if (REGISTRATION_DISABLED) {
+    return NextResponse.json(
+      { error: "Pendaftaran mandiri dinonaktifkan. Hubungi Super Admin untuk pembuatan akun." },
+      { status: 403 }
+    );
+  }
+
+  // Rate limiting: 5 attempts per IP per hour
+  const rl = checkRegisterRate(req);
+  if (!rl.allowed) return rateLimitResponse(rl);
+
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) {

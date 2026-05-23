@@ -6,10 +6,33 @@ import { prisma } from "./prisma";
 import type { Role, SessionPayload } from "./types";
 import type { User as PrismaUser } from "@prisma/client";
 
+const DEFAULT_DEV_SECRET = "unigamalang-dev-secret-change-me-in-production-0123456789";
+
 const SECRET = new TextEncoder().encode(
-  process.env.AUTH_SECRET || "unigamalang-dev-secret-change-me-in-production-0123456789"
+  process.env.AUTH_SECRET || DEFAULT_DEV_SECRET
 );
 const COOKIE_NAME = "unigamalang_session";
+
+/**
+ * Validate AUTH_SECRET at runtime (not at module load / build time).
+ * Called once on the first auth request.
+ */
+let _secretValidated = false;
+function validateSecret() {
+  if (_secretValidated) return;
+  _secretValidated = true;
+  // Skip during `next build` (NEXT_PHASE is set by Next.js during builds)
+  if (process.env.NEXT_PHASE === "phase-production-build") return;
+  if (
+    process.env.NODE_ENV === "production" &&
+    (!process.env.AUTH_SECRET || process.env.AUTH_SECRET === DEFAULT_DEV_SECRET)
+  ) {
+    throw new Error(
+      "[FATAL] AUTH_SECRET tidak boleh kosong atau menggunakan nilai default di production. " +
+      "Set AUTH_SECRET ke random string >=32 karakter di environment variables."
+    );
+  }
+}
 const EMAIL_DOMAIN = "@unigamalang.ac.id";
 
 export function isAllowedEmail(email: string): boolean {
@@ -39,6 +62,7 @@ export async function verifySession(token: string): Promise<SessionPayload | nul
 // component that needs the session re-runs the same Neon query.
 export const getSession = cache(
   async (): Promise<SessionPayload | null> => {
+    validateSecret();
     const token = cookies().get(COOKIE_NAME)?.value;
     if (!token) return null;
     const payload = await verifySession(token);

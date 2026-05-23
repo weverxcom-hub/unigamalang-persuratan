@@ -23,6 +23,7 @@ import {
 import { formatDate } from "@/lib/utils";
 import type { Unit } from "@/lib/types";
 import { Plus, Pencil, Trash2, Printer, RotateCcw, Hash } from "lucide-react";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface Props {
   initialUnits: Unit[];
@@ -42,9 +43,10 @@ export function UnitsClient({ initialUnits, initialInactive = [] }: Props) {
   const [editing, setEditing] = useState<Unit | null>(null);
   const [deleting, setDeleting] = useState<Unit | null>(null);
   const [setLastFor, setSetLastFor] = useState<Unit | null>(null);
+  const [reactivateTarget, setReactivateTarget] = useState<Unit | null>(null);
+  const [reactivateError, setReactivateError] = useState<string | null>(null);
 
-  async function reactivate(u: Unit) {
-    if (!confirm(`Aktifkan kembali unit ${u.code} (${u.name})?`)) return;
+  async function doReactivate(u: Unit) {
     const res = await fetch(`/api/units/${u.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -52,11 +54,12 @@ export function UnitsClient({ initialUnits, initialInactive = [] }: Props) {
     });
     const data = await res.json();
     if (!res.ok) {
-      alert(data.error || "Gagal mengaktifkan kembali");
+      setReactivateError(data.error || "Gagal mengaktifkan kembali");
       return;
     }
     setInactive((prev) => prev.filter((x) => x.id !== u.id));
     setUnits((prev) => [...prev, data.unit].sort((a, b) => a.code.localeCompare(b.code)));
+    setReactivateTarget(null);
   }
 
   async function onCreate(e: React.FormEvent) {
@@ -226,7 +229,7 @@ export function UnitsClient({ initialUnits, initialInactive = [] }: Props) {
                   <Badge variant="outline">{u.code}</Badge>
                   <span className="text-muted-foreground">{u.name}</span>
                 </div>
-                <Button size="sm" variant="ghost" onClick={() => reactivate(u)}>
+                <Button size="sm" variant="ghost" onClick={() => setReactivateTarget(u)}>
                   <RotateCcw className="h-3.5 w-3.5" />
                   Aktifkan kembali
                 </Button>
@@ -265,6 +268,29 @@ export function UnitsClient({ initialUnits, initialInactive = [] }: Props) {
           unit={setLastFor}
           onClose={() => setSetLastFor(null)}
         />
+      )}
+
+      <ConfirmDialog
+        open={!!reactivateTarget}
+        onOpenChange={(open) => !open && setReactivateTarget(null)}
+        title="Aktifkan Kembali Unit"
+        description={reactivateTarget ? `Aktifkan kembali unit ${reactivateTarget.code} (${reactivateTarget.name})?` : ""}
+        confirmLabel="Ya, Aktifkan"
+        onConfirm={() => reactivateTarget && doReactivate(reactivateTarget)}
+      />
+
+      {reactivateError && (
+        <Dialog open={!!reactivateError} onOpenChange={() => setReactivateError(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Gagal Mengaktifkan</DialogTitle>
+              <DialogDescription>{reactivateError}</DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button onClick={() => setReactivateError(null)}>Tutup</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

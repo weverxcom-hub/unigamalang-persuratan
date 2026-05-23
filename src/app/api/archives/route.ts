@@ -114,14 +114,31 @@ export async function GET(req: Request) {
   }
   if (Object.keys(dateFilter).length > 0) where.date = dateFilter;
 
-  const archives = await prisma.archive.findMany({
-    where,
-    orderBy: { date: "desc" },
-    take: 500,
-  });
+  // Pagination: ?page=1&pageSize=50 (default 50, max 200)
+  const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
+  const pageSize = Math.min(200, Math.max(1, Number(url.searchParams.get("pageSize")) || 50));
+  const skip = (page - 1) * pageSize;
+
+  const [archives, total] = await Promise.all([
+    prisma.archive.findMany({
+      where,
+      orderBy: { date: "desc" },
+      skip,
+      take: pageSize,
+    }),
+    prisma.archive.count({ where }),
+  ]);
 
   const lightweight: ArchiveListItem[] = archives.map(serialiseArchiveList);
-  return NextResponse.json({ archives: lightweight });
+  return NextResponse.json({
+    archives: lightweight,
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+    },
+  });
 }
 
 // -------------------------------------------------------------------------
@@ -372,7 +389,20 @@ async function postImpl(req: Request) {
         fileUrl: input.fileUrl ?? null,
         blobPathname: input.blobPathname ?? null,
         gdriveFileId: input.gdriveFileId ?? null,
-        fileDataUrl: input.fileUrl ? null : input.fileDataUrl ?? null,
+        // DEPRECATED: inline base64 storage inflates DB size. This fallback
+        // is kept for backward compatibility but should be removed once all
+        // clients use Blob/GDrive uploads. See issue D5.
+        fileDataUrl: (() => {
+          if (input.fileUrl) return null;
+          if (input.fileDataUrl) {
+            console.warn(
+              "[DEPRECATED] Archive created with inline base64 fileDataUrl. " +
+              "Migrate to Blob/GDrive upload. archiveId will be logged post-create."
+            );
+            return input.fileDataUrl;
+          }
+          return null;
+        })(),
         createdById: session.userId,
         isInsert: isInsertArchive,
         insertReason: isInsertArchive ? input.insertReason!.trim() : null,

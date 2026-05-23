@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
+const DEFAULT_DEV_SECRET = "unigamalang-dev-secret-change-me-in-production-0123456789";
+
 const SECRET = new TextEncoder().encode(
-  process.env.AUTH_SECRET || "unigamalang-dev-secret-change-me-in-production-0123456789"
+  process.env.AUTH_SECRET || DEFAULT_DEV_SECRET
 );
 const COOKIE_NAME = "unigamalang_session";
 
@@ -19,6 +21,37 @@ async function isValidSession(token: string | undefined): Promise<boolean> {
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  // ── CSRF protection: verify Origin / Referer on state-changing requests ──
+  // sameSite=lax covers most CSRF vectors, but explicit Origin checking adds
+  // defense-in-depth for API mutations.
+  if (
+    pathname.startsWith("/api/") &&
+    req.method !== "GET" &&
+    req.method !== "HEAD" &&
+    req.method !== "OPTIONS"
+  ) {
+    const origin = req.headers.get("origin");
+    const host = req.headers.get("host");
+    if (origin && host) {
+      try {
+        const originHost = new URL(origin).host;
+        if (originHost !== host) {
+          return NextResponse.json(
+            { error: "Permintaan lintas asal tidak diizinkan" },
+            { status: 403 }
+          );
+        }
+      } catch {
+        return NextResponse.json(
+          { error: "Header Origin tidak valid" },
+          { status: 403 }
+        );
+      }
+    }
+  }
+
+  // ── Auth guard ──
   const token = req.cookies.get(COOKIE_NAME)?.value;
   const valid = await isValidSession(token);
 
@@ -41,5 +74,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/register", "/auth/:path*"],
+  matcher: ["/dashboard/:path*", "/login", "/register", "/auth/:path*", "/api/:path*"],
 };
