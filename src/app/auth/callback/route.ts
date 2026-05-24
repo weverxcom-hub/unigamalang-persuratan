@@ -48,6 +48,12 @@ export async function GET(req: NextRequest) {
     // Create local session
     await setSessionCookie(toSessionPayload(user));
 
+    // SSO auto-created users have no unit assigned — redirect to setup page
+    // so they can choose their unit before accessing the dashboard.
+    if (!user.unitId) {
+      return NextResponse.redirect(new URL("/setup-unit", req.nextUrl.origin));
+    }
+
     return NextResponse.redirect(new URL("/dashboard", req.nextUrl.origin));
   } catch (error) {
     console.error("SSO callback error:", error);

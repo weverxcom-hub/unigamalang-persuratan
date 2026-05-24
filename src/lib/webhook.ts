@@ -13,6 +13,15 @@ const SIGNING_SECRET = process.env.WEBHOOK_SIGNING_SECRET ?? "";
 
 export const WEBHOOK_AVAILABLE = !!TARGET_URL;
 
+/** Max retry attempts for failed webhook deliveries */
+const MAX_RETRIES = 3;
+/** Base delay for exponential backoff (ms): 1s, 2s, 4s */
+const BASE_DELAY_MS = 1000;
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export interface WebhookPayload {
   event: string;
   archiveId?: string;
@@ -63,42 +72,87 @@ export async function fireWebhook(
       return;
     }
 
-    let res: Response | null = null;
-    let fetchError: unknown = null;
-    try {
-      res = await fetch(TARGET_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Signature": signature,
-          "X-Signature-Algorithm": "sha256",
-          "X-Event": payload.event,
-        },
-        body,
-      });
-    } catch (e) {
-      fetchError = e;
-    }
+    // Retry loop with exponential backoff (1s, 2s, 4s)
+    let lastError: string | null = null;
+    let lastStatus: number | null = null;
+    let succeeded = false;
 
-    if (res) {
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      if (attempt > 0) {
+        await delay(BASE_DELAY_MS * Math.pow(2, attempt - 1));
+      }
+
+      let res: Response | null = null;
+      try {
+        res = await fetch(TARGET_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Signature": signature,
+            "X-Signature-Algorithm": "sha256",
+            "X-Event": payload.event,
+          },
+          body,
+        });
+      } catch (e) {
+        lastError = e instanceof Error ? e.message : String(e);
+        lastStatus = null;
+        // Increment attempt counter in DB
+        await client.webhookDelivery.update({
+          where: { id: row.id },
+          data: { attempts: { increment: 1 }, lastError },
+        }).catch(() => {});
+        continue;
+      }
+
+      lastStatus = res.status;
+      if (res.ok) {
+        succeeded = true;
+        await client.webhookDelivery.update({
+          where: { id: row.id },
+          data: {
+            status: "SUCCESS",
+            responseStatus: res.status,
+            lastError: null,
+            attempts: { increment: 1 },
+          },
+        });
+        break;
+      }
+
+      // Non-retryable status codes (4xx except 429)
+      if (res.status >= 400 && res.status < 500 && res.status !== 429) {
+        lastError = await res.text().catch(() => `HTTP ${res!.status}`);
+        await client.webhookDelivery.update({
+          where: { id: row.id },
+          data: {
+            status: "FAILED",
+            responseStatus: res.status,
+            lastError,
+            attempts: { increment: 1 },
+          },
+        });
+        break;
+      }
+
+      // Retryable failure (5xx or 429)
+      lastError = await res.text().catch(() => `HTTP ${res!.status}`);
       await client.webhookDelivery.update({
         where: { id: row.id },
-        data: {
-          status: res.ok ? "SUCCESS" : "FAILED",
-          responseStatus: res.status,
-          lastError: res.ok ? null : await res.text().catch(() => null),
-          attempts: { increment: 1 },
-        },
-      });
-    } else {
+        data: { attempts: { increment: 1 }, lastError },
+      }).catch(() => {});
+    }
+
+    // Final status update if all retries exhausted
+    if (!succeeded && lastError) {
       await client.webhookDelivery.update({
         where: { id: row.id },
         data: {
           status: "FAILED",
-          lastError: fetchError instanceof Error ? fetchError.message : String(fetchError),
-          attempts: { increment: 1 },
+          responseStatus: lastStatus,
+          lastError: `[after ${MAX_RETRIES} attempts] ${lastError}`,
         },
-      });
+      }).catch(() => {});
     }
   } catch (e) {
     // Last-resort safety net: if the row create/update itself failed (e.g. DB

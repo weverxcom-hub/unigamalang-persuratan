@@ -34,16 +34,25 @@ export async function GET(req: Request) {
     where.requestedById = session.userId;
   }
 
-  const rows = await prisma.letterTypeRequest.findMany({
-    where,
-    orderBy: [{ status: "asc" }, { createdAt: "desc" }],
-    include: {
-      unit: { select: { id: true, code: true, name: true } },
-      requestedBy: { select: { id: true, name: true, email: true } },
-      reviewedBy: { select: { id: true, name: true, email: true } },
-    },
-    take: 200,
-  });
+  // Pagination: ?page=1&pageSize=50 (default 50, max 200)
+  const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
+  const pageSize = Math.min(200, Math.max(1, Number(url.searchParams.get("pageSize")) || 50));
+  const skip = (page - 1) * pageSize;
+
+  const [rows, total] = await Promise.all([
+    prisma.letterTypeRequest.findMany({
+      where,
+      orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+      include: {
+        unit: { select: { id: true, code: true, name: true } },
+        requestedBy: { select: { id: true, name: true, email: true } },
+        reviewedBy: { select: { id: true, name: true, email: true } },
+      },
+      skip,
+      take: pageSize,
+    }),
+    prisma.letterTypeRequest.count({ where }),
+  ]);
 
   return NextResponse.json({
     requests: rows.map((r) => ({
@@ -61,6 +70,12 @@ export async function GET(req: Request) {
       createdAt: r.createdAt.toISOString(),
       updatedAt: r.updatedAt.toISOString(),
     })),
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+    },
   });
 }
 

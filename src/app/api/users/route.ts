@@ -5,6 +5,7 @@ import { ALLOWED_EMAIL_DOMAIN, getSession, isAllowedEmail } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { audit } from "@/lib/audit";
 import type { Role } from "@prisma/client";
+import { PASSWORD_REGEX, PASSWORD_HINT } from "@/lib/password-policy";
 
 /**
  * GET /api/users — list users.
@@ -62,7 +63,7 @@ const ROLES = ["SUPER_ADMIN", "ADMIN_UNIT", "USER"] as const;
 const createSchema = z.object({
   name: z.string().min(2, "Nama minimal 2 karakter"),
   email: z.string().email(),
-  password: z.string().min(8, "Kata sandi minimal 8 karakter"),
+  password: z.string().min(8, "Kata sandi minimal 8 karakter").regex(PASSWORD_REGEX, PASSWORD_HINT),
   role: z.enum(ROLES),
   // Treat empty string as null so that picking "Tidak terikat" in the UI
   // (which submits "") doesn't slip past the FK validation below and

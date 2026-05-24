@@ -23,6 +23,7 @@ import {
 import { formatDate } from "@/lib/utils";
 import type { LetterType, LetterTypeRequest } from "@/lib/types";
 import { Plus, Pencil, Trash2, Printer, RotateCcw, Check, X, Inbox } from "lucide-react";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface UnitOption {
   id: string;
@@ -111,8 +112,10 @@ export function LetterTypesClient({
     setLetterTypes((prev) => prev.filter((lt) => lt.id !== id));
   }
 
-  async function reactivate(lt: LetterType) {
-    if (!confirm(`Aktifkan kembali jenis surat ${lt.code} (${lt.name})?`)) return;
+  const [reactivateTarget, setReactivateTarget] = useState<LetterType | null>(null);
+  const [reactivateError, setReactivateError] = useState<string | null>(null);
+
+  async function doReactivate(lt: LetterType) {
     const res = await fetch(`/api/letter-types/${lt.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -120,13 +123,15 @@ export function LetterTypesClient({
     });
     const data = await res.json();
     if (!res.ok) {
-      alert(data.error || "Gagal mengaktifkan kembali");
+      setReactivateError(data.error || "Gagal mengaktifkan kembali");
+      setReactivateTarget(null);
       return;
     }
     setInactive((prev) => prev.filter((x) => x.id !== lt.id));
     setLetterTypes((prev) =>
       [...prev, data.letterType].sort((a, b) => a.code.localeCompare(b.code))
     );
+    setReactivateTarget(null);
   }
 
   function describeAllowedUnits(lt: LetterType): string {
@@ -306,7 +311,7 @@ export function LetterTypesClient({
                   <Badge variant="outline">{lt.code}</Badge>
                   <span className="text-muted-foreground">{lt.name}</span>
                 </div>
-                <Button size="sm" variant="ghost" onClick={() => reactivate(lt)}>
+                <Button size="sm" variant="ghost" onClick={() => setReactivateTarget(lt)}>
                   <RotateCcw className="h-3.5 w-3.5" />
                   Aktifkan kembali
                 </Button>
@@ -405,6 +410,29 @@ export function LetterTypesClient({
             setReviewing(null);
           }}
         />
+      )}
+
+      <ConfirmDialog
+        open={!!reactivateTarget}
+        onOpenChange={(open) => !open && setReactivateTarget(null)}
+        title="Aktifkan Kembali Jenis Surat"
+        description={reactivateTarget ? `Aktifkan kembali jenis surat ${reactivateTarget.code} (${reactivateTarget.name})?` : ""}
+        confirmLabel="Ya, Aktifkan"
+        onConfirm={() => reactivateTarget && doReactivate(reactivateTarget)}
+      />
+
+      {reactivateError && (
+        <Dialog open={!!reactivateError} onOpenChange={() => setReactivateError(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Gagal Mengaktifkan</DialogTitle>
+              <DialogDescription>{reactivateError}</DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button onClick={() => setReactivateError(null)}>Tutup</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

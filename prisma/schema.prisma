@@ -115,6 +115,11 @@ model User {
   // log in and is hidden from list endpoints by default.
   deletedAt    DateTime?
 
+  // Self-service password reset. Token is a random hex string; expires
+  // after 1 hour. Both fields are cleared after a successful reset.
+  resetToken          String?
+  resetTokenExpiresAt DateTime?
+
   archives             Archive[]
   archivesVoided       Archive[]     @relation("ArchiveVoidedBy")
   dispositionsSent     Disposition[] @relation("DispositionFrom")

@@ -4,10 +4,11 @@ import bcrypt from "bcryptjs";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { audit } from "@/lib/audit";
+import { PASSWORD_REGEX, PASSWORD_HINT } from "@/lib/password-policy";
 
 const schema = z.object({
   currentPassword: z.string().min(1, "Kata sandi saat ini wajib diisi"),
-  newPassword: z.string().min(8, "Kata sandi baru minimal 8 karakter"),
+  newPassword: z.string().min(8, "Kata sandi baru minimal 8 karakter").regex(PASSWORD_REGEX, PASSWORD_HINT),
 });
 
 /**

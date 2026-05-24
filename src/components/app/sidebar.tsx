@@ -137,16 +137,36 @@ export function DashboardShell({
   badges?: SidebarBadges;
   children: React.ReactNode;
 }) {
-  const safeBadges: SidebarBadges = badges ?? {
+  const initialBadges: SidebarBadges = badges ?? {
     pendingArchives: 0,
     pendingDispositions: 0,
     openTickets: 0,
   };
-  const primaryNav = applyBadges(PRIMARY_NAV, safeBadges, session);
-  const accountNav = applyBadges(ACCOUNT_NAV, safeBadges, session);
-  const adminUnitNav = applyBadges(ADMIN_UNIT_NAV, safeBadges, session);
-  const masterDataNav = applyBadges(MASTER_DATA_NAV, safeBadges, session);
-  const systemNav = applyBadges(SYSTEM_NAV, safeBadges, session);
+
+  // Poll badge counts every 60 seconds for real-time notifications
+  const [liveBadges, setLiveBadges] = useState<SidebarBadges>(initialBadges);
+  useEffect(() => {
+    let active = true;
+    async function pollBadges() {
+      try {
+        const res = await fetch("/api/badges");
+        if (res.ok && active) {
+          const data = await res.json();
+          setLiveBadges(data);
+        }
+      } catch {
+        // Silently fail — badges are non-critical
+      }
+    }
+    const interval = setInterval(pollBadges, 60_000); // every 60 seconds
+    return () => { active = false; clearInterval(interval); };
+  }, []);
+
+  const primaryNav = applyBadges(PRIMARY_NAV, liveBadges, session);
+  const accountNav = applyBadges(ACCOUNT_NAV, liveBadges, session);
+  const adminUnitNav = applyBadges(ADMIN_UNIT_NAV, liveBadges, session);
+  const masterDataNav = applyBadges(MASTER_DATA_NAV, liveBadges, session);
+  const systemNav = applyBadges(SYSTEM_NAV, liveBadges, session);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const router = useRouter();

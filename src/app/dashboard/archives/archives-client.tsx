@@ -55,10 +55,11 @@ import {
   GDRIVE_MAX_BYTES,
 } from "@/lib/upload-client";
 import { bundleProofFiles, isImageFile } from "@/lib/proof-bundle";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface Props {
-  units: { id: string; code: string; name: string; formatTemplate?: string }[];
-  letterTypes: { id: string; code: string; name: string }[];
+  units: { id: string; code: string; name: string; formatTemplate?: string; allowedLetterTypeIds?: string[] }[];
+  letterTypes: { id: string; code: string; name: string; scope?: "GLOBAL" | "UNIT_SPECIFIC" }[];
   role: Role;
   sessionUnitId: string | null;
   sessionUserId: string;
@@ -167,6 +168,11 @@ export function ArchivesClient({
   const [dateTo, setDateTo] = useState<string>("");
   const [disposeArchive, setDisposeArchive] = useState<ArchiveListItem | null>(null);
   const [voidArchive, setVoidArchive] = useState<ArchiveListItem | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   const fetchArchives = useCallback(async () => {
     setLoading(true);
@@ -180,13 +186,19 @@ export function ArchivesClient({
       if (statusFilter !== "__all") params.set("status", statusFilter);
       if (dateFrom) params.set("dateFrom", dateFrom);
       if (dateTo) params.set("dateTo", dateTo);
+      params.set("page", String(page));
+      params.set("pageSize", "50");
       const res = await fetch(`/api/archives?${params.toString()}`);
       const data = await res.json();
       setArchives(data.archives ?? []);
+      if (data.pagination) {
+        setTotalPages(data.pagination.totalPages);
+        setTotalCount(data.pagination.total);
+      }
     } finally {
       setLoading(false);
     }
-  }, [q, unitId, letterTypeId, year, direction, statusFilter, dateFrom, dateTo]);
+  }, [q, unitId, letterTypeId, year, direction, statusFilter, dateFrom, dateTo, page]);
 
   useEffect(() => {
     fetchArchives();
@@ -209,16 +221,18 @@ export function ArchivesClient({
     setStatusFilter("__all");
     setDateFrom("");
     setDateTo("");
+    setPage(1);
   }
 
-  async function onDelete(id: string) {
-    if (!confirm("Hapus arsip ini? Tindakan tidak dapat dibatalkan.")) return;
+  async function onDeleteConfirmed(id: string) {
     const res = await fetch(`/api/archives/${id}`, { method: "DELETE" });
     if (res.ok) {
       setArchives((prev) => prev.filter((a) => a.id !== id));
+      setDeleteTarget(null);
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Gagal menghapus arsip");
+      setDeleteError(data.error || "Gagal menghapus arsip");
+      setDeleteTarget(null);
     }
   }
 
@@ -388,7 +402,14 @@ export function ArchivesClient({
           {/* Mobile: card list */}
           <div className="space-y-2 md:hidden">
             {loading ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">Memuat arsip…</p>
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="animate-pulse rounded-lg border p-4">
+                    <div className="h-4 w-3/4 rounded bg-muted mb-2" />
+                    <div className="h-3 w-1/2 rounded bg-muted" />
+                  </div>
+                ))}
+              </div>
             ) : archives.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
                 <Filter className="mx-auto mb-2 h-5 w-5" />
@@ -458,7 +479,7 @@ export function ArchivesClient({
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => onDelete(a.id)}
+                      onClick={() => setDeleteTarget(a.id)}
                       aria-label="Hapus arsip"
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
@@ -486,11 +507,17 @@ export function ArchivesClient({
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="py-10 text-center text-sm text-muted-foreground">
-                      Memuat arsip…
-                    </TableCell>
-                  </TableRow>
+                  <>  
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <TableRow key={i}>
+                        {Array.from({ length: 8 }).map((_, j) => (
+                          <TableCell key={j}>
+                            <div className="animate-pulse h-4 rounded bg-muted" style={{ width: `${55 + ((i + j) % 4) * 10}%` }} />
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </>
                 ) : archives.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="py-10 text-center text-sm text-muted-foreground">
@@ -588,7 +615,7 @@ export function ArchivesClient({
                                 <Ban className="h-4 w-4 text-destructive" />
                               </Button>
                             )}
-                          <Button variant="ghost" size="icon" onClick={() => onDelete(a.id)} aria-label="Hapus arsip">
+                          <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(a.id)} aria-label="Hapus arsip">
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </div>
@@ -599,6 +626,33 @@ export function ArchivesClient({
               </TableBody>
             </Table>
           </div>
+
+          {/* Pagination controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4">
+              <p className="text-sm text-muted-foreground">
+                Halaman {page} dari {totalPages} ({totalCount} arsip)
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  Sebelumnya
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  Selanjutnya
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -635,6 +689,30 @@ export function ArchivesClient({
         onOpenChange={(open) => !open && setDisposeArchive(null)}
         onCreated={() => setDisposeArchive(null)}
       />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Hapus Arsip"
+        description="Hapus arsip ini? Tindakan ini menggunakan soft-delete dan data masih dapat dipulihkan oleh Super Admin."
+        confirmLabel="Ya, Hapus"
+        variant="destructive"
+        onConfirm={() => deleteTarget && onDeleteConfirmed(deleteTarget)}
+      />
+
+      {deleteError && (
+        <Dialog open={!!deleteError} onOpenChange={() => setDeleteError(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Gagal Menghapus</DialogTitle>
+              <DialogDescription>{deleteError}</DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button onClick={() => setDeleteError(null)}>Tutup</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
 
       <VoidArchiveDialog
         archive={voidArchive}
@@ -1225,8 +1303,8 @@ function ProofViewDialog({
 interface DialogProps {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  units: { id: string; code: string; name: string }[];
-  letterTypes: { id: string; code: string; name: string }[];
+  units: { id: string; code: string; name: string; allowedLetterTypeIds?: string[] }[];
+  letterTypes: { id: string; code: string; name: string; scope?: "GLOBAL" | "UNIT_SPECIFIC" }[];
   defaultUnitId: string;
   canChooseUnit: boolean;
   sessionUserId: string;
@@ -1257,14 +1335,35 @@ function ManualArchiveDialog({
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // TechSpec 3.1: filter letter types by unit scope. GLOBAL letter types are
+  // always visible; UNIT_SPECIFIC types only appear when the selected unit is
+  // in the letter type's allowlist.
+  const selectedUnit = useMemo(() => units.find((u) => u.id === unitId), [units, unitId]);
+  const visibleLetterTypes = useMemo(() => {
+    const allowed = new Set(selectedUnit?.allowedLetterTypeIds ?? []);
+    return letterTypes.filter(
+      (lt) => (lt.scope ?? "GLOBAL") === "GLOBAL" || allowed.has(lt.id)
+    );
+  }, [letterTypes, selectedUnit]);
+
+  // Reset letter type selection when unit changes and current selection is no
+  // longer visible (e.g. UNIT_SPECIFIC type not available for new unit).
+  useEffect(() => {
+    if (visibleLetterTypes.length > 0 && !visibleLetterTypes.some((lt) => lt.id === letterTypeId)) {
+      const preferredCodes = ["UMUM", "SP", "UND"];
+      const preferred = visibleLetterTypes.find((lt) => preferredCodes.includes(lt.code));
+      setLetterTypeId(preferred?.id ?? visibleLetterTypes[0].id);
+    }
+  }, [visibleLetterTypes, letterTypeId]);
+
   useEffect(() => {
     if (open) {
       setUnitId(defaultUnitId);
       // Default to a "generic" letter type if one exists (UMUM/UND/SP) so
       // INCOMING tidak memaksa user memilih klasifikasi yang tidak mereka tahu.
       const preferredCodes = ["UMUM", "SP", "UND"];
-      const preferred = letterTypes.find((lt) => preferredCodes.includes(lt.code));
-      setLetterTypeId(preferred?.id ?? letterTypes[0]?.id ?? "");
+      const preferred = visibleLetterTypes.find((lt) => preferredCodes.includes(lt.code));
+      setLetterTypeId(preferred?.id ?? visibleLetterTypes[0]?.id ?? "");
       setManualNumber("");
       setDirection("INCOMING");
       setSubject("");
@@ -1276,7 +1375,7 @@ function ManualArchiveDialog({
       setFiles([]);
       setError(null);
     }
-  }, [open, defaultUnitId, letterTypes, defaultRecipientLabel]);
+  }, [open, defaultUnitId, visibleLetterTypes, defaultRecipientLabel]);
 
   // When user toggles direction, reset recipient to a sensible default.
   useEffect(() => {
@@ -1486,7 +1585,7 @@ function ManualArchiveDialog({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {letterTypes.map((lt) => (
+                    {visibleLetterTypes.map((lt) => (
                       <SelectItem key={lt.id} value={lt.id}>
                         {lt.code} &mdash; {lt.name}
                       </SelectItem>
