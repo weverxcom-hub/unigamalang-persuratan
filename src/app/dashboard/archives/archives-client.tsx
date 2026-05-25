@@ -46,6 +46,8 @@ import {
   Printer,
   Download,
   Ban,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import type { Archive, ArchiveListItem, ArchiveStatus, Role } from "@/lib/types";
 import {
@@ -170,6 +172,7 @@ export function ArchivesClient({
   const [voidArchive, setVoidArchive] = useState<ArchiveListItem | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<ArchiveListItem | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -233,6 +236,42 @@ export function ArchivesClient({
       const data = await res.json().catch(() => ({}));
       setDeleteError(data.error || "Gagal menghapus arsip");
       setDeleteTarget(null);
+    }
+  }
+
+  async function onApproveArchive(id: string) {
+    const res = await fetch(`/api/archives/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "APPROVE" }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.archive) {
+      setArchives((prev) =>
+        prev.map((a) =>
+          a.id === id
+            ? { ...a, status: data.archive.status, number: data.archive.number, sequenceNumber: data.archive.sequenceNumber }
+            : a
+        )
+      );
+    } else {
+      setDeleteError(data.error || "Gagal menyetujui arsip");
+    }
+  }
+
+  async function onRejectArchive(id: string, reason?: string) {
+    const res = await fetch(`/api/archives/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "REJECT", rejectReason: reason }),
+    });
+    if (res.ok) {
+      setArchives((prev) => prev.filter((a) => a.id !== id));
+      setRejectTarget(null);
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setDeleteError(data.error || "Gagal menolak arsip");
+      setRejectTarget(null);
     }
   }
 
@@ -372,6 +411,7 @@ export function ArchivesClient({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__all">Semua Status</SelectItem>
+                <SelectItem value="PENDING">Menunggu Persetujuan</SelectItem>
                 <SelectItem value="PENDING_PROOF">Menunggu Bukti</SelectItem>
                 <SelectItem value="ISSUED">Terbit</SelectItem>
                 <SelectItem value="OVERDUE">Melewati Batas</SelectItem>
@@ -451,6 +491,18 @@ export function ArchivesClient({
                     {formatDate(a.date)} · {a.unitCode}
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2">
+                    {role !== "USER" && a.status === "PENDING" && (
+                      <>
+                        <Button size="sm" onClick={() => onApproveArchive(a.id)}>
+                          <CheckCircle2 className="h-4 w-4" />
+                          Setujui
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => setRejectTarget(a)}>
+                          <XCircle className="h-4 w-4" />
+                          Tolak
+                        </Button>
+                      </>
+                    )}
                     {a.hasProof ? (
                       <Button size="sm" variant="outline" onClick={() => setViewArchive(a)}>
                         <Eye className="h-4 w-4" />
@@ -577,6 +629,28 @@ export function ArchivesClient({
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
+                          {role !== "USER" && a.status === "PENDING" && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label="Setujui arsip"
+                                title="Setujui"
+                                onClick={() => onApproveArchive(a.id)}
+                              >
+                                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label="Tolak arsip"
+                                title="Tolak"
+                                onClick={() => setRejectTarget(a)}
+                              >
+                                <XCircle className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </>
+                          )}
                           {a.direction === "INCOMING" && (
                             <>
                               <Button
@@ -704,7 +778,7 @@ export function ArchivesClient({
         <Dialog open={!!deleteError} onOpenChange={() => setDeleteError(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Gagal Menghapus</DialogTitle>
+              <DialogTitle>Terjadi Kesalahan</DialogTitle>
               <DialogDescription>{deleteError}</DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -733,6 +807,12 @@ export function ArchivesClient({
             )
           );
         }}
+      />
+
+      <RejectArchiveDialog
+        archive={rejectTarget}
+        onOpenChange={(open) => !open && setRejectTarget(null)}
+        onRejected={(id, reason) => onRejectArchive(id, reason)}
       />
     </div>
   );
@@ -833,6 +913,74 @@ function VoidArchiveDialog({
           <Button variant="destructive" onClick={onSubmit} disabled={submitting}>
             {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Ban className="h-4 w-4" />}
             Batalkan Nomor
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function RejectArchiveDialog({
+  archive,
+  onOpenChange,
+  onRejected,
+}: {
+  archive: ArchiveListItem | null;
+  onOpenChange: (open: boolean) => void;
+  onRejected: (id: string, reason?: string) => void;
+}) {
+  const [reason, setReason] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!archive) {
+      setReason("");
+      setSubmitting(false);
+    }
+  }, [archive]);
+
+  function onSubmit() {
+    if (!archive) return;
+    setSubmitting(true);
+    onRejected(archive.id, reason.trim() || undefined);
+  }
+
+  return (
+    <Dialog open={!!archive} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Tolak Arsip</DialogTitle>
+          <DialogDescription>
+            {archive ? (
+              <>
+                Menolak arsip <code className="rounded bg-muted px-1 py-0.5">{archive.number}</code> —{" "}
+                <em>{archive.subject}</em>. Arsip akan dihapus (soft-delete) dan nomor tidak akan
+                dialokasikan.
+              </>
+            ) : (
+              "Menolak arsip yang menunggu persetujuan."
+            )}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          <Label htmlFor="reject-reason">Alasan Penolakan (opsional)</Label>
+          <textarea
+            id="reject-reason"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            rows={3}
+            disabled={submitting}
+            placeholder="Contoh: perihal surat tidak sesuai, duplikat, dll."
+            className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+            Batal
+          </Button>
+          <Button variant="destructive" onClick={onSubmit} disabled={submitting}>
+            {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
+            Tolak Arsip
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -1362,8 +1510,8 @@ function ManualArchiveDialog({
       // Default to a "generic" letter type if one exists (UMUM/UND/SP) so
       // INCOMING tidak memaksa user memilih klasifikasi yang tidak mereka tahu.
       const preferredCodes = ["UMUM", "SP", "UND"];
-      const preferred = visibleLetterTypes.find((lt) => preferredCodes.includes(lt.code));
-      setLetterTypeId(preferred?.id ?? visibleLetterTypes[0]?.id ?? "");
+      const preferred = letterTypes.find((lt) => preferredCodes.includes(lt.code));
+      setLetterTypeId(preferred?.id ?? letterTypes[0]?.id ?? "");
       setManualNumber("");
       setDirection("INCOMING");
       setSubject("");
@@ -1375,7 +1523,12 @@ function ManualArchiveDialog({
       setFiles([]);
       setError(null);
     }
-  }, [open, defaultUnitId, visibleLetterTypes, defaultRecipientLabel]);
+    // NOTE: visibleLetterTypes is intentionally excluded — including it would
+    // cause a full form reset every time the unit dropdown changes (because
+    // visibleLetterTypes depends on unitId). The letter-type-only reset when
+    // the unit changes is handled by the separate useEffect above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, defaultUnitId, defaultRecipientLabel]);
 
   // When user toggles direction, reset recipient to a sensible default.
   useEffect(() => {
