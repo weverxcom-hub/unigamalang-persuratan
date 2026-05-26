@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { ALLOWED_EMAIL_DOMAIN, authenticate, isAllowedEmail, setSessionCookie, toSessionPayload } from "@/lib/auth";
+import { checkLoginRate, rateLimitResponse } from "@/lib/rate-limit";
 
 const schema = z.object({
   email: z.string().email(),
@@ -8,6 +9,10 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
+  // Rate limiting: 10 attempts per IP per 15 minutes
+  const rl = checkLoginRate(req);
+  if (!rl.allowed) return rateLimitResponse(rl);
+
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) {

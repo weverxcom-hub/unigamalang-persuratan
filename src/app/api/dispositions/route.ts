@@ -44,31 +44,40 @@ export async function GET(req: Request) {
     where.status = status;
   }
 
-  // Filter deleted archives at the DB level so the take(200) limit cannot be
+  // Filter deleted archives at the DB level so the take limit cannot be
   // consumed by rows that we would later drop in JS — that path could leave
   // a user's inbox blank even when valid older dispositions exist.
   where.archive = { deletedAt: null };
 
-  const rows = await prisma.disposition.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    take: 200,
-    include: {
-      archive: {
-        select: {
-          id: true,
-          number: true,
-          subject: true,
-          direction: true,
-          unitCode: true,
-          externalSender: true,
+  // Pagination: ?page=1&pageSize=50 (default 50, max 200)
+  const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
+  const pageSize = Math.min(200, Math.max(1, Number(url.searchParams.get("pageSize")) || 50));
+  const skip = (page - 1) * pageSize;
+
+  const [rows, total] = await Promise.all([
+    prisma.disposition.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: pageSize,
+      include: {
+        archive: {
+          select: {
+            id: true,
+            number: true,
+            subject: true,
+            direction: true,
+            unitCode: true,
+            externalSender: true,
+          },
         },
+        fromUser: { select: { id: true, name: true, email: true } },
+        toUser: { select: { id: true, name: true, email: true } },
+        toUnit: { select: { id: true, code: true, name: true } },
       },
-      fromUser: { select: { id: true, name: true, email: true } },
-      toUser: { select: { id: true, name: true, email: true } },
-      toUnit: { select: { id: true, code: true, name: true } },
-    },
-  });
+    }),
+    prisma.disposition.count({ where }),
+  ]);
 
   return NextResponse.json({
     dispositions: rows.map((r) => ({
@@ -94,5 +103,11 @@ export async function GET(req: Request) {
         acknowledgedAt: r.acknowledgedAt ? r.acknowledgedAt.toISOString() : null,
         completedAt: r.completedAt ? r.completedAt.toISOString() : null,
       })),
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+    },
   });
 }

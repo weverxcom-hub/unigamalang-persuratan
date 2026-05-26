@@ -46,6 +46,8 @@ import {
   Printer,
   Download,
   Ban,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import type { Archive, ArchiveListItem, ArchiveStatus, Role } from "@/lib/types";
 import {
@@ -55,10 +57,11 @@ import {
   GDRIVE_MAX_BYTES,
 } from "@/lib/upload-client";
 import { bundleProofFiles, isImageFile } from "@/lib/proof-bundle";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface Props {
-  units: { id: string; code: string; name: string; formatTemplate?: string }[];
-  letterTypes: { id: string; code: string; name: string }[];
+  units: { id: string; code: string; name: string; formatTemplate?: string; allowedLetterTypeIds?: string[] }[];
+  letterTypes: { id: string; code: string; name: string; scope?: "GLOBAL" | "UNIT_SPECIFIC" }[];
   role: Role;
   sessionUnitId: string | null;
   sessionUserId: string;
@@ -167,6 +170,12 @@ export function ArchivesClient({
   const [dateTo, setDateTo] = useState<string>("");
   const [disposeArchive, setDisposeArchive] = useState<ArchiveListItem | null>(null);
   const [voidArchive, setVoidArchive] = useState<ArchiveListItem | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<ArchiveListItem | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   const fetchArchives = useCallback(async () => {
     setLoading(true);
@@ -180,13 +189,19 @@ export function ArchivesClient({
       if (statusFilter !== "__all") params.set("status", statusFilter);
       if (dateFrom) params.set("dateFrom", dateFrom);
       if (dateTo) params.set("dateTo", dateTo);
+      params.set("page", String(page));
+      params.set("pageSize", "50");
       const res = await fetch(`/api/archives?${params.toString()}`);
       const data = await res.json();
       setArchives(data.archives ?? []);
+      if (data.pagination) {
+        setTotalPages(data.pagination.totalPages);
+        setTotalCount(data.pagination.total);
+      }
     } finally {
       setLoading(false);
     }
-  }, [q, unitId, letterTypeId, year, direction, statusFilter, dateFrom, dateTo]);
+  }, [q, unitId, letterTypeId, year, direction, statusFilter, dateFrom, dateTo, page]);
 
   useEffect(() => {
     fetchArchives();
@@ -209,16 +224,54 @@ export function ArchivesClient({
     setStatusFilter("__all");
     setDateFrom("");
     setDateTo("");
+    setPage(1);
   }
 
-  async function onDelete(id: string) {
-    if (!confirm("Hapus arsip ini? Tindakan tidak dapat dibatalkan.")) return;
+  async function onDeleteConfirmed(id: string) {
     const res = await fetch(`/api/archives/${id}`, { method: "DELETE" });
     if (res.ok) {
       setArchives((prev) => prev.filter((a) => a.id !== id));
+      setDeleteTarget(null);
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Gagal menghapus arsip");
+      setDeleteError(data.error || "Gagal menghapus arsip");
+      setDeleteTarget(null);
+    }
+  }
+
+  async function onApproveArchive(id: string) {
+    const res = await fetch(`/api/archives/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "APPROVE" }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.archive) {
+      setArchives((prev) =>
+        prev.map((a) =>
+          a.id === id
+            ? { ...a, status: data.archive.status, number: data.archive.number, sequenceNumber: data.archive.sequenceNumber }
+            : a
+        )
+      );
+    } else {
+      setDeleteError(data.error || "Gagal menyetujui arsip");
+    }
+  }
+
+  async function onRejectArchive(id: string, reason?: string) {
+    const res = await fetch(`/api/archives/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "REJECT", rejectReason: reason }),
+    });
+    if (res.ok) {
+      setArchives((prev) => prev.filter((a) => a.id !== id));
+      setRejectTarget(null);
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setDeleteError(data.error || "Gagal menolak arsip");
+      setRejectTarget(null);
     }
   }
 
@@ -358,6 +411,7 @@ export function ArchivesClient({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__all">Semua Status</SelectItem>
+                <SelectItem value="PENDING">Menunggu Persetujuan</SelectItem>
                 <SelectItem value="PENDING_PROOF">Menunggu Bukti</SelectItem>
                 <SelectItem value="ISSUED">Terbit</SelectItem>
                 <SelectItem value="OVERDUE">Melewati Batas</SelectItem>
@@ -388,7 +442,14 @@ export function ArchivesClient({
           {/* Mobile: card list */}
           <div className="space-y-2 md:hidden">
             {loading ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">Memuat arsip…</p>
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="animate-pulse rounded-lg border p-4">
+                    <div className="h-4 w-3/4 rounded bg-muted mb-2" />
+                    <div className="h-3 w-1/2 rounded bg-muted" />
+                  </div>
+                ))}
+              </div>
             ) : archives.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
                 <Filter className="mx-auto mb-2 h-5 w-5" />
@@ -430,6 +491,18 @@ export function ArchivesClient({
                     {formatDate(a.date)} · {a.unitCode}
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2">
+                    {role !== "USER" && a.status === "PENDING" && (
+                      <>
+                        <Button size="sm" onClick={() => onApproveArchive(a.id)}>
+                          <CheckCircle2 className="h-4 w-4" />
+                          Setujui
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => setRejectTarget(a)}>
+                          <XCircle className="h-4 w-4" />
+                          Tolak
+                        </Button>
+                      </>
+                    )}
                     {a.hasProof ? (
                       <Button size="sm" variant="outline" onClick={() => setViewArchive(a)}>
                         <Eye className="h-4 w-4" />
@@ -458,7 +531,7 @@ export function ArchivesClient({
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => onDelete(a.id)}
+                      onClick={() => setDeleteTarget(a.id)}
                       aria-label="Hapus arsip"
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
@@ -486,11 +559,17 @@ export function ArchivesClient({
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="py-10 text-center text-sm text-muted-foreground">
-                      Memuat arsip…
-                    </TableCell>
-                  </TableRow>
+                  <>  
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <TableRow key={i}>
+                        {Array.from({ length: 8 }).map((_, j) => (
+                          <TableCell key={j}>
+                            <div className="animate-pulse h-4 rounded bg-muted" style={{ width: `${55 + ((i + j) % 4) * 10}%` }} />
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </>
                 ) : archives.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="py-10 text-center text-sm text-muted-foreground">
@@ -550,6 +629,28 @@ export function ArchivesClient({
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
+                          {role !== "USER" && a.status === "PENDING" && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label="Setujui arsip"
+                                title="Setujui"
+                                onClick={() => onApproveArchive(a.id)}
+                              >
+                                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label="Tolak arsip"
+                                title="Tolak"
+                                onClick={() => setRejectTarget(a)}
+                              >
+                                <XCircle className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </>
+                          )}
                           {a.direction === "INCOMING" && (
                             <>
                               <Button
@@ -588,7 +689,7 @@ export function ArchivesClient({
                                 <Ban className="h-4 w-4 text-destructive" />
                               </Button>
                             )}
-                          <Button variant="ghost" size="icon" onClick={() => onDelete(a.id)} aria-label="Hapus arsip">
+                          <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(a.id)} aria-label="Hapus arsip">
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </div>
@@ -599,6 +700,33 @@ export function ArchivesClient({
               </TableBody>
             </Table>
           </div>
+
+          {/* Pagination controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4">
+              <p className="text-sm text-muted-foreground">
+                Halaman {page} dari {totalPages} ({totalCount} arsip)
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  Sebelumnya
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  Selanjutnya
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -636,6 +764,30 @@ export function ArchivesClient({
         onCreated={() => setDisposeArchive(null)}
       />
 
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Hapus Arsip"
+        description="Hapus arsip ini? Tindakan ini menggunakan soft-delete dan data masih dapat dipulihkan oleh Super Admin."
+        confirmLabel="Ya, Hapus"
+        variant="destructive"
+        onConfirm={() => deleteTarget && onDeleteConfirmed(deleteTarget)}
+      />
+
+      {deleteError && (
+        <Dialog open={!!deleteError} onOpenChange={() => setDeleteError(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Terjadi Kesalahan</DialogTitle>
+              <DialogDescription>{deleteError}</DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button onClick={() => setDeleteError(null)}>Tutup</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
       <VoidArchiveDialog
         archive={voidArchive}
         onOpenChange={(open) => !open && setVoidArchive(null)}
@@ -655,6 +807,12 @@ export function ArchivesClient({
             )
           );
         }}
+      />
+
+      <RejectArchiveDialog
+        archive={rejectTarget}
+        onOpenChange={(open) => !open && setRejectTarget(null)}
+        onRejected={(id, reason) => onRejectArchive(id, reason)}
       />
     </div>
   );
@@ -755,6 +913,74 @@ function VoidArchiveDialog({
           <Button variant="destructive" onClick={onSubmit} disabled={submitting}>
             {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Ban className="h-4 w-4" />}
             Batalkan Nomor
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function RejectArchiveDialog({
+  archive,
+  onOpenChange,
+  onRejected,
+}: {
+  archive: ArchiveListItem | null;
+  onOpenChange: (open: boolean) => void;
+  onRejected: (id: string, reason?: string) => void;
+}) {
+  const [reason, setReason] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!archive) {
+      setReason("");
+      setSubmitting(false);
+    }
+  }, [archive]);
+
+  function onSubmit() {
+    if (!archive) return;
+    setSubmitting(true);
+    onRejected(archive.id, reason.trim() || undefined);
+  }
+
+  return (
+    <Dialog open={!!archive} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Tolak Arsip</DialogTitle>
+          <DialogDescription>
+            {archive ? (
+              <>
+                Menolak arsip <code className="rounded bg-muted px-1 py-0.5">{archive.number}</code> —{" "}
+                <em>{archive.subject}</em>. Arsip akan dihapus (soft-delete) dan nomor tidak akan
+                dialokasikan.
+              </>
+            ) : (
+              "Menolak arsip yang menunggu persetujuan."
+            )}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          <Label htmlFor="reject-reason">Alasan Penolakan (opsional)</Label>
+          <textarea
+            id="reject-reason"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            rows={3}
+            disabled={submitting}
+            placeholder="Contoh: perihal surat tidak sesuai, duplikat, dll."
+            className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+            Batal
+          </Button>
+          <Button variant="destructive" onClick={onSubmit} disabled={submitting}>
+            {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
+            Tolak Arsip
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -1225,8 +1451,8 @@ function ProofViewDialog({
 interface DialogProps {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  units: { id: string; code: string; name: string }[];
-  letterTypes: { id: string; code: string; name: string }[];
+  units: { id: string; code: string; name: string; allowedLetterTypeIds?: string[] }[];
+  letterTypes: { id: string; code: string; name: string; scope?: "GLOBAL" | "UNIT_SPECIFIC" }[];
   defaultUnitId: string;
   canChooseUnit: boolean;
   sessionUserId: string;
@@ -1257,6 +1483,27 @@ function ManualArchiveDialog({
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // TechSpec 3.1: filter letter types by unit scope. GLOBAL letter types are
+  // always visible; UNIT_SPECIFIC types only appear when the selected unit is
+  // in the letter type's allowlist.
+  const selectedUnit = useMemo(() => units.find((u) => u.id === unitId), [units, unitId]);
+  const visibleLetterTypes = useMemo(() => {
+    const allowed = new Set(selectedUnit?.allowedLetterTypeIds ?? []);
+    return letterTypes.filter(
+      (lt) => (lt.scope ?? "GLOBAL") === "GLOBAL" || allowed.has(lt.id)
+    );
+  }, [letterTypes, selectedUnit]);
+
+  // Reset letter type selection when unit changes and current selection is no
+  // longer visible (e.g. UNIT_SPECIFIC type not available for new unit).
+  useEffect(() => {
+    if (visibleLetterTypes.length > 0 && !visibleLetterTypes.some((lt) => lt.id === letterTypeId)) {
+      const preferredCodes = ["UMUM", "SP", "UND"];
+      const preferred = visibleLetterTypes.find((lt) => preferredCodes.includes(lt.code));
+      setLetterTypeId(preferred?.id ?? visibleLetterTypes[0].id);
+    }
+  }, [visibleLetterTypes, letterTypeId]);
+
   useEffect(() => {
     if (open) {
       setUnitId(defaultUnitId);
@@ -1276,7 +1523,12 @@ function ManualArchiveDialog({
       setFiles([]);
       setError(null);
     }
-  }, [open, defaultUnitId, letterTypes, defaultRecipientLabel]);
+    // NOTE: visibleLetterTypes is intentionally excluded — including it would
+    // cause a full form reset every time the unit dropdown changes (because
+    // visibleLetterTypes depends on unitId). The letter-type-only reset when
+    // the unit changes is handled by the separate useEffect above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, defaultUnitId, defaultRecipientLabel]);
 
   // When user toggles direction, reset recipient to a sensible default.
   useEffect(() => {
@@ -1486,7 +1738,7 @@ function ManualArchiveDialog({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {letterTypes.map((lt) => (
+                    {visibleLetterTypes.map((lt) => (
                       <SelectItem key={lt.id} value={lt.id}>
                         {lt.code} &mdash; {lt.name}
                       </SelectItem>

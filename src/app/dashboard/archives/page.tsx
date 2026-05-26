@@ -8,7 +8,11 @@ export default async function ArchivesPage() {
   if (!session) redirect("/login");
 
   const [unitsRaw, letterTypesRaw] = await Promise.all([
-    prisma.unit.findMany({ where: { deletedAt: null }, orderBy: { code: "asc" } }),
+    prisma.unit.findMany({
+      where: { deletedAt: null },
+      orderBy: { code: "asc" },
+      include: { letterTypes: { select: { letterTypeId: true } } },
+    }),
     prisma.letterType.findMany({ where: { deletedAt: null }, orderBy: { code: "asc" } }),
   ]);
 
@@ -19,12 +23,14 @@ export default async function ArchivesPage() {
       code: u.code,
       name: u.name,
       formatTemplate: u.formatTemplate,
+      allowedLetterTypeIds: u.letterTypes.map((lt) => lt.letterTypeId),
       createdAt: u.createdAt.toISOString(),
     }));
   const letterTypes = letterTypesRaw.map((lt) => ({
     id: lt.id,
     code: lt.code,
     name: lt.name,
+    scope: lt.scope as "GLOBAL" | "UNIT_SPECIFIC",
     createdAt: lt.createdAt.toISOString(),
   }));
 

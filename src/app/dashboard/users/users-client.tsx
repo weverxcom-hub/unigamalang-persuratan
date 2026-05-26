@@ -231,7 +231,11 @@ export function UsersClient({ initialUsers, units, currentUserId }: Props) {
   );
 }
 
-async function reactivate(user: User, setUsers: React.Dispatch<React.SetStateAction<User[]>>) {
+async function reactivate(
+  user: User,
+  setUsers: React.Dispatch<React.SetStateAction<User[]>>,
+  setActionError?: React.Dispatch<React.SetStateAction<string | null>>
+) {
   const res = await fetch(`/api/users/${user.id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -239,7 +243,7 @@ async function reactivate(user: User, setUsers: React.Dispatch<React.SetStateAct
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    alert(data.error || "Gagal mengaktifkan akun");
+    setActionError?.(data.error || "Gagal mengaktifkan akun");
     return;
   }
   const data = await res.json();
@@ -527,7 +531,7 @@ function ResetPasswordDialog({
         setError(data.error || "Gagal reset kata sandi");
         return;
       }
-      alert(`Kata sandi ${user.email} berhasil diatur. Sampaikan ke pengguna terkait.`);
+      setError(null);
       onDone();
     } finally {
       setLoading(false);

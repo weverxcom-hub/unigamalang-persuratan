@@ -1,43 +1,53 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle2 } from "lucide-react";
 
-export function LoginForm() {
-  const router = useRouter();
-  const search = useSearchParams();
+export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email }),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Gagal masuk");
+      if (res.status === 429) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || "Terlalu banyak percobaan. Coba lagi nanti.");
         return;
       }
-      const next = search.get("next") || "/dashboard";
-      router.push(next);
-      router.refresh();
+      // Always show success to prevent email enumeration
+      setSent(true);
     } catch {
       setError("Terjadi kesalahan jaringan");
     } finally {
       setLoading(false);
     }
+  }
+
+  if (sent) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-4 text-center">
+        <CheckCircle2 className="h-10 w-10 text-green-600" />
+        <p className="text-sm text-muted-foreground">
+          Jika email <span className="font-semibold text-foreground">{email}</span> terdaftar,
+          kami telah mengirimkan link reset kata sandi. Periksa inbox Anda.
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Link berlaku selama 1 jam. Periksa juga folder spam.
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -47,29 +57,9 @@ export function LoginForm() {
         <Input
           id="email"
           type="email"
-          autoComplete="email"
           placeholder="nama@unigamalang.ac.id"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="password">Kata Sandi</Label>
-          <Link
-            href="/forgot-password"
-            className="text-xs font-medium text-primary hover:underline"
-          >
-            Lupa kata sandi?
-          </Link>
-        </div>
-        <Input
-          id="password"
-          type="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
           required
         />
       </div>
@@ -80,7 +70,7 @@ export function LoginForm() {
       )}
       <Button type="submit" className="w-full" disabled={loading}>
         {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-        Masuk
+        Kirim Link Reset
       </Button>
     </form>
   );
