@@ -1,3 +1,8 @@
+---
+name: testing-app
+description: Test the Sistem Persuratan Universitas Gajayana application end-to-end. Use when verifying archive management, approve/reject flows, letter numbering, dispositions, or role-based access.
+---
+
 # Testing — Sistem Persuratan Universitas Gajayana
 
 ## Devin Secrets Needed
@@ -67,9 +72,28 @@ To find preview URLs: run `git_pr(action="view_pr")` and look for base64-encoded
 - XLSX export: uses ExcelJS, similar hardening
 - Print button triggers `window.print()` — filter form hidden via `@media print`
 
+### Archive Approve/Reject Flow (PR #34 scope)
+- Navigate to `/dashboard/archives` → look for archives with status "Menunggu Persetujuan" (PENDING)
+- PENDING archives show ✓ (Setujui) and ✗ (Tolak) action buttons — only visible to ADMIN_UNIT and SUPER_ADMIN (not USER)
+- **Approve (✓)**: Calls `PATCH /api/archives/[id]` with `{ action: "APPROVE" }` — allocates real sequence number via `allocateNextNumber()` and transitions to PENDING_PROOF
+- **Reject (✗)**: Opens "Tolak Arsip" dialog with optional rejection reason textarea, then calls `PATCH /api/archives/[id]` with `{ action: "REJECT" }` — soft-deletes the archive
+- Status filter dropdown should include "Menunggu Persetujuan" option (6 total options)
+- **Test order matters**: Only test reject dialog UI (open + cancel) before approve, since approve/reject are destructive and consume the PENDING archive. If only 1 PENDING archive exists, test reject dialog UI first (cancel without rejecting), then approve.
+- To create PENDING archives for testing: login as USER role (`staff@unigamalang.ac.id`) and create a surat keluar via `/dashboard/generate`
+
+### ManualArchiveDialog Form Reset Bug (PR #34 scope)
+- Open "Arsipkan Surat (Lama / Masuk)" dialog on `/dashboard/archives`
+- Fill in Perihal and Diteruskan ke fields with test values
+- Change Unit dropdown (only available for SUPER_ADMIN — disabled for ADMIN_UNIT)
+- Verify Perihal and Diteruskan ke fields are NOT reset after unit change
+- Jenis Surat dropdown may change if selected type is invalid for new unit (expected behavior)
+
 ## Common Issues
 
-- **Vercel SSO 401**: Ensure bypass token is set via URL param or header. Token might expire if regenerated in Vercel dashboard.
+- **Vercel SSO 401**: Ensure bypass token is set via URL param or header. Token might expire if regenerated in Vercel dashboard. Note: The bypass token approach might not work if the team uses Vercel Authentication (team SSO) instead of standard deployment protection — in that case, deploy changes to production via main branch merge instead.
 - **No data in reports**: Seed data only exists if `prisma db seed` was run. Check if DB has archives/dispositions.
 - **Badge count = 0 everywhere**: Might mean no pending items in DB. Create test data or check seed.
 - **Theme toggle not visible**: Only present in PR B (dark mode) branch. Production/other PRs might not have it unless PR B is merged into their base.
+- **Preview deployment inaccessible**: If Vercel preview returns 401 despite bypass token, the project might use Vercel Authentication (team SSO) which cannot be bypassed via automation tokens. Workaround: create a sync PR to merge dev → main, have the user merge it, then test on production URL.
+- **Approve flow error "Gagal menyetujui arsip"**: The APPROVE path in `PATCH /api/archives/[id]` might throw unhandled exceptions from `allocateNextNumber()` if the archive's `letterTypeId` references a deleted/invalid letter type. Check Vercel function logs for the actual error. The PATCH handler might need better error handling (try-catch) around the approve transaction.
+- **Only 1 PENDING archive available**: If you need to test both approve and reject, test reject dialog UI first (open → verify → cancel) then approve. Don't reject first or you'll lose the only test archive.
