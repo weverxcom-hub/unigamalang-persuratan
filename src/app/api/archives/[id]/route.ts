@@ -158,72 +158,82 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 
   // APPROVE: allocate a real sequence number and transition to PENDING_PROOF.
-  const updated = await prisma.$transaction(async (tx) => {
-    // Re-check status atomically to prevent race conditions.
-    const current = await tx.archive.findUniqueOrThrow({ where: { id: archive.id } });
-    if (current.status !== "PENDING") {
-      throw new Error("ARCHIVE_NOT_PENDING");
-    }
+  try {
+    const updated = await prisma.$transaction(async (tx) => {
+      // Re-check status atomically to prevent race conditions.
+      const current = await tx.archive.findUniqueOrThrow({ where: { id: archive.id } });
+      if (current.status !== "PENDING") {
+        throw new Error("ARCHIVE_NOT_PENDING");
+      }
 
-    const allocated = await allocateNextNumber(archive.unitId, archive.letterTypeId, tx);
+      const allocated = await allocateNextNumber(archive.unitId, archive.letterTypeId, tx);
 
-    const u = await tx.archive.update({
-      where: { id: archive.id },
-      data: {
-        status: "PENDING_PROOF",
-        number: allocated.number,
-        sequenceNumber: allocated.sequenceNumber,
-      },
-    });
-
-    await audit(
-      {
-        action: "UPDATE",
-        actorId: session.userId,
-        actorEmail: session.email,
-        targetType: "Archive",
-        targetId: archive.id,
-        archiveId: archive.id,
-        metadata: {
-          event: "archive.approved",
-          previousStatus: "PENDING",
-          previousNumber: archive.number,
-          newNumber: allocated.number,
+      const u = await tx.archive.update({
+        where: { id: archive.id },
+        data: {
+          status: "PENDING_PROOF",
+          number: allocated.number,
           sequenceNumber: allocated.sequenceNumber,
         },
-        ip: clientIp(req),
-        userAgent: req.headers.get("user-agent"),
-      },
-      tx
-    );
+      });
 
-    return u;
-  }).catch((e: unknown) => {
-    if (e instanceof Error && e.message === "ARCHIVE_NOT_PENDING") return null;
-    throw e;
-  });
+      await audit(
+        {
+          action: "UPDATE",
+          actorId: session.userId,
+          actorEmail: session.email,
+          targetType: "Archive",
+          targetId: archive.id,
+          archiveId: archive.id,
+          metadata: {
+            event: "archive.approved",
+            previousStatus: "PENDING",
+            previousNumber: archive.number,
+            newNumber: allocated.number,
+            sequenceNumber: allocated.sequenceNumber,
+          },
+          ip: clientIp(req),
+          userAgent: req.headers.get("user-agent"),
+        },
+        tx
+      );
 
-  if (!updated) {
-    return NextResponse.json(
-      { error: "Status arsip berubah di tengah proses. Silakan muat ulang dan coba lagi." },
-      { status: 409 }
-    );
-  }
-
-  runAfter("archive.approved", async () => {
-    await fireWebhook({
-      event: "archive.approved",
-      archiveId: updated.id,
-      number: updated.number,
-      subject: updated.subject,
-      unitCode: updated.unitCode,
-      letterTypeCode: updated.letterTypeCode,
-      approvedById: session.userId,
-      previousNumber: archive.number,
+      return u;
     });
-  });
 
-  return NextResponse.json({ archive: serialiseArchive(updated) });
+    if (!updated) {
+      return NextResponse.json(
+        { error: "Status arsip berubah di tengah proses. Silakan muat ulang dan coba lagi." },
+        { status: 409 }
+      );
+    }
+
+    runAfter("archive.approved", async () => {
+      await fireWebhook({
+        event: "archive.approved",
+        archiveId: updated.id,
+        number: updated.number,
+        subject: updated.subject,
+        unitCode: updated.unitCode,
+        letterTypeCode: updated.letterTypeCode,
+        approvedById: session.userId,
+        previousNumber: archive.number,
+      });
+    });
+
+    return NextResponse.json({ archive: serialiseArchive(updated) });
+  } catch (e: unknown) {
+    if (e instanceof Error && e.message === "ARCHIVE_NOT_PENDING") {
+      return NextResponse.json(
+        { error: "Status arsip berubah di tengah proses. Silakan muat ulang dan coba lagi." },
+        { status: 409 }
+      );
+    }
+    const message =
+      e instanceof Error ? e.message : "Terjadi kesalahan saat menyetujui arsip";
+    console.error("[PATCH /api/archives/[id]] approve failed:", e);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
 
 /**
