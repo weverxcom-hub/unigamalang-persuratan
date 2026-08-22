@@ -9,6 +9,7 @@ import {
   renameFile as renameGdriveFile,
 } from "@/lib/gdrive";
 import { buildArchiveFilename } from "@/lib/archive-filename";
+import { validateDataUrlContent } from "@/lib/file-signature";
 import { serialiseArchive } from "../../serialise";
 
 const MAX_DATA_URL_LEN = 4 * 1024 * 1024;
@@ -93,6 +94,18 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       { error: parsed.error?.issues?.[0]?.message ?? "Data tidak valid" },
       { status: 400 }
     );
+  }
+
+  // Content-sniff the inline base64 fallback: it's the only upload path
+  // where this server ever holds the raw bytes (Blob/GDrive uploads go
+  // straight from the browser to storage), so it's the only path where a
+  // client can lie about the MIME type in the `data:` prefix. Reject a
+  // mismatch before it's ever persisted. See src/lib/file-signature.ts.
+  if (parsed.data.fileDataUrl) {
+    const check = validateDataUrlContent(parsed.data.fileDataUrl);
+    if (!check.ok) {
+      return NextResponse.json({ error: check.reason }, { status: 422 });
+    }
   }
 
   const archive = await prisma.archive.findFirst({
