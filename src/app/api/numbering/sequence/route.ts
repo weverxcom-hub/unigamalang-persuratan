@@ -82,6 +82,29 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "Jenis surat tidak ditemukan" }, { status: 400 });
   }
 
+  // Refuse to wind the counter back below a sequence number that's already
+  // been issued (audit T-05): allocateNextNumber() always hands out
+  // `last + 1`, so setting `last` lower than an archive that already
+  // exists for this (unit, jenis, year) would make the very next
+  // auto-generated number collide with a real, already-issued document.
+  // Checked against every archive regardless of VOID/soft-delete status —
+  // a retired number must never be reissued either.
+  const yearStart = new Date(Date.UTC(year, 0, 1));
+  const yearEnd = new Date(Date.UTC(year + 1, 0, 1));
+  const maxIssued = await prisma.archive.aggregate({
+    where: { unitId, letterTypeId, date: { gte: yearStart, lt: yearEnd } },
+    _max: { sequenceNumber: true },
+  });
+  const maxIssuedSeq = maxIssued._max.sequenceNumber ?? 0;
+  if (last < maxIssuedSeq) {
+    return NextResponse.json(
+      {
+        error: `Tidak bisa menurunkan nomor terakhir di bawah ${maxIssuedSeq} — sudah ada surat dengan nomor urut sampai ${maxIssuedSeq} di tahun ${year} untuk unit/jenis surat ini.`,
+      },
+      { status: 400 }
+    );
+  }
+
   const seq = await prisma.numberingSequence.upsert({
     where: { unitId_letterTypeId_year: { unitId, letterTypeId, year } },
     create: { unitId, letterTypeId, year, last },

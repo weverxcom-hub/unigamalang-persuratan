@@ -26,6 +26,18 @@ enum Role {
   USER
 }
 
+// How the account's identity was established.
+//   CREDENTIALS — self-registered via /register (email + password). Starts
+//                 with no unit; a SUPER_ADMIN must assign one (admin
+//                 approval gate — see /api/users/me/unit).
+//   SSO         — auto-provisioned from the institutional SSO gateway
+//                 (src/lib/sso-client.ts). Trusted enough to self-assign
+//                 its own unit once, via /setup-unit.
+enum AuthProvider {
+  CREDENTIALS
+  SSO
+}
+
 enum Direction {
   OUTGOING
   INCOMING
@@ -109,11 +121,21 @@ model User {
   role         Role      @default(USER)
   unitId       String?
   unit         Unit?     @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  authProvider AuthProvider @default(CREDENTIALS)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   // Soft-delete sentinel. When non-null, account is deactivated: cannot
   // log in and is hidden from list endpoints by default.
   deletedAt    DateTime?
+
+  // Bumped whenever role, unitId, or passwordHash change (by self or by a
+  // SUPER_ADMIN). The JWT carries the version it was signed with; getSession()
+  // rejects a token whose version doesn't match the current DB value. This
+  // gives near-immediate revocation for privilege/identity changes without
+  // needing a server-side session store — a demoted admin or a password
+  // reset after a suspected leak can't keep using an old cookie for the
+  // rest of its 7-day lifetime.
+  sessionVersion Int @default(0)
 
   // Self-service password reset. Token is a random hex string; expires
   // after 1 hour. Both fields are cleared after a successful reset.
@@ -253,7 +275,13 @@ model NumberingSequence {
 
 model Archive {
   id             String        @id @default(cuid())
-  number         String // e.g. "001/UNIGA/SK/IV/2026"
+  // Globally unique: the rendered number is the institution's actual
+  // document reference (e.g. "001/UNIGA/SK/IV/2026") and must never be
+  // reused, including across VOID'd or soft-deleted rows — a voided
+  // number stays retired, not recyclable. Enforced by the DB, not just
+  // app-level checks, so a manual/"sisipan" entry can't collide with an
+  // auto-generated one under concurrent requests.
+  number         String        @unique
   date           DateTime      @default(now())
   subject        String
   recipient      String // internal recipient / tujuan (OUTGOING) or internal receiver (INCOMING)
@@ -311,7 +339,7 @@ model Archive {
   @@index([direction])
   @@index([status])
   @@index([date])
-  @@index([number])
+  // number already has an index via @unique above
 }
 
 model Disposition {

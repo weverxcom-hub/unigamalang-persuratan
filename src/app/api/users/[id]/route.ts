@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
-import { getSession } from "@/lib/auth";
+import { getSession, setSessionCookie, toSessionPayload } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { audit } from "@/lib/audit";
 import type { Role } from "@prisma/client";
@@ -65,14 +65,29 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     unitId?: string | null;
     passwordHash?: string;
     deletedAt?: Date | null;
+    sessionVersion?: { increment: number };
   } = {};
   if (parsed.data.name !== undefined) data.name = parsed.data.name;
   if (parsed.data.role !== undefined) data.role = parsed.data.role as Role;
   if (parsed.data.unitId !== undefined) data.unitId = parsed.data.unitId;
   if (parsed.data.password !== undefined) data.passwordHash = bcrypt.hashSync(parsed.data.password, 10);
   if (parsed.data.reactivate) data.deletedAt = null;
+  // Bump sessionVersion whenever role, unit, or password change so any
+  // already-issued cookie for this user stops working on their very next
+  // request instead of waiting out the 7-day JWT expiry (audit T-03).
+  if (parsed.data.role !== undefined || parsed.data.unitId !== undefined || parsed.data.password !== undefined) {
+    data.sessionVersion = { increment: 1 };
+  }
 
   const updated = await prisma.user.update({ where: { id: params.id }, data });
+
+  // A SUPER_ADMIN editing their own row (e.g. their own password) just
+  // bumped their own sessionVersion above — refresh their cookie so they
+  // aren't immediately logged out by their own action.
+  if (updated.id === session.userId) {
+    await setSessionCookie(toSessionPayload(updated));
+  }
+
   await audit({
     action: "UPDATE",
     actorId: session.userId,

@@ -5,6 +5,9 @@ import { prisma } from "@/lib/prisma";
 import { DEFAULT_FORMAT_TEMPLATE } from "@/lib/format";
 
 export async function GET() {
+  const session = await getSession();
+  if (!session) return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
+
   const units = await prisma.unit.findMany({
     where: { deletedAt: null },
     orderBy: { code: "asc" },

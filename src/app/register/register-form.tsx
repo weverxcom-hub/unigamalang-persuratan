@@ -4,19 +4,13 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 
-interface RegisterFormProps {
-  units: { id: string; code: string; name: string }[];
-}
-
-export function RegisterForm({ units }: RegisterFormProps) {
+export function RegisterForm() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [unitId, setUnitId] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -28,14 +22,16 @@ export function RegisterForm({ units }: RegisterFormProps) {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, unitId: unitId || null }),
+        body: JSON.stringify({ name, email, password }),
       });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || "Gagal mendaftar");
         return;
       }
-      router.push("/dashboard");
+      // New accounts start with no unit — /setup-unit explains that a
+      // Super Admin needs to assign one before the dashboard is usable.
+      router.push("/setup-unit");
       router.refresh();
     } catch {
       setError("Terjadi kesalahan jaringan");
@@ -71,21 +67,6 @@ export function RegisterForm({ units }: RegisterFormProps) {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="unit">Unit</Label>
-        <Select value={unitId} onValueChange={setUnitId}>
-          <SelectTrigger id="unit">
-            <SelectValue placeholder="Pilih unit Anda" />
-          </SelectTrigger>
-          <SelectContent>
-            {units.map((u) => (
-              <SelectItem key={u.id} value={u.id}>
-                {u.code} — {u.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
       {error && (
         <div className="rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">

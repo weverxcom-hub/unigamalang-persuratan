@@ -36,6 +36,10 @@ export async function GET(req: NextRequest) {
           // Generate a random password hash — user authenticates via SSO
           passwordHash: bcrypt.hashSync(crypto.randomUUID(), 10),
           role: (ssoUser.role as "SUPER_ADMIN" | "ADMIN_UNIT" | "USER") || "USER",
+          // Marks this account as institutionally-vouched-for, so it's
+          // allowed to self-assign a unit once via /setup-unit (unlike a
+          // self-registered CREDENTIALS account — see audit T-01).
+          authProvider: "SSO",
         },
       });
     } else if (user.deletedAt) {

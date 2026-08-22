@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { cache } from "react";
 import { prisma } from "./prisma";
-import type { Role, SessionPayload } from "./types";
+import type { SessionPayload } from "./types";
 import type { User as PrismaUser } from "@prisma/client";
 
 const DEFAULT_DEV_SECRET = "unigamalang-dev-secret-change-me-in-production-0123456789";
@@ -67,13 +67,16 @@ export const getSession = cache(
     if (!token) return null;
     const payload = await verifySession(token);
     if (!payload) return null;
-    // Reject sessions for deactivated accounts. One DB lookup per request,
-    // but gives immediate revocation when an account is soft-deleted.
+    // Reject sessions for deactivated accounts, and for tokens whose
+    // sessionVersion is stale (role/unit/password changed since signing —
+    // see User.sessionVersion). One DB lookup per request, but gives
+    // near-immediate revocation instead of waiting out the 7-day JWT expiry.
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
-      select: { deletedAt: true },
+      select: { deletedAt: true, sessionVersion: true },
     });
     if (!user || user.deletedAt) return null;
+    if ((payload.sessionVersion ?? 0) !== user.sessionVersion) return null;
     return payload;
   }
 );
@@ -107,12 +110,20 @@ export async function authenticate(
   return ok ? user : null;
 }
 
+/**
+ * Self-service registration (POST /register). Deliberately does NOT accept
+ * a `unitId` — letting a self-registered account declare its own unit was
+ * the direct path to reading another unit's archives (audit finding T-01).
+ * Every self-registered account starts with unitId: null and
+ * authProvider: CREDENTIALS; a SUPER_ADMIN must assign the unit via
+ * PATCH /api/users/[id]. This is distinct from SSO-provisioned accounts,
+ * which are trusted to self-assign once via /setup-unit (see
+ * /api/users/me/unit).
+ */
 export async function registerUser(params: {
   email: string;
   password: string;
   name: string;
-  unitId: string | null;
-  role?: Role;
 }): Promise<PrismaUser> {
   if (!isAllowedEmail(params.email)) {
     throw new Error(`Hanya email ${EMAIL_DOMAIN} yang diizinkan`);
@@ -127,23 +138,14 @@ export async function registerUser(params: {
     throw new Error("Email sudah terdaftar");
   }
 
-  // Defensive: empty-string unitId from any caller is normalised to null
-  // so we don't slip past the truthiness check and crash on FK P2003.
-  const unitId = params.unitId === "" ? null : params.unitId ?? null;
-  if (unitId) {
-    const unit = await prisma.unit.findUnique({ where: { id: unitId } });
-    if (!unit || unit.deletedAt) {
-      throw new Error("Unit tidak ditemukan atau telah dinonaktifkan");
-    }
-  }
-
   return prisma.user.create({
     data: {
       email: params.email.toLowerCase(),
       name: params.name,
       passwordHash: bcrypt.hashSync(params.password, 10),
-      role: params.role ?? "USER",
-      unitId,
+      role: "USER",
+      unitId: null,
+      authProvider: "CREDENTIALS",
     },
   });
 }
@@ -155,6 +157,7 @@ export function toSessionPayload(user: PrismaUser): SessionPayload {
     name: user.name,
     role: user.role,
     unitId: user.unitId,
+    sessionVersion: user.sessionVersion,
   };
 }
 

@@ -72,13 +72,19 @@ export async function POST(req: Request) {
     );
   }
 
-  // Update password and clear the reset token
+  // Update password, clear the reset token, and bump sessionVersion (audit
+  // T-03) so any session opened with the old password — e.g. by whoever
+  // this reset flow is protecting against — stops working immediately.
+  // Deliberately does NOT refresh a cookie here: the caller has no session
+  // at this point (this is the "my password may be compromised" flow), so
+  // they're expected to log in fresh with the new password.
   await prisma.user.update({
     where: { id: user.id },
     data: {
       passwordHash: bcrypt.hashSync(newPassword, 10),
       resetToken: null,
       resetTokenExpiresAt: null,
+      sessionVersion: { increment: 1 },
     },
   });
 
