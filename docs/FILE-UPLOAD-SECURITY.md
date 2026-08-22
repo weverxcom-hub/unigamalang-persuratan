@@ -6,6 +6,16 @@ File uploads are validated by:
 - **MIME type allowlist**: Only `image/*`, `application/pdf`, `application/msword`, and OpenXML formats
 - **File size limits**: 2MB inline, 5MB Blob, 25MB Google Drive
 - **Extension check**: Client-side + server-side validation
+- **Content sniffing (inline base64 path only)**: `src/lib/file-signature.ts` checks the
+  actual magic bytes of a `data:` URL against its declared MIME type and rejects a
+  mismatch with 422 before the record is persisted (`/api/archives` POST and
+  `/api/archives/[id]/proof` POST). This is the only upload path where the server ever
+  holds the raw bytes — Google Drive and Vercel Blob uploads go straight from the
+  browser to storage, so a client-declared MIME type can't be cross-checked there without
+  fetching the file back down server-side. **This is not malware scanning** — it only
+  catches "file X disguised as file Y", not a legitimate-looking file carrying a
+  malicious payload (e.g. a PDF with embedded JavaScript). ClamAV/VirusTotal integration
+  below is still the recommended next step for real malware detection.
 
 ## Recommended: ClamAV Integration
 
