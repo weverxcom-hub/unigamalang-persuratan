@@ -69,13 +69,21 @@ export async function getSidebarBadges(
       });
     })();
 
-    // Disposisi inbox — anyone can be a recipient. We count rows still in
+    // Disposisi inbox — anyone can be a recipient, either directly
+    // (toUserId) or via their unit (toUnitId), matching the OR the actual
+    // inbox query (GET /api/dispositions?box=inbox) uses. Audit L1
+    // (2026-08-27): this previously only counted toUserId, so a disposition
+    // sent to a user's *unit* was invisible on the sidebar until they
+    // opened Disposisi and saw it in the list. We count rows still in
     // PENDING status (user hasn't even acknowledged yet). ACKNOWLEDGED rows
     // are excluded because the user has already seen them.
     const dispositionsPromise = prisma.disposition.count({
       where: {
-        toUserId: session.userId,
         status: "PENDING",
+        OR: [
+          { toUserId: session.userId },
+          ...(session.unitId ? [{ toUnitId: session.unitId }] : []),
+        ],
       },
     });
 

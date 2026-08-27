@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import crypto from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { audit } from "@/lib/audit";
+import { hashResetToken } from "@/lib/auth";
 import { PASSWORD_REGEX, PASSWORD_HINT } from "@/lib/password-policy";
 import { checkPasswordResetRate, rateLimitResponse } from "@/lib/rate-limit";
 
@@ -51,19 +53,18 @@ export async function POST(req: Request) {
     );
   }
 
-  // Constant-time comparison to prevent timing attacks
-  const tokenValid =
-    crypto.timingSafeEqual
-      ? (() => {
-          try {
-            const a = Buffer.from(user.resetToken!, "utf-8");
-            const b = Buffer.from(token, "utf-8");
-            return a.length === b.length && crypto.timingSafeEqual(a, b);
-          } catch {
-            return false;
-          }
-        })()
-      : user.resetToken === token;
+  // user.resetToken stores SHA-256(token), not the raw token (audit M5) —
+  // hash the caller's token the same way before comparing. Constant-time
+  // comparison to prevent timing attacks.
+  const tokenValid = (() => {
+    try {
+      const a = Buffer.from(user.resetToken!, "utf-8");
+      const b = Buffer.from(hashResetToken(token), "utf-8");
+      return a.length === b.length && crypto.timingSafeEqual(a, b);
+    } catch {
+      return false;
+    }
+  })();
 
   if (!tokenValid || user.resetTokenExpiresAt < new Date()) {
     return NextResponse.json(
@@ -99,6 +100,3 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ ok: true });
 }
-
-// Import crypto for timingSafeEqual
-import crypto from "node:crypto";

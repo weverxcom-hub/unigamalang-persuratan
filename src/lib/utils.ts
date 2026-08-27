@@ -12,7 +12,14 @@ export function toRoman(month: number): string {
 
 export function formatDate(iso: string | Date): string {
   const d = iso instanceof Date ? iso : new Date(iso);
-  return d.toLocaleDateString("id-ID", { year: "numeric", month: "short", day: "2-digit" });
+  // Explicit timeZone (audit B3) — don't rely on the server's TZ env var
+  // being set correctly; without it this renders in UTC on Vercel.
+  return d.toLocaleDateString("id-ID", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    timeZone: "Asia/Jakarta",
+  });
 }
 
 export function pad3(n: number): string {

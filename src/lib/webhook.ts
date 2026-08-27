@@ -10,6 +10,11 @@ import type { Prisma } from "@prisma/client";
 
 const TARGET_URL = process.env.N8N_WEBHOOK_URL ?? "";
 const SIGNING_SECRET = process.env.WEBHOOK_SIGNING_SECRET ?? "";
+// The literal placeholder from .env.example — if ops copies that file
+// without changing this value, every payload would carry a signature an
+// attacker can compute themselves from the public repo (audit M10).
+const PLACEHOLDER_SECRET = "change-this-to-another-long-random-string";
+const SIGNING_SECRET_VALID = !!SIGNING_SECRET && SIGNING_SECRET !== PLACEHOLDER_SECRET;
 
 export const WEBHOOK_AVAILABLE = !!TARGET_URL;
 
@@ -44,7 +49,7 @@ export async function fireWebhook(
 ): Promise<void> {
   const client = opts?.tx ?? prisma;
   const body = JSON.stringify(payload);
-  const signature = SIGNING_SECRET ? sign(body) : "";
+  const signature = SIGNING_SECRET_VALID ? sign(body) : "";
 
   let rowId: string | null = null;
   try {
@@ -68,6 +73,23 @@ export async function fireWebhook(
           lastError: "N8N_WEBHOOK_URL is not configured",
           attempts: { increment: 1 },
         },
+      });
+      return;
+    }
+
+    // Refuse to deliver an unsigned (or placeholder-signed) payload (audit
+    // M10) — a receiver relying on X-Signature to trust the sender would
+    // otherwise accept forged events from anyone who can reach the URL, or
+    // (with the placeholder secret) from anyone who read .env.example.
+    // Better to skip delivery loudly than deliver something unverifiable.
+    if (!SIGNING_SECRET_VALID) {
+      const reason = SIGNING_SECRET
+        ? "WEBHOOK_SIGNING_SECRET is still the .env.example placeholder value"
+        : "WEBHOOK_SIGNING_SECRET is not configured";
+      console.error(`[fireWebhook] refusing to deliver unsigned payload: ${reason}`);
+      await client.webhookDelivery.update({
+        where: { id: row.id },
+        data: { status: "FAILED", lastError: reason, attempts: { increment: 1 } },
       });
       return;
     }

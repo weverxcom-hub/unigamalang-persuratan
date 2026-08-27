@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { audit } from "@/lib/audit";
 import { DEFAULT_FORMAT_TEMPLATE } from "@/lib/format";
 
 export async function GET() {
@@ -76,6 +77,17 @@ export async function POST(req: Request) {
       name: parsed.data.name,
       formatTemplate: parsed.data.formatTemplate || DEFAULT_FORMAT_TEMPLATE,
     },
+  });
+  // Audit L3 (2026-08-27): PATCH and DELETE on this resource already write
+  // an audit row; POST (creation) was the one gap in an otherwise-consistent
+  // master-data audit trail.
+  await audit({
+    action: "CREATE",
+    actorId: session.userId,
+    actorEmail: session.email,
+    targetType: "Unit",
+    targetId: unit.id,
+    metadata: { code: unit.code, name: unit.name, formatTemplate: unit.formatTemplate },
   });
   return NextResponse.json(
     {

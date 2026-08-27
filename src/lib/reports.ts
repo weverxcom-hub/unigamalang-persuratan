@@ -5,6 +5,7 @@
 // helpers parse those params into typed values + Prisma filter snippets.
 
 import type { Prisma } from "@prisma/client";
+import { getJakartaParts } from "./timezone";
 
 /** A from..to date window. Both bounds are inclusive at the day granularity. */
 export interface DateRange {
@@ -23,7 +24,9 @@ export function parseDate(value: string | null | undefined): Date | null {
 /** Default range when neither `from` nor `to` is supplied: current calendar
  *  year. Matches the most common use-case (laporan tahunan akreditasi). */
 export function defaultRange(now: Date = new Date()): DateRange {
-  const year = now.getFullYear();
+  // Jakarta calendar year, not server/UTC (audit B3) — otherwise a report
+  // opened between 00:00–06:59 WIB on 1 Jan defaults to the prior year.
+  const { year } = getJakartaParts(now);
   return {
     from: new Date(Date.UTC(year, 0, 1)),
     to: new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999)),
@@ -77,7 +80,12 @@ export function isoDate(d: Date): string {
 export function describeRange(range: DateRange): string {
   if (!range.from && !range.to) return "Seluruh waktu";
   const fmt = (d: Date) =>
-    d.toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
+    d.toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      timeZone: "Asia/Jakarta",
+    });
   if (range.from && range.to) {
     if (range.from.toDateString() === range.to.toDateString()) {
       return fmt(range.from);

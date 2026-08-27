@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
+import crypto from "node:crypto";
 import { cache } from "react";
 import { prisma } from "./prisma";
 import type { SessionPayload } from "./types";
@@ -159,6 +160,20 @@ export function toSessionPayload(user: PrismaUser): SessionPayload {
     unitId: user.unitId,
     sessionVersion: user.sessionVersion,
   };
+}
+
+/**
+ * Hash a password-reset token before it touches the database (audit M5,
+ * 2026-08-27). The raw token only ever exists in the emailed link and in
+ * memory during the request that issues/verifies it; User.resetToken stores
+ * SHA-256(token) so that DB access (a backup, a dump, a leaked query log,
+ * an internal tool reading the User table) cannot be used to take over an
+ * account the way a plaintext token could. This is a lookup key, not a
+ * secret an attacker needs to brute-force offline (it's 32 random bytes and
+ * expires in 1h), so a fast hash is fine — no bcrypt/scrypt needed.
+ */
+export function hashResetToken(token: string): string {
+  return crypto.createHash("sha256").update(token).digest("hex");
 }
 
 export const AUTH_COOKIE = COOKIE_NAME;

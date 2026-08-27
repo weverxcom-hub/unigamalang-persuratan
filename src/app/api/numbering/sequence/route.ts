@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { audit } from "@/lib/audit";
+import { getJakartaParts } from "@/lib/timezone";
 
 const setSchema = z.object({
   unitId: z.string().min(1),
@@ -23,9 +24,16 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const unitId = url.searchParams.get("unitId") ?? "";
   const yearRaw = url.searchParams.get("year");
-  const year = yearRaw ? Number(yearRaw) : new Date().getFullYear();
+  const year = yearRaw ? Number(yearRaw) : getJakartaParts().year;
   if (!unitId || !Number.isInteger(year)) {
     return NextResponse.json({ error: "Parameter tidak valid" }, { status: 400 });
+  }
+  // Audit M7 (2026-08-27): this endpoint only had an auth check, not a scope
+  // check — any authenticated USER/ADMIN_UNIT could pass another unit's
+  // unitId and see how many letters that unit has issued per jenis surat
+  // this year (a real, if minor, information leak between units).
+  if (session.role !== "SUPER_ADMIN" && session.unitId !== unitId) {
+    return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
   }
   const [letterTypes, sequences] = await Promise.all([
     prisma.letterType.findMany({

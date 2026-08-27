@@ -236,6 +236,24 @@ const createSchema = z
         });
       }
     }
+    // Audit M1 (2026-08-27): the UI always sends isInsert=true alongside a
+    // manual OUTGOING number, but that pairing was only enforced client-side
+    // — a direct API call could submit `manualNumber` without `isInsert` and
+    // create an archive with an arbitrary number, isInsert=false, and no
+    // insertReason, invisible as a sisipan to auditors. Reject that
+    // combination server-side instead of silently accepting it.
+    if (
+      val.direction !== "INCOMING" &&
+      !val.isInsert &&
+      val.manualNumber &&
+      val.manualNumber.trim().length > 0
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Nomor manual untuk surat keluar hanya diperbolehkan sebagai sisipan (isInsert)",
+        path: ["manualNumber"],
+      });
+    }
   });
 
 export async function POST(req: Request) {
@@ -490,6 +508,7 @@ async function postImpl(req: Request) {
         day: "2-digit",
         month: "long",
         year: "numeric",
+        timeZone: "Asia/Jakarta",
       });
       for (const a of admins) {
         const msg = renderIncomingLetterEmail({

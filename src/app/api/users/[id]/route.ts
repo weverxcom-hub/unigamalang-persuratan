@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { getSession, setSessionCookie, toSessionPayload } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { audit } from "@/lib/audit";
+import { PASSWORD_REGEX, PASSWORD_HINT } from "@/lib/password-policy";
 import type { Role } from "@prisma/client";
 
 const ROLES = ["SUPER_ADMIN", "ADMIN_UNIT", "USER"] as const;
@@ -12,7 +13,9 @@ const patchSchema = z.object({
   role: z.enum(ROLES).optional(),
   // Empty string => null (avoid FK P2003 crash when UI picks "Tidak terikat").
   unitId: z.preprocess((v) => (v === "" ? null : v), z.string().nullable().optional()),
-  password: z.string().min(8, "Kata sandi minimal 8 karakter").optional(),
+  // Same complexity rule as register/self-change (audit M3) — this route
+  // previously only enforced length, so a SUPER_ADMIN could set "12345678".
+  password: z.string().min(8, "Kata sandi minimal 8 karakter").regex(PASSWORD_REGEX, PASSWORD_HINT).optional(),
   // Reactivate (clear deletedAt). Cannot be combined with deactivation —
   // explicit DELETE handles that.
   reactivate: z.boolean().optional(),

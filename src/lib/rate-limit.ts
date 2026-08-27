@@ -85,6 +85,19 @@ export function checkLoginRate(req: Request): RateLimitResult {
   return rateLimit(`login:${ip}`, 10, 15 * 60 * 1000);
 }
 
+/**
+ * Login, per-account: 10 attempts per email per 15 minutes, independent of
+ * IP (audit H7). checkLoginRate() alone only slows down a single-IP
+ * attacker; someone spraying one target account's password from rotating
+ * IPs (botnet, residential proxies) sails through it untouched since each
+ * IP gets its own fresh bucket. This closes that gap by also keying on the
+ * (lowercased) email being attempted — cheap to add since login already
+ * has the email in hand before calling authenticate().
+ */
+export function checkLoginRateByEmail(email: string): RateLimitResult {
+  return rateLimit(`login-email:${email.toLowerCase()}`, 10, 15 * 60 * 1000);
+}
+
 /** Register: 5 attempts per IP per hour */
 export function checkRegisterRate(req: Request): RateLimitResult {
   const ip = getClientIp(req);

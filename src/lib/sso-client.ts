@@ -8,6 +8,10 @@
  *   SSO_REDIRECT_URI   — this app's callback URL, e.g. http://localhost:3001/auth/callback
  */
 
+/** Cookie name for the SSO login-CSRF `state` value (set by
+ * /auth/sso/start, verified by /auth/callback). See audit B2. */
+export const SSO_STATE_COOKIE = "sso_state";
+
 export function getSSOConfig() {
   const baseUrl = process.env.SSO_BASE_URL;
   const clientId = process.env.SSO_CLIENT_ID;
@@ -21,6 +25,18 @@ export function getSSOConfig() {
   }
 
   return { baseUrl, clientId, clientSecret, redirectUri };
+}
+
+/** Whether SSO is configured. Same var set `getSSOConfig()` requires, but
+ * doesn't throw — used to decide whether to show the "Masuk dengan SSO"
+ * button / expose the start route at all. */
+export function ssoAvailable(): boolean {
+  return Boolean(
+    process.env.SSO_BASE_URL &&
+      process.env.SSO_CLIENT_ID &&
+      process.env.SSO_CLIENT_SECRET &&
+      process.env.SSO_REDIRECT_URI
+  );
 }
 
 /** Build the URL to redirect the user to for SSO login. */
