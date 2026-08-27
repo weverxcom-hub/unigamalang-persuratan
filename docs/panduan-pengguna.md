@@ -27,11 +27,19 @@ berjalan otomatis, terpusat, dan dapat ditelusuri.
 3. Isi data:
    - Nama lengkap
    - Email institusi (**harus** `@unigamalang.ac.id`)
-   - Unit tempat Anda bernaung (mis. Rektorat, Yayasan, Fakultas Ekonomi)
    - Kata sandi minimal 8 karakter
-4. Setelah terdaftar, Anda dapat masuk di halaman **Login**.
+4. Setelah mendaftar, akun Anda **belum terhubung ke unit mana pun**. Anda akan
+   melihat halaman "Menunggu penetapan unit" — ini normal, bukan error.
+5. Hubungi Super Admin (TU Pusat) untuk memberi tahu unit tempat Anda bernaung.
+   Begitu Super Admin menetapkan unit Anda di menu **Pengguna**, Anda bisa langsung
+   masuk dan mulai menggunakan sistem.
 
 > **Penting:** Email selain `@unigamalang.ac.id` akan otomatis ditolak oleh sistem.
+>
+> **Kenapa harus lewat Super Admin?** Unit menentukan arsip surat mana yang bisa
+> Anda lihat. Penetapan unit oleh Super Admin memastikan tidak ada yang bisa
+> mengaku-aku sebagai anggota unit lain hanya dengan memilihnya sendiri saat
+> mendaftar.
 
 ---
 
