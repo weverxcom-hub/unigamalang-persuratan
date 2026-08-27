@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { allocateNextNumber } from "@/lib/numbering";
@@ -145,6 +145,15 @@ export async function GET(req: Request) {
 // POST /api/archives
 // -------------------------------------------------------------------------
 
+/** Thrown inside the create transaction when a manual number collides with
+ * an existing archive (audit T-05). Caught after the transaction to return
+ * a 409 with the offending number. */
+class DuplicateNumberError extends Error {
+  constructor(public readonly number: string) {
+    super(`Nomor surat sudah digunakan: ${number}`);
+  }
+}
+
 const MAX_DATA_URL_LEN = 4 * 1024 * 1024; // ~3MB binary (base64 adds ~33%)
 const DATA_URL_PATTERN = /^data:(image\/(png|jpe?g|webp|gif)|application\/pdf);base64,/i;
 const BLOB_URL_PATTERN = /^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\//i;
@@ -226,6 +235,24 @@ const createSchema = z
           path: ["insertReason"],
         });
       }
+    }
+    // Audit M1 (2026-08-27): the UI always sends isInsert=true alongside a
+    // manual OUTGOING number, but that pairing was only enforced client-side
+    // — a direct API call could submit `manualNumber` without `isInsert` and
+    // create an archive with an arbitrary number, isInsert=false, and no
+    // insertReason, invisible as a sisipan to auditors. Reject that
+    // combination server-side instead of silently accepting it.
+    if (
+      val.direction !== "INCOMING" &&
+      !val.isInsert &&
+      val.manualNumber &&
+      val.manualNumber.trim().length > 0
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Nomor manual untuk surat keluar hanya diperbolehkan sebagai sisipan (isInsert)",
+        path: ["manualNumber"],
+      });
     }
   });
 
@@ -360,80 +387,113 @@ async function postImpl(req: Request) {
   const status: Prisma.ArchiveCreateInput["status"] =
     session.role === "USER" ? "PENDING" : hasFile ? "ISSUED" : "PENDING_PROOF";
 
-  const archive = await prisma.$transaction(async (tx) => {
-    let number: string;
-    let sequenceNumber = 0;
-    if (isManualArchive) {
-      number = input.manualNumber!.trim();
-    } else {
-      const allocated = await allocateNextNumber(input.unitId, input.letterTypeId, tx);
-      number = allocated.number;
-      sequenceNumber = allocated.sequenceNumber;
-    }
+  let archive: Awaited<ReturnType<typeof prisma.archive.create>>;
+  try {
+    archive = await prisma.$transaction(async (tx) => {
+      let number: string;
+      let sequenceNumber = 0;
+      if (isManualArchive) {
+        number = input.manualNumber!.trim();
+        // Manual/"sisipan" numbers bypass the atomic allocator, so they
+        // need their own duplicate check (audit T-05). This pre-check gives
+        // a friendly error in the common case; the DB's unique constraint
+        // on Archive.number (below, via create()) is what actually
+        // prevents a race between two concurrent requests submitting the
+        // same number — checked against every archive regardless of
+        // VOID/soft-delete status, because a retired number must never be
+        // reissued.
+        const clash = await tx.archive.findUnique({ where: { number } });
+        if (clash) {
+          throw new DuplicateNumberError(number);
+        }
+      } else {
+        const allocated = await allocateNextNumber(input.unitId, input.letterTypeId, tx);
+        number = allocated.number;
+        sequenceNumber = allocated.sequenceNumber;
+      }
 
-    const created = await tx.archive.create({
-      data: {
-        number,
-        date: input.date ? new Date(input.date) : new Date(),
-        subject: input.subject,
-        recipient: input.recipient,
-        externalSender: input.externalSender ?? null,
-        direction: input.direction,
-        status,
-        unitId: unit.id,
-        unitCode: unit.code,
-        letterTypeId: letterType.id,
-        letterTypeCode: letterType.code,
-        sequenceNumber,
-        fileName: input.fileName ?? null,
-        fileUrl: input.fileUrl ?? null,
-        blobPathname: input.blobPathname ?? null,
-        gdriveFileId: input.gdriveFileId ?? null,
-        // DEPRECATED: inline base64 storage inflates DB size. This fallback
-        // is kept for backward compatibility but should be removed once all
-        // clients use Blob/GDrive uploads. See issue D5.
-        fileDataUrl: (() => {
-          if (input.fileUrl) return null;
-          if (input.fileDataUrl) {
-            console.warn(
-              "[DEPRECATED] Archive created with inline base64 fileDataUrl. " +
-              "Migrate to Blob/GDrive upload. archiveId will be logged post-create."
-            );
-            return input.fileDataUrl;
-          }
-          return null;
-        })(),
-        createdById: session.userId,
-        isInsert: isInsertArchive,
-        insertReason: isInsertArchive ? input.insertReason!.trim() : null,
-      },
-    });
-
-    await audit(
-      {
-        action: "CREATE",
-        actorId: session.userId,
-        actorEmail: session.email,
-        targetType: "Archive",
-        targetId: created.id,
-        archiveId: created.id,
-        metadata: {
-          number: created.number,
-          direction: created.direction,
-          status: created.status,
-          unitCode: created.unitCode,
-          letterTypeCode: created.letterTypeCode,
-          isInsert: created.isInsert,
-          insertReason: created.insertReason,
+      const created = await tx.archive.create({
+        data: {
+          number,
+          date: input.date ? new Date(input.date) : new Date(),
+          subject: input.subject,
+          recipient: input.recipient,
+          externalSender: input.externalSender ?? null,
+          direction: input.direction,
+          status,
+          unitId: unit.id,
+          unitCode: unit.code,
+          letterTypeId: letterType.id,
+          letterTypeCode: letterType.code,
+          sequenceNumber,
+          fileName: input.fileName ?? null,
+          fileUrl: input.fileUrl ?? null,
+          blobPathname: input.blobPathname ?? null,
+          gdriveFileId: input.gdriveFileId ?? null,
+          // DEPRECATED: inline base64 storage inflates DB size. This fallback
+          // is kept for backward compatibility but should be removed once all
+          // clients use Blob/GDrive uploads. See issue D5.
+          fileDataUrl: (() => {
+            if (input.fileUrl) return null;
+            if (input.fileDataUrl) {
+              console.warn(
+                "[DEPRECATED] Archive created with inline base64 fileDataUrl. " +
+                "Migrate to Blob/GDrive upload. archiveId will be logged post-create."
+              );
+              return input.fileDataUrl;
+            }
+            return null;
+          })(),
+          createdById: session.userId,
+          isInsert: isInsertArchive,
+          insertReason: isInsertArchive ? input.insertReason!.trim() : null,
         },
-        ip: clientIp(req),
-        userAgent: req.headers.get("user-agent"),
-      },
-      tx
-    );
+      });
 
-    return created;
-  });
+      await audit(
+        {
+          action: "CREATE",
+          actorId: session.userId,
+          actorEmail: session.email,
+          targetType: "Archive",
+          targetId: created.id,
+          archiveId: created.id,
+          metadata: {
+            number: created.number,
+            direction: created.direction,
+            status: created.status,
+            unitCode: created.unitCode,
+            letterTypeCode: created.letterTypeCode,
+            isInsert: created.isInsert,
+            insertReason: created.insertReason,
+          },
+          ip: clientIp(req),
+          userAgent: req.headers.get("user-agent"),
+        },
+        tx
+      );
+
+      return created;
+    });
+  } catch (err) {
+    if (err instanceof DuplicateNumberError) {
+      return NextResponse.json(
+        { error: `Nomor surat "${err.number}" sudah digunakan. Gunakan nomor lain.` },
+        { status: 409 }
+      );
+    }
+    // Race-safety net: two concurrent requests can both pass the pre-check
+    // above before either commits. The DB's unique constraint on
+    // Archive.number is what actually stops that — this translates the
+    // resulting P2002 into the same friendly error.
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      return NextResponse.json(
+        { error: "Nomor surat sudah digunakan. Gunakan nomor lain." },
+        { status: 409 }
+      );
+    }
+    throw err;
+  }
 
   // Post-commit side effects (email + webhook + Drive rename). Use
   // waitUntil() so the Vercel serverless runtime keeps the function alive
@@ -448,6 +508,7 @@ async function postImpl(req: Request) {
         day: "2-digit",
         month: "long",
         year: "numeric",
+        timeZone: "Asia/Jakarta",
       });
       for (const a of admins) {
         const msg = renderIncomingLetterEmail({

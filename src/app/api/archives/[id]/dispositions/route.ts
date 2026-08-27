@@ -202,6 +202,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
           day: "2-digit",
           month: "long",
           year: "numeric",
+          timeZone: "Asia/Jakarta",
         })
       : null;
     for (const r of recipients) {

@@ -127,6 +127,7 @@ export default async function PrintArchivesPage({
                     day: "2-digit",
                     month: "short",
                     year: "numeric",
+                    timeZone: "Asia/Jakarta",
                   })}
                 </td>
                 <td className="py-1.5 pr-2">{directionLabel(a.direction)}</td>

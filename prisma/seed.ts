@@ -1,9 +1,44 @@
 import { PrismaClient, Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import crypto from "node:crypto";
 
 const prisma = new PrismaClient();
 
-const DEMO_PASSWORD = "Password123!";
+/**
+ * Seeds demo accounts for local development only.
+ *
+ * Security (audit B1, 2026-08-27): this used to hash a fixed literal
+ * ("Password123!") that was also printed in README.md — anyone who could
+ * read the repo (public or not) had the SUPER_ADMIN password for any
+ * database the seed had ever been run against. Now:
+ *   - Refuses to run when NODE_ENV=production unless SEED_CONFIRM=true is
+ *     also set, so `npm run db:seed` can't be fat-fingered against a
+ *     deployed DATABASE_URL.
+ *   - The password is either read from SEED_DEMO_PASSWORD (useful for CI /
+ *     scripted local setups) or generated randomly per run and printed once
+ *     to the console — never hardcoded, never committed.
+ *   - Re-running the seed does NOT reset passwordHash for accounts that
+ *     already exist (see the `update:` clause below), so this only matters
+ *     the first time each demo account is created.
+ */
+if (process.env.NODE_ENV === "production" && process.env.SEED_CONFIRM !== "true") {
+  console.error(
+    "[seed] Refusing to run: NODE_ENV=production. This script creates demo " +
+    "accounts (including a SUPER_ADMIN) and must never touch a production " +
+    "database. If you really mean to do this, set SEED_CONFIRM=true."
+  );
+  process.exit(1);
+}
+
+function generateDemoPassword(): string {
+  // Guarantee at least one upper/lower/digit (matches PASSWORD_REGEX) even
+  // though the seed bypasses that check — the generated password should
+  // still work if reused through the normal password-change flow.
+  const rand = crypto.randomBytes(9).toString("base64url"); // 12 chars
+  return `Aa1${rand}`;
+}
+
+const DEMO_PASSWORD = process.env.SEED_DEMO_PASSWORD || generateDemoPassword();
 
 async function main() {
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
@@ -84,6 +119,13 @@ async function main() {
   console.log(
     `Seeded ${units.length} units, ${letterTypes.length} letter types, ${accounts.length} accounts.`
   );
+  if (!process.env.SEED_DEMO_PASSWORD) {
+    console.log(
+      `\nDemo password (generated, only shown once — save it now):\n  ${DEMO_PASSWORD}\n\n` +
+      `Re-running this seed will NOT reset it for accounts that already exist.\n` +
+      `To pin a known password instead, set SEED_DEMO_PASSWORD before running.\n`
+    );
+  }
 }
 
 main()

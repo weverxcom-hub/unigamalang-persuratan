@@ -7,19 +7,9 @@ import { SiteFooter } from "@/components/app/footer";
 import { LoginForm } from "./login-form";
 import { SSOButton } from "./sso-button";
 import { getSession } from "@/lib/auth";
+import { ssoAvailable } from "@/lib/sso-client";
 
 export const dynamic = "force-dynamic";
-
-function getSSOLoginUrl(): string | null {
-  const baseUrl = process.env.SSO_BASE_URL;
-  const clientId = process.env.SSO_CLIENT_ID;
-  const redirectUri = process.env.SSO_REDIRECT_URI;
-  if (!baseUrl || !clientId || !redirectUri) return null;
-  const url = new URL("/authorize", baseUrl);
-  url.searchParams.set("client_id", clientId);
-  url.searchParams.set("redirect_uri", redirectUri);
-  return url.toString();
-}
 
 export default async function LoginPage() {
   // Already-active session => skip the form. getSession also rejects
@@ -27,7 +17,10 @@ export default async function LoginPage() {
   const session = await getSession();
   if (session) redirect("/dashboard");
 
-  const ssoUrl = getSSOLoginUrl();
+  // The button links to the local /auth/sso/start route (not the gateway
+  // directly) so a per-attempt CSRF `state` can be generated and stored in
+  // a cookie before redirecting to the gateway — see that route's comment.
+  const ssoUrl = ssoAvailable() ? "/auth/sso/start" : null;
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-background via-background to-primary/5">

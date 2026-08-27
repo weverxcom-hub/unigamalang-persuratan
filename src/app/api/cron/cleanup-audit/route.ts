@@ -12,13 +12,15 @@ export const dynamic = "force-dynamic";
  * Security: Protected by CRON_SECRET env var (same as mark-overdue cron).
  */
 export async function GET(req: Request) {
-  // Validate cron secret to prevent unauthorized access
+  // Validate cron secret to prevent unauthorized access. Fail CLOSED: if
+  // CRON_SECRET isn't configured, refuse the request rather than silently
+  // skipping auth (matches /api/cron/mark-overdue). This route permanently
+  // deletes audit log rows, so an unset secret must never leave it open.
   const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const auth = req.headers.get("authorization");
-    if (auth !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  const auth = req.headers.get("authorization") ?? "";
+  const tokenOk = !!cronSecret && auth === `Bearer ${cronSecret}`;
+  if (!tokenOk) {
+    return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
   }
 
   const now = new Date();

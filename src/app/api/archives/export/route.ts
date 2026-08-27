@@ -3,6 +3,7 @@ import type { Prisma } from "@prisma/client";
 import ExcelJS from "exceljs";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { jakartaDateString } from "@/lib/timezone";
 
 // Mirrors the labels in dashboard/archives/archives-client.tsx so the export
 // uses the same Indonesian wording the user sees in the UI.
@@ -68,8 +69,9 @@ function rowToCsv(r: Row): string {
 }
 
 function fmtDate(d: Date): string {
-  // ISO yyyy-mm-dd in local TZ — sufficient for accreditation export.
-  return d.toISOString().slice(0, 10);
+  // Asia/Jakarta calendar date, not UTC (audit B3) — toISOString().slice(0,10)
+  // renders the wrong day for anything created 00:00–06:59 WIB.
+  return jakartaDateString(d);
 }
 
 /**
@@ -102,7 +104,21 @@ export async function GET(req: Request) {
   }
   if (letterTypeId) where.letterTypeId = letterTypeId;
   if (direction === "OUTGOING" || direction === "INCOMING") where.direction = direction;
-  if (status) where.status = status as Prisma.ArchiveWhereInput["status"];
+  // Whitelist (audit M8) — mirrors GET /api/archives, which already guards
+  // this. An unrecognised value here previously reached Prisma unvalidated
+  // and threw, surfacing as a raw 500 instead of a clean empty/ignored filter.
+  const ALLOWED_STATUSES = new Set([
+    "DRAFT",
+    "PENDING",
+    "PENDING_PROOF",
+    "APPROVED",
+    "ISSUED",
+    "OVERDUE",
+    "VOID",
+  ]);
+  if (status && ALLOWED_STATUSES.has(status)) {
+    where.status = status as Prisma.ArchiveWhereInput["status"];
+  }
 
   if (q) {
     const tokens = q.split(/\s+/).filter(Boolean);

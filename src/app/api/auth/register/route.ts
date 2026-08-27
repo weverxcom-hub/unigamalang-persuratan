@@ -8,8 +8,10 @@ const schema = z.object({
   name: z.string().min(2, "Nama minimal 2 karakter"),
   email: z.string().email(),
   password: z.string().min(8, "Kata sandi minimal 8 karakter").regex(PASSWORD_REGEX, PASSWORD_HINT),
-  // Empty string => null so an unselected unit picker doesn't trip FK P2003.
-  unitId: z.preprocess((v) => (v === "" ? null : v), z.string().nullable().optional()),
+  // No unitId here on purpose (audit T-01): letting a self-registered
+  // account declare its own unit was a direct path to reading another
+  // unit's archives. Every self-registered account starts unassigned; a
+  // SUPER_ADMIN assigns the unit afterwards via PATCH /api/users/[id].
 });
 
 /**
@@ -39,7 +41,7 @@ export async function POST(req: Request) {
       { status: 400 }
     );
   }
-  const { name, email, password, unitId } = parsed.data;
+  const { name, email, password } = parsed.data;
   if (!isAllowedEmail(email)) {
     return NextResponse.json(
       { error: `Hanya email ${ALLOWED_EMAIL_DOMAIN} yang diizinkan mendaftar` },
@@ -47,7 +49,7 @@ export async function POST(req: Request) {
     );
   }
   try {
-    const user = await registerUser({ name, email, password, unitId: unitId ?? null, role: "USER" });
+    const user = await registerUser({ name, email, password });
     const payload = toSessionPayload(user);
     await setSessionCookie(payload);
     return NextResponse.json({ user: payload }, { status: 201 });

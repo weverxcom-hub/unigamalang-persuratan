@@ -3,6 +3,7 @@ import type { Prisma } from "@prisma/client";
 import ExcelJS from "exceljs";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { jakartaDateString } from "@/lib/timezone";
 import {
   DISPOSITION_STATUS_LABEL,
   rangeFilter,
@@ -51,7 +52,8 @@ function rowToCsv(r: Row): string {
 }
 
 function fmtDate(d: Date | null | undefined): string {
-  return d ? d.toISOString().slice(0, 10) : "";
+  // Asia/Jakarta calendar date (audit B3), not UTC.
+  return d ? jakartaDateString(d) : "";
 }
 
 export async function GET(req: Request) {

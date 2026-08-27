@@ -128,7 +128,7 @@ cp .env.example .env.local
 ### 2. Migrasi Database
 ```bash
 npx prisma migrate dev --name init
-npm run db:seed   # populate unit, jenis surat, 4 akun demo
+npm run db:seed   # populate unit, jenis surat, 4 akun demo (LOKAL SAJA)
 ```
 
 ### 3. Jalankan dev server
@@ -139,28 +139,55 @@ npm run dev
 
 ## Akun Demo (seed)
 
-> ⚠️ Password demo **tidak ditampilkan di halaman login**. Kredensial hanya di
-> README ini untuk pengujian internal.
+> ⚠️ **JANGAN pernah jalankan `npm run db:seed` terhadap `DATABASE_URL`
+> production** — script ini membuat akun SUPER_ADMIN. Script menolak
+> berjalan bila `NODE_ENV=production` kecuali `SEED_CONFIRM=true` dipaksa
+> secara eksplisit.
+>
+> Password demo dibuat **acak setiap kali seed dijalankan** dan hanya
+> ditampilkan sekali di output terminal — tidak pernah disimpan di repo.
+> Untuk memakai password tetap (mis. di CI), set env `SEED_DEMO_PASSWORD`
+> sebelum menjalankan `npm run db:seed`.
 
-| Peran | Email | Password |
-|---|---|---|
-| Super Admin | `superadmin@unigamalang.ac.id` | `Password123!` |
-| Admin Unit (Rektorat) | `admin.rektorat@unigamalang.ac.id` | `Password123!` |
-| Admin Unit (Yayasan) | `admin.yayasan@unigamalang.ac.id` | `Password123!` |
-| User | `staff@unigamalang.ac.id` | `Password123!` |
+| Peran | Email |
+|---|---|
+| Super Admin | `superadmin@unigamalang.ac.id` |
+| Admin Unit (Rektorat) | `admin.rektorat@unigamalang.ac.id` |
+| Admin Unit (Yayasan) | `admin.yayasan@unigamalang.ac.id` |
+| User | `staff@unigamalang.ac.id` |
 
 ## Deploy ke Vercel
 
 1. Push repository ke GitHub.
 2. Vercel → **Add New Project** → import repo.
-3. Set environment variables (lihat `.env.example`):
-   - **WAJIB:** `AUTH_SECRET`, `DATABASE_URL`, `DIRECT_URL`.
-   - **Opsional:** `BLOB_READ_WRITE_TOKEN`, `RESEND_API_KEY`,
-     `RESEND_FROM_EMAIL`, `N8N_WEBHOOK_URL`, `WEBHOOK_SIGNING_SECRET`,
-     `NEXT_PUBLIC_APP_URL`.
-4. Build command otomatis: `prisma generate && next build`.
-5. Setelah deploy, jalankan migrasi satu kali:
+3. Set environment variables (lihat `.env.example` untuk daftar lengkap):
+   - **WAJIB:** `AUTH_SECRET` (random ≥32 karakter — build gagal tanpa ini di
+     production), `DATABASE_URL`, `DIRECT_URL`.
+   - **SANGAT DISARANKAN untuk production:**
+     - `REGISTRATION_DISABLED=true` — tanpa ini, siapa pun dengan email
+       `@unigamalang.ac.id` bisa mendaftar sendiri lewat `/register`.
+     - `CRON_SECRET` — tanpa ini, cron `mark-overdue` (tandai surat
+       terlambat bukti >14 hari) dan `cleanup-audit` **tidak akan pernah
+       berjalan** (endpoint menolak request tanpa secret yang valid, by
+       design — fail closed).
+     - `TZ=Asia/Jakarta` — server Vercel berjalan di UTC; tanpa ini nomor
+       surat yang dibuat dini hari WIB (00:00–07:00) bisa salah bulan/tahun.
+       Set di Vercel Project Settings → Environment Variables.
+   - **Opsional (graceful fallback bila kosong):** `BLOB_READ_WRITE_TOKEN`,
+     `GOOGLE_SERVICE_ACCOUNT_JSON` + `GOOGLE_DRIVE_PARENT_FOLDER_ID`,
+     `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `N8N_WEBHOOK_URL`,
+     `WEBHOOK_SIGNING_SECRET`, `NEXT_PUBLIC_APP_URL`.
+   - **SSO (belum siap produksi — lihat catatan di bawah):** `SSO_BASE_URL`,
+     `SSO_CLIENT_ID`, `SSO_CLIENT_SECRET`, `SSO_REDIRECT_URI`. **Biarkan
+     kosong** untuk peluncuran ini; tombol "Masuk dengan SSO" otomatis
+     tersembunyi bila salah satu var ini tidak diisi.
+4. Build command otomatis: `prisma migrate deploy && prisma generate && next build`.
+5. Setelah deploy, jalankan migrasi satu kali (biasanya sudah tercakup oleh
+   `prisma migrate deploy` di build command, tapi bila perlu manual):
    `npx prisma migrate deploy` (dari lokal dengan `DATABASE_URL` production).
+6. **JANGAN** jalankan `npm run db:seed` terhadap database production.
+   Buat akun SUPER_ADMIN pertama secara manual (lihat catatan di
+   `.env.example`) atau lewat Prisma Studio.
 
 ### Setup integrasi opsional
 
@@ -177,6 +204,29 @@ npm run dev
   "Webhook", copy URL-nya ke `N8N_WEBHOOK_URL`. Generate random string
   untuk `WEBHOOK_SIGNING_SECRET`. Di sisi n8n, verifikasi header
   `X-Signature` dengan HMAC-SHA256 (`body` = raw JSON).
+- **UNIGA SSO Gateway — belum siap produksi.** Kode integrasinya ada
+  ([src/app/auth/callback/route.ts](src/app/auth/callback/route.ts),
+  [src/lib/sso-client.ts](src/lib/sso-client.ts)) tapi belum melalui review
+  keamanan penuh (validasi `state`/CSRF, penentuan role, whitelist domain
+  email). **Untuk peluncuran ini, biarkan semua var `SSO_*` kosong** — login
+  email + password tetap berfungsi normal. Aktifkan SSO hanya setelah item
+  di atas direview.
+
+## Membuat Akun SUPER_ADMIN Pertama (production)
+
+`npm run db:seed` tidak boleh dijalankan terhadap database production (lihat
+peringatan di atas). Untuk membuat akun pertama:
+
+```bash
+# Dari lokal, dengan DATABASE_URL/DIRECT_URL mengarah ke database production
+npx prisma studio
+```
+
+Buka tabel `User`, buat baris baru dengan `role = SUPER_ADMIN`, `unitId =
+null`, dan `passwordHash` diisi hasil bcrypt (bisa digenerate lokal dengan
+`node -e "console.log(require('bcryptjs').hashSync('PASSWORD-ANDA', 10))"`).
+Setelah punya satu akun SUPER_ADMIN, akun berikutnya bisa dibuat lewat UI
+**Dashboard → Pengguna**.
 
 ### Contoh verifikasi HMAC di n8n (Function Node)
 ```js

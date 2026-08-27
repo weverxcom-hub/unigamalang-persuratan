@@ -44,6 +44,7 @@ export default async function PrintLetterTypesPage() {
                   day: "2-digit",
                   month: "long",
                   year: "numeric",
+                  timeZone: "Asia/Jakarta",
                 })}
               </td>
             </tr>

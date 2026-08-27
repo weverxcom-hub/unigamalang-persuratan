@@ -4,7 +4,6 @@ import { Logo } from "@/components/brand/logo";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SiteFooter } from "@/components/app/footer";
 import { RegisterForm } from "./register-form";
-import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -12,11 +11,6 @@ export const dynamic = "force-dynamic";
 export default async function RegisterPage() {
   const session = await getSession();
   if (session) redirect("/dashboard");
-  const unitsRaw = await prisma.unit.findMany({
-    where: { deletedAt: null },
-    orderBy: { code: "asc" },
-  });
-  const units = unitsRaw.map((u) => ({ id: u.id, code: u.code, name: u.name }));
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-background via-background to-primary/5">
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-10">
@@ -31,10 +25,11 @@ export default async function RegisterPage() {
             <CardTitle>Daftar Akun Baru</CardTitle>
             <CardDescription>
               Pendaftaran hanya untuk email <span className="font-semibold text-foreground">@unigamalang.ac.id</span>.
+              Unit kerja Anda akan ditetapkan oleh Super Admin setelah mendaftar.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <RegisterForm units={units} />
+            <RegisterForm />
             <p className="mt-4 text-center text-sm text-muted-foreground">
               Sudah punya akun?{" "}
               <Link href="/login" className="font-medium text-primary hover:underline">

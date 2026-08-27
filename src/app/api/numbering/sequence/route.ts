@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { audit } from "@/lib/audit";
+import { getJakartaParts } from "@/lib/timezone";
 
 const setSchema = z.object({
   unitId: z.string().min(1),
@@ -23,9 +24,16 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const unitId = url.searchParams.get("unitId") ?? "";
   const yearRaw = url.searchParams.get("year");
-  const year = yearRaw ? Number(yearRaw) : new Date().getFullYear();
+  const year = yearRaw ? Number(yearRaw) : getJakartaParts().year;
   if (!unitId || !Number.isInteger(year)) {
     return NextResponse.json({ error: "Parameter tidak valid" }, { status: 400 });
+  }
+  // Audit M7 (2026-08-27): this endpoint only had an auth check, not a scope
+  // check — any authenticated USER/ADMIN_UNIT could pass another unit's
+  // unitId and see how many letters that unit has issued per jenis surat
+  // this year (a real, if minor, information leak between units).
+  if (session.role !== "SUPER_ADMIN" && session.unitId !== unitId) {
+    return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
   }
   const [letterTypes, sequences] = await Promise.all([
     prisma.letterType.findMany({
@@ -80,6 +88,29 @@ export async function PATCH(req: Request) {
   }
   if (!letterType || letterType.deletedAt) {
     return NextResponse.json({ error: "Jenis surat tidak ditemukan" }, { status: 400 });
+  }
+
+  // Refuse to wind the counter back below a sequence number that's already
+  // been issued (audit T-05): allocateNextNumber() always hands out
+  // `last + 1`, so setting `last` lower than an archive that already
+  // exists for this (unit, jenis, year) would make the very next
+  // auto-generated number collide with a real, already-issued document.
+  // Checked against every archive regardless of VOID/soft-delete status —
+  // a retired number must never be reissued either.
+  const yearStart = new Date(Date.UTC(year, 0, 1));
+  const yearEnd = new Date(Date.UTC(year + 1, 0, 1));
+  const maxIssued = await prisma.archive.aggregate({
+    where: { unitId, letterTypeId, date: { gte: yearStart, lt: yearEnd } },
+    _max: { sequenceNumber: true },
+  });
+  const maxIssuedSeq = maxIssued._max.sequenceNumber ?? 0;
+  if (last < maxIssuedSeq) {
+    return NextResponse.json(
+      {
+        error: `Tidak bisa menurunkan nomor terakhir di bawah ${maxIssuedSeq} — sudah ada surat dengan nomor urut sampai ${maxIssuedSeq} di tahun ${year} untuk unit/jenis surat ini.`,
+      },
+      { status: 400 }
+    );
   }
 
   const seq = await prisma.numberingSequence.upsert({

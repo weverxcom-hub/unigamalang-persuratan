@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import crypto from "node:crypto";
-import { isAllowedEmail } from "@/lib/auth";
+import { hashResetToken, isAllowedEmail } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { sendEmail } from "@/lib/email";
+import { escapeHtml, sendEmail } from "@/lib/email";
 import { checkPasswordResetRate, rateLimitResponse } from "@/lib/rate-limit";
 
 const schema = z.object({
@@ -41,15 +41,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  // Generate a secure token + expiry (1 hour)
+  // Generate a secure token + expiry (1 hour). Only the hash is persisted
+  // (audit M5) — the raw `token` lives solely in the emailed link.
   const token = crypto.randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
-  // Store the token in the user record (we'll add these fields via a migration)
   await prisma.user.update({
     where: { id: user.id },
     data: {
-      resetToken: token,
+      resetToken: hashResetToken(token),
       resetTokenExpiresAt: expiresAt,
     },
   });
@@ -64,7 +64,7 @@ export async function POST(req: Request) {
     html: `<!doctype html><html><body style="font-family: system-ui, sans-serif; background:#f6f7f9; padding:24px;">
   <div style="max-width:560px; margin:0 auto; background:#fff; border-radius:12px; padding:24px; border:1px solid #e5e7eb;">
     <h2 style="margin:0 0 8px; color:#7f1d1d;">Reset Kata Sandi</h2>
-    <p style="margin:0 0 16px; color:#374151;">Halo <strong>${user.name}</strong>, Anda meminta reset kata sandi akun Sistem Persuratan.</p>
+    <p style="margin:0 0 16px; color:#374151;">Halo <strong>${escapeHtml(user.name)}</strong>, Anda meminta reset kata sandi akun Sistem Persuratan.</p>
     <p style="margin:0 0 16px; color:#374151;">Klik tombol di bawah untuk membuat kata sandi baru. Link ini berlaku selama <strong>1 jam</strong>.</p>
     <p style="margin:20px 0;"><a href="${resetLink}" style="display:inline-block; padding:12px 24px; background:#991b1b; color:#fff; text-decoration:none; border-radius:8px; font-weight:600;">Reset Kata Sandi</a></p>
     <p style="margin:16px 0 0; color:#6b7280; font-size:13px;">Jika Anda tidak merasa meminta reset ini, abaikan email ini. Akun Anda tetap aman.</p>

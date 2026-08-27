@@ -229,10 +229,15 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
         { status: 409 }
       );
     }
-    const message =
-      e instanceof Error ? e.message : "Terjadi kesalahan saat menyetujui arsip";
+    // Log full detail server-side only. Echoing e.message (audit M4) can leak
+    // Prisma internals — constraint/table names, or DB host:port on a
+    // connection error — to the client, the same class of leak the POST
+    // /api/archives handler above was explicitly written to avoid.
     console.error("[PATCH /api/archives/[id]] approve failed:", e);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(
+      { error: "Terjadi kesalahan saat menyetujui arsip. Silakan coba lagi atau hubungi superadmin." },
+      { status: 500 }
+    );
   }
 }
 

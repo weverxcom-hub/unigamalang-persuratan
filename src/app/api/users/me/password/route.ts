@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
-import { getSession } from "@/lib/auth";
+import { getSession, setSessionCookie, toSessionPayload } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { audit } from "@/lib/audit";
 import { PASSWORD_REGEX, PASSWORD_HINT } from "@/lib/password-policy";
@@ -46,10 +46,17 @@ export async function POST(req: Request) {
     );
   }
 
-  await prisma.user.update({
+  // Bump sessionVersion (audit T-03) — a stolen cookie stops working the
+  // moment the real owner changes their password. Refresh our own cookie
+  // in the same request so the person who just changed it isn't logged out.
+  const updated = await prisma.user.update({
     where: { id: user.id },
-    data: { passwordHash: bcrypt.hashSync(parsed.data.newPassword, 10) },
+    data: {
+      passwordHash: bcrypt.hashSync(parsed.data.newPassword, 10),
+      sessionVersion: { increment: 1 },
+    },
   });
+  await setSessionCookie(toSessionPayload(updated));
 
   await audit({
     action: "UPDATE",

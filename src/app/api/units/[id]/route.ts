@@ -89,10 +89,17 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
   // Soft delete only — Archive.unit / NumberingSequence reference this row.
   // Active users in this unit have their unitId nulled (onDelete: SetNull at
   // the schema level only fires on hard delete; do it manually here so they
-  // stop seeing this unit in pickers immediately).
+  // stop seeing this unit in pickers immediately). sessionVersion is also
+  // bumped (audit H6, 2026-08-27) — without it, a cookie signed before the
+  // unit was deactivated still carries the old unitId and getSession() never
+  // re-checks it against the DB, so the member could keep reading that
+  // unit's archives for up to 7 days (the JWT's lifetime) after deactivation.
   await prisma.$transaction([
     prisma.unit.update({ where: { id: params.id }, data: { deletedAt: new Date() } }),
-    prisma.user.updateMany({ where: { unitId: params.id }, data: { unitId: null } }),
+    prisma.user.updateMany({
+      where: { unitId: params.id },
+      data: { unitId: null, sessionVersion: { increment: 1 } },
+    }),
   ]);
   await audit({
     action: "DELETE",

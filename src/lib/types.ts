@@ -136,6 +136,10 @@ export interface SessionPayload {
   name: string;
   role: Role;
   unitId: string | null;
+  // Must match User.sessionVersion in the DB at request time. Bumped on
+  // role/unit/password change so an already-issued cookie stops working
+  // immediately instead of at its 7-day expiry. See getSession().
+  sessionVersion: number;
 }
 
 export interface Ticket {

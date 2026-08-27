@@ -1,5 +1,6 @@
 import { prisma } from "./prisma";
 import { renderFormat } from "./format";
+import { getJakartaParts } from "./timezone";
 import type { Prisma } from "@prisma/client";
 
 export interface GeneratedNumber {
@@ -42,9 +43,11 @@ export async function allocateNextNumber(
     if (!letterType || letterType.deletedAt)
       throw new Error("Jenis surat tidak ditemukan atau telah dinonaktifkan");
 
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth() + 1;
+    // Computed in Asia/Jakarta, not server-local/UTC (audit B3): a letter
+    // created between 00:00–06:59 WIB would otherwise render the previous
+    // UTC day's month, and on 1 January the counter would keep incrementing
+    // the prior year's sequence instead of resetting to 001.
+    const { year, month } = getJakartaParts();
 
     // Atomic increment: either create (last=1) or bump existing row by 1.
     const seq = await c.numberingSequence.upsert({
@@ -87,7 +90,7 @@ export async function previewNextNumber(
     prisma.unit.findUnique({ where: { id: unitId } }),
     prisma.letterType.findUnique({ where: { id: letterTypeId } }),
     (async () => {
-      const year = new Date().getFullYear();
+      const { year } = getJakartaParts();
       return prisma.numberingSequence.findUnique({
         where: { unitId_letterTypeId_year: { unitId, letterTypeId, year } },
       });
@@ -96,9 +99,7 @@ export async function previewNextNumber(
   if (!unit || unit.deletedAt) return null;
   if (!letterType || letterType.deletedAt) return null;
 
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
+  const { year, month } = getJakartaParts();
   const sequence = (seq?.last ?? 0) + 1;
 
   return {
