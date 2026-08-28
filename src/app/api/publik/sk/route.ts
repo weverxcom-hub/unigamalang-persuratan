@@ -19,7 +19,10 @@ import { prisma } from "@/lib/prisma";
 // createdBy, no disposition or audit data. Only letterType SK/EDAR and
 // status ISSUED Archive rows are eligible; anything else in Archive
 // (surat masuk, disposisi, draft, other letter types) never reaches this
-// endpoint.
+// endpoint. LegacyDecree rows additionally require isPublic=true — the
+// BP3M recap includes personnel/disciplinary decrees (resignations,
+// sanctions, one row is a student sexual-harassment case) that must never
+// be publicly searchable; see LegacyDecree.isPublic in schema.prisma.
 // -----------------------------------------------------------------------
 
 type UnifiedResult = {
@@ -65,6 +68,7 @@ export async function GET(req: Request) {
   const [legacyRows, archiveRows] = await Promise.all([
     prisma.legacyDecree.findMany({
       where: {
+        isPublic: true,
         ...(unitId ? { unitId } : {}),
         ...(yearRange ? { tanggal: yearRange } : {}),
         ...(q

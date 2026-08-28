@@ -7,9 +7,9 @@
     "perihal": "PENDIRIAN LABORATORIUM MATEMATIKA & ILMU PENGETAHUAN ALAM (MIPA) UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1gT08GlUUnC6D2_8E5BFTKapdMnqzGeQ2/edit",
     "catatan": "tidak ada nomor surat; yang masih merah di skip",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1gT08GlUUnC6D2_8E5BFTKapdMnqzGeQ2/edit"
   },
   {
     "noUrutAsli": 2,
@@ -19,9 +19,9 @@
     "perihal": "PENDIRIAN LABORATORIUM KOMPUTER UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1VAH2ibAk0MIAWXHnS85JZnl8_8cHXlgF/edit",
     "catatan": "tidak ada nomor surat",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1VAH2ibAk0MIAWXHnS85JZnl8_8cHXlgF/edit"
   },
   {
     "noUrutAsli": 3,
@@ -31,9 +31,9 @@
     "perihal": "PENGANGKATAN DOSEN TETAP Saudara : Dra. Martaleni",
     "unitKode": "YAYASAN",
     "unitLabel": "Yayasan",
-    "sumberLink": "https://docs.google.com/document/d/1ff3fShiVf_eD8g39t8radxpXIZTPkZwL/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1ff3fShiVf_eD8g39t8radxpXIZTPkZwL/edit"
   },
   {
     "noUrutAsli": 4,
@@ -43,9 +43,9 @@
     "perihal": "SUSUNAN ORGANISASI LEMBAGA PENELITIAN DAN PENGABDIAN MASYARAKAT (LPPM) UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/16d_WH03QXx7_FzXkkUHcPJRhShINpHO1/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/16d_WH03QXx7_FzXkkUHcPJRhShINpHO1/edit"
   },
   {
     "noUrutAsli": 5,
@@ -55,9 +55,9 @@
     "perihal": "SUSUNAN ORGANISASI LEMBAGA PENELITIAN DAN PENGABDIAN MASYARAKAT (LPPM) UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/13crutaQPMrvKEKgMuFCSDGkLClrdj0ZN/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/13crutaQPMrvKEKgMuFCSDGkLClrdj0ZN/edit"
   },
   {
     "noUrutAsli": 6,
@@ -67,9 +67,9 @@
     "perihal": "SUSUNAN ORGANISASI LEMBAGA PENELITIAN DAN LEMBAGA PENGABDIAN KEPADA MASYARAKAT UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1DLzFsFz7L_KVqCR11H_2a6DehHOuswB2/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1DLzFsFz7L_KVqCR11H_2a6DehHOuswB2/edit"
   },
   {
     "noUrutAsli": 7,
@@ -79,9 +79,9 @@
     "perihal": "Pendirian Laboratorium pada Jurusan Program Studi Elektronika & Telekomunikasi dan Program Studi Sistem Energi Listrik Fakultas Teknik Universitas Gajayana Malang",
     "unitKode": "FT",
     "unitLabel": "Fakultas Teknik",
-    "sumberLink": "https://docs.google.com/document/d/11m56t8eNSiSv5oBv-UgsTdCXRowrkJvB/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/11m56t8eNSiSv5oBv-UgsTdCXRowrkJvB/edit"
   },
   {
     "noUrutAsli": 8,
@@ -91,9 +91,9 @@
     "perihal": "Pendirian Laboratorium pada Program Studi Sistem Energi Listrik dan Program Studi Elektronika & Telekomunikasi Fakultas Teknik Universitas Gajayana Malang",
     "unitKode": "FT",
     "unitLabel": "Fakultas Teknik",
-    "sumberLink": "https://docs.google.com/document/d/1JpIJ2TMqTd3r0v6owY44-8RpYc_TQa3q/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1JpIJ2TMqTd3r0v6owY44-8RpYc_TQa3q/edit"
   },
   {
     "noUrutAsli": 9,
@@ -103,9 +103,9 @@
     "perihal": "RENCANA INDUK PENGEMBANGAN (RENIP) UNIVERSITAS GAJAYANA MALANG TAHUN 2002 - 2026",
     "unitKode": "YAYASAN",
     "unitLabel": "Yayasan",
-    "sumberLink": "https://docs.google.com/document/d/1Kc1fTyDVnQ77rNRe7P4o4cP1jDdvhdJY/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1Kc1fTyDVnQ77rNRe7P4o4cP1jDdvhdJY/edit"
   },
   {
     "noUrutAsli": 10,
@@ -115,9 +115,9 @@
     "perihal": "SUSUNAN ORGANISASI LEMBAGA PENELITIAN DAN LEMBAGA PENGABDIAN KEPADA MASYARAKAT UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1GPklazR4YvwZ8y5JDuKiyWu21UWJQEgr/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1GPklazR4YvwZ8y5JDuKiyWu21UWJQEgr/edit"
   },
   {
     "noUrutAsli": 11,
@@ -127,9 +127,9 @@
     "perihal": "PENGESAHAN DAN LEGALISIR IJASAH DAN TRANSKRIP NILAI",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1nXdyoFqrXs1T-oUjJANtu9E35TZH5do3/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1nXdyoFqrXs1T-oUjJANtu9E35TZH5do3/edit"
   },
   {
     "noUrutAsli": 12,
@@ -139,9 +139,9 @@
     "perihal": "PENDIRIAN LABORATORIUM PADA PROGRAM STUDI SISTEM INFORMASI FAKULTAS ILMU KOMPUTER UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "FIK",
     "unitLabel": "Fakultas Ilmu Komputer",
-    "sumberLink": "https://docs.google.com/document/d/1rYS3AHgB1yKDXFiCG-1azud-ayY_-WjD/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1rYS3AHgB1yKDXFiCG-1azud-ayY_-WjD/edit"
   },
   {
     "noUrutAsli": 13,
@@ -151,9 +151,9 @@
     "perihal": "Pendirian Laboratorium pada Program Studi Sistem Energi Listrik Fakultas Teknik Universitas Gajayana Malang",
     "unitKode": "FT",
     "unitLabel": "Fakultas Teknik",
-    "sumberLink": "https://docs.google.com/document/d/1lnQSRkOzwWSLExbpUU-DKztcd4Wvvgd0/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1lnQSRkOzwWSLExbpUU-DKztcd4Wvvgd0/edit"
   },
   {
     "noUrutAsli": 14,
@@ -163,9 +163,9 @@
     "perihal": "KURIKULUM PROGRAM STUDI BAHASA DAN SASTRA INGGRIS TAHUN 2005/ 2006",
     "unitKode": "FS",
     "unitLabel": "Fakultas Sastra",
-    "sumberLink": "https://docs.google.com/document/d/1iayrsxqP3bvCCulDjMuvhNZgNcl8obr4/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1iayrsxqP3bvCCulDjMuvhNZgNcl8obr4/edit"
   },
   {
     "noUrutAsli": 15,
@@ -175,9 +175,9 @@
     "perihal": "KURIKULUM PROGRAM STUDI BAHASA DAN SASTRA INGGRIS TAHUN 2006/ 2007",
     "unitKode": "FS",
     "unitLabel": "Fakultas Sastra",
-    "sumberLink": "https://docs.google.com/document/d/1kVZaQVnkFhW5Rtv9Cye-GiOR7UqJ3KmX/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1kVZaQVnkFhW5Rtv9Cye-GiOR7UqJ3KmX/edit"
   },
   {
     "noUrutAsli": 16,
@@ -187,9 +187,9 @@
     "perihal": "PENGANGKATAN REKTOR UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "P4KG",
     "unitLabel": "Panitia Pemilihan Rektor",
-    "sumberLink": "https://docs.google.com/document/d/1nXdyoFqrXs1T-oUjJANtu9E35TZH5do3/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1nXdyoFqrXs1T-oUjJANtu9E35TZH5do3/edit"
   },
   {
     "noUrutAsli": 17,
@@ -199,9 +199,9 @@
     "perihal": "SUSUNAN ORGANISASI LEMBAGA PENELITIAN DAN PENGABDIAN MASYARAKAT UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1j0Gz7CsVS4NzLy0YYtqZoGtpYG7HBdM3/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1j0Gz7CsVS4NzLy0YYtqZoGtpYG7HBdM3/edit"
   },
   {
     "noUrutAsli": 18,
@@ -211,9 +211,9 @@
     "perihal": "KURIKULUM PROGRAM STUDI BAHASA DAN SASTRA INGGRIS TAHUN 2007/ 2008",
     "unitKode": "FS",
     "unitLabel": "Fakultas Sastra",
-    "sumberLink": "https://docs.google.com/document/d/1j6AIAO8UFXfoe0QXdRiurR7RciNXNGXJ/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1j6AIAO8UFXfoe0QXdRiurR7RciNXNGXJ/edit"
   },
   {
     "noUrutAsli": 19,
@@ -223,9 +223,9 @@
     "perihal": "KURIKULUM PROGRAM STUDI BAHASA DAN SASTRA INGGRIS TAHUN 2008/ 2009",
     "unitKode": "FS",
     "unitLabel": "Fakultas Sastra",
-    "sumberLink": "https://docs.google.com/document/d/1aonHZXSfw5NQhH9259nu5QExwqaF4nPq/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1aonHZXSfw5NQhH9259nu5QExwqaF4nPq/edit"
   },
   {
     "noUrutAsli": 20,
@@ -235,9 +235,9 @@
     "perihal": "PENGANGKATAN DOSEN TETAP DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG Saudara : Edy Priyanto, S.E.",
     "unitKode": "YAYASAN",
     "unitLabel": "Yayasan",
-    "sumberLink": "https://docs.google.com/document/d/16-svK96wg2qt6pL1i7PhjjwJFpPBvpB3/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/16-svK96wg2qt6pL1i7PhjjwJFpPBvpB3/edit"
   },
   {
     "noUrutAsli": 21,
@@ -247,9 +247,9 @@
     "perihal": "RENCANA STRATEGIS (RENSTRA) UNIVERSITAS GAJAYANA MALANG TAHUN 2010 - 2014",
     "unitKode": "YAYASAN",
     "unitLabel": "Yayasan",
-    "sumberLink": "https://docs.google.com/document/d/16yYXzb9H88dTQmi4dJhb8TUC0o2_FlTm/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/16yYXzb9H88dTQmi4dJhb8TUC0o2_FlTm/edit"
   },
   {
     "noUrutAsli": 22,
@@ -259,9 +259,9 @@
     "perihal": "Pengangkatan Tenaga Administrasi di lingkungan Lembaga Penelitian dan Pengabdian kepada Masyarakat Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1qIBV2rnyQQD77JYyzdzrXufDNy6zQ6Vg/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1qIBV2rnyQQD77JYyzdzrXufDNy6zQ6Vg/edit"
   },
   {
     "noUrutAsli": 23,
@@ -271,9 +271,9 @@
     "perihal": "RENCANA STRATEGIS PROGRAM STUDI AKUNTANSI FAKULTAS EKONOMI UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1VcWN1Znxh2rV-p18KxJXgzLWOixhGggp/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1VcWN1Znxh2rV-p18KxJXgzLWOixhGggp/edit"
   },
   {
     "noUrutAsli": 24,
@@ -283,9 +283,9 @@
     "perihal": "Pengangkatan Tim Penyusun Rencana Strategis Fakultas Ekonomi Universitas Gajayana Malang Tahun 2010-2020",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1ZTzUA2i_J6ktdKwqvTEYnsi0pHGWaqHp/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1ZTzUA2i_J6ktdKwqvTEYnsi0pHGWaqHp/edit"
   },
   {
     "noUrutAsli": 25,
@@ -295,9 +295,9 @@
     "perihal": "Pendirian Laboratorium pada Program Studi Teknik Mesin Fakultas Teknik Universitas Gajayana Malang",
     "unitKode": "FT",
     "unitLabel": "Fakultas Teknik",
-    "sumberLink": "https://docs.google.com/document/d/14QcKifS2MNjKDYggLI_8nSxs36k02g5o/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/14QcKifS2MNjKDYggLI_8nSxs36k02g5o/edit"
   },
   {
     "noUrutAsli": 26,
@@ -307,9 +307,9 @@
     "perihal": "Pelacakan Lulusan/ Alumni Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1GRqDFViJ8hV9ByTzrsjgZWetFWWkw-Kz/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1GRqDFViJ8hV9ByTzrsjgZWetFWWkw-Kz/edit"
   },
   {
     "noUrutAsli": 27,
@@ -319,9 +319,9 @@
     "perihal": "Pengangkatan Tim Penyusun Borang Fakultas, Evaluasi Diri dan Borang Program Studi Bahasa & Sastra Inggris Fakultas Sastra Universitas Gajayana Malang 2009/2010",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1rwSVGOuHVNMlq6sgckaUd4s1Rh2AiK8D/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1rwSVGOuHVNMlq6sgckaUd4s1Rh2AiK8D/edit"
   },
   {
     "noUrutAsli": 28,
@@ -331,9 +331,9 @@
     "perihal": "Integrasi Hasil Penelitian Dan Pengabdian Kepada Masyarakat Dengan Kegiatan Pembelajaran",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1h2L38PKeF0Reh2V9wH4GoULb4We_GGdU/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1h2L38PKeF0Reh2V9wH4GoULb4We_GGdU/edit"
   },
   {
     "noUrutAsli": 29,
@@ -343,9 +343,9 @@
     "perihal": "Keterlibatan Mahasiswa Dalam Kegiatan Penelitian Dan Pengabdian Kepada Masyarakat",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1r9yjjoLFzsn8BI1xiwGfapKsb_RyF5Y9/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1r9yjjoLFzsn8BI1xiwGfapKsb_RyF5Y9/edit"
   },
   {
     "noUrutAsli": 30,
@@ -355,9 +355,9 @@
     "perihal": "RENCANA INDUK PENELITIAN (RIP) LEMBAGA PENELITIAN DAN PENGABDIAN KEPADA MASYARAKAT (LPPM)",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1Obd_kXAmYX4Ct7O5BycqHVh7rlzeOlbI/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1Obd_kXAmYX4Ct7O5BycqHVh7rlzeOlbI/edit"
   },
   {
     "noUrutAsli": 31,
@@ -367,9 +367,9 @@
     "perihal": "Buku Pedoman Proses Belajar Mengajar Program Pascasarjana Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1SnYMlsqDLrmUWmydN2K_sUxnnerS9XJa/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1SnYMlsqDLrmUWmydN2K_sUxnnerS9XJa/edit"
   },
   {
     "noUrutAsli": 32,
@@ -379,9 +379,9 @@
     "perihal": "Susunan Organisasi dan Pejabat Badan Pengembangan Pendidikan dan Penjaminan Mutu (BP3M) Rektor Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1AA6Ek7rM_EnUneCaj9d0gl51fhnHLBop/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1AA6Ek7rM_EnUneCaj9d0gl51fhnHLBop/edit"
   },
   {
     "noUrutAsli": 33,
@@ -391,9 +391,9 @@
     "perihal": "Pembentukan Unit Penjaminan Mutu Di Lingkungan Fakultas Ekonomi Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/13VWK36u22xTV8RKH7gVAV4nvMtv11QT3/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/13VWK36u22xTV8RKH7gVAV4nvMtv11QT3/edit"
   },
   {
     "noUrutAsli": 34,
@@ -403,9 +403,9 @@
     "perihal": "Pembentukan Unit Penjaminan Mutu Di Lingkungan Program Pascasarjana Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1wDHXKfMNofEx6U6wvsEHliW9_FTIIaAq/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1wDHXKfMNofEx6U6wvsEHliW9_FTIIaAq/edit"
   },
   {
     "noUrutAsli": 35,
@@ -415,9 +415,9 @@
     "perihal": "Pembentukan Unit Penjaminan Mutu Di Lingkungan Fakultas Ilmu Komputer Universitas Gajayana Malang",
     "unitKode": "FIK",
     "unitLabel": "Fakultas Ilmu Komputer",
-    "sumberLink": "https://docs.google.com/document/d/1lzfhr9DlsVbEq6uLyxoNIZydLnwBR4-3/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1lzfhr9DlsVbEq6uLyxoNIZydLnwBR4-3/edit"
   },
   {
     "noUrutAsli": 36,
@@ -427,9 +427,9 @@
     "perihal": "Pembentukan Unit Penjaminan Mutu Di Lingkungan Fakultas Sastra Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1UCQ3DDdUTt0lCfgJxEZvalOcf22Qmxys/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1UCQ3DDdUTt0lCfgJxEZvalOcf22Qmxys/edit"
   },
   {
     "noUrutAsli": 37,
@@ -439,9 +439,9 @@
     "perihal": "Pembentukan Unit Penjaminan Mutu Di Lingkungan Fakultas Psikologi Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1n1KOvJTRXpwzIiTPXN2Lp8f_aXTUBWi0/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1n1KOvJTRXpwzIiTPXN2Lp8f_aXTUBWi0/edit"
   },
   {
     "noUrutAsli": 38,
@@ -451,9 +451,9 @@
     "perihal": "Pembentukan Unit Penjaminan Mutu Di Lingkungan Fakultas Ilmu Komputer Universitas Gajayana Malang",
     "unitKode": "FIK",
     "unitLabel": "Fakultas Ilmu Komputer",
-    "sumberLink": "https://docs.google.com/document/d/1lzfhr9DlsVbEq6uLyxoNIZydLnwBR4-3/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1lzfhr9DlsVbEq6uLyxoNIZydLnwBR4-3/edit"
   },
   {
     "noUrutAsli": 39,
@@ -463,9 +463,9 @@
     "perihal": "Pembentukan Unit Penjaminan Mutu Di Lingkungan Fakultas Teknik Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1WpMuTFsCIJhXth6CiZAmxvFbqAkCTdct/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1WpMuTFsCIJhXth6CiZAmxvFbqAkCTdct/edit"
   },
   {
     "noUrutAsli": 40,
@@ -475,9 +475,9 @@
     "perihal": "Standar Mutu Jurusan/ Program Studi Sistem Penjaminan Mutu Internal (SPMI) Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1JfKVPsvV43oH4TTgAoN6Q117g7_jZdz5/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1JfKVPsvV43oH4TTgAoN6Q117g7_jZdz5/edit"
   },
   {
     "noUrutAsli": 41,
@@ -487,9 +487,9 @@
     "perihal": "Integrasi Kegiatan Penelitian dan Pengabdian kepada Masyarakat dengan Pembelajaran Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1iEcdFLqpcp3ZMfsojHJbPLPp2_PSf9Sj/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1iEcdFLqpcp3ZMfsojHJbPLPp2_PSf9Sj/edit"
   },
   {
     "noUrutAsli": 42,
@@ -499,9 +499,9 @@
     "perihal": "PENGANGKATAN REKTOR UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "YAYASAN",
     "unitLabel": "Yayasan",
-    "sumberLink": "https://docs.google.com/document/d/1DfrU81qiwvcEI9K6QwEtZ_kn4u9Ot7hn/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1DfrU81qiwvcEI9K6QwEtZ_kn4u9Ot7hn/edit"
   },
   {
     "noUrutAsli": 43,
@@ -511,9 +511,9 @@
     "perihal": "SUSUNAN TIM PERUMUS VISI DAN MISI FAKULTAS ILMU SOSIAL DAN BUDAYA",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1UB20uraTCRPb-qpNSZC75fANdMb7q_iU/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1UB20uraTCRPb-qpNSZC75fANdMb7q_iU/edit"
   },
   {
     "noUrutAsli": 44,
@@ -523,9 +523,9 @@
     "perihal": "Pembentukan Unit Penjaminan Mutu Di Lingkungan Fakultas Ilmu Sosial dan Budaya Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1xF1_umrvYb7OEKfGb9PkXJ-rGdLqRSQT/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1xF1_umrvYb7OEKfGb9PkXJ-rGdLqRSQT/edit"
   },
   {
     "noUrutAsli": 45,
@@ -535,9 +535,9 @@
     "perihal": "TIM PERUMUS VISI DAN MISI PROGRAM STUDI FAKULTAS ILMU SOSIAL DAN BUDAYA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1gSGnSxdOcmItNUjYGJroJSQnJY5K_9mo/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1gSGnSxdOcmItNUjYGJroJSQnJY5K_9mo/edit"
   },
   {
     "noUrutAsli": 46,
@@ -547,9 +547,9 @@
     "perihal": "Pembentukan Unit Penjaminan Mutu Di Lingkungan Fakultas Teknik dan Informatika Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1GzArB_VAVtobBGpV5JDnuJLJFmuXnEEi/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1GzArB_VAVtobBGpV5JDnuJLJFmuXnEEi/view"
   },
   {
     "noUrutAsli": 47,
@@ -559,9 +559,9 @@
     "perihal": "Pembentukan Unit Penjaminan Mutu Di Lingkungan Fakultas Ilmu Sosial dan Budaya Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1Ses0Ow3b_PEHnEbrj9FcjElwDptq_jp7/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1Ses0Ow3b_PEHnEbrj9FcjElwDptq_jp7/view"
   },
   {
     "noUrutAsli": 48,
@@ -571,9 +571,9 @@
     "perihal": "Pencanangan Panduan Umum Pelayanan Prima Dalam Rangka Penjaminan Mutu Pendidikan di lingkungan Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/10WfjHhyiqIBPBe7vNlR-CwFQNUYxypPf/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/10WfjHhyiqIBPBe7vNlR-CwFQNUYxypPf/edit"
   },
   {
     "noUrutAsli": 49,
@@ -583,9 +583,9 @@
     "perihal": "RENCANA STRATEGIS (RENSTRA) UNIVERSITAS GAJAYANA MALANG TAHUN 2012 - 2016",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1tzuFu_QbrWOgMyy6iqJkfLqQElEYDKVx/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1tzuFu_QbrWOgMyy6iqJkfLqQElEYDKVx/edit"
   },
   {
     "noUrutAsli": 50,
@@ -595,9 +595,9 @@
     "perihal": "RENCANA OPERASIONAL (RENOP) UNIVERSITAS GAJAYANA MALANG TAHUN 2012 - 2016",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1SGa1wS9hBOJjhyDH_LfBUuFuDzgZn8HE/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1SGa1wS9hBOJjhyDH_LfBUuFuDzgZn8HE/edit"
   },
   {
     "noUrutAsli": 51,
@@ -607,9 +607,9 @@
     "perihal": "RENCANA STRATEGIS PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG TAHUN 2012 - 2016",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1IL0ggieOsRIrDRll8tondULm4NR5WHXZ/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1IL0ggieOsRIrDRll8tondULm4NR5WHXZ/edit"
   },
   {
     "noUrutAsli": 52,
@@ -619,9 +619,9 @@
     "perihal": "Standar Mutu Sistem Penjaminan Mutu Internal (SPMI) Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1B5pOZ-tq5hxKwTDjvVl8NeelqLwpBRIH/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1B5pOZ-tq5hxKwTDjvVl8NeelqLwpBRIH/edit"
   },
   {
     "noUrutAsli": 53,
@@ -631,9 +631,9 @@
     "perihal": "Pergantian Personil Unit Penjaminan Mutu Di Lingkungan Fakultas Teknik dan Informatika Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/13AhQmGwkRQlsd0__uJQiHARjLeUCqS5B/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/13AhQmGwkRQlsd0__uJQiHARjLeUCqS5B/edit"
   },
   {
     "noUrutAsli": 54,
@@ -643,9 +643,9 @@
     "perihal": "Susunan Organisasi dan Pejabat Lembaga Penelitian dan Pengabdian kepada Masyarakat (LPPM) Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1uMtUTf82n0LRkELO_Vlu-kMuVUTXzvj4/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1uMtUTf82n0LRkELO_Vlu-kMuVUTXzvj4/edit"
   },
   {
     "noUrutAsli": 55,
@@ -655,9 +655,9 @@
     "perihal": "Pembentukan Unit Penjaminan Mutu Di Lingkungan Fakultas Ekonomi dan Bisnis Universitas Gajayana Malang",
     "unitKode": "FEB",
     "unitLabel": "Fakultas Ekonomi dan Bisnis",
-    "sumberLink": "https://docs.google.com/document/d/1KpFTrrRHRI3eUpn6ekHVigCOn5Bo2rQW/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1KpFTrrRHRI3eUpn6ekHVigCOn5Bo2rQW/edit"
   },
   {
     "noUrutAsli": 56,
@@ -667,9 +667,9 @@
     "perihal": "STATUTA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1l0eHhvpwj9nifaKywqcI5Mip4xtZFUoD/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1l0eHhvpwj9nifaKywqcI5Mip4xtZFUoD/edit"
   },
   {
     "noUrutAsli": 57,
@@ -679,9 +679,9 @@
     "perihal": "PENGANGKATAN MANAGEMENT REPRESENTATIVE (MR) PENJAMINAN MUTU UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1xNmk9zRzoXt3SPcBYMGXGjWeL_bXkrDb/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1xNmk9zRzoXt3SPcBYMGXGjWeL_bXkrDb/edit"
   },
   {
     "noUrutAsli": 58,
@@ -691,9 +691,9 @@
     "perihal": "STATUTA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "YAYASAN",
     "unitLabel": "Yayasan",
-    "sumberLink": "https://docs.google.com/document/d/1l0eHhvpwj9nifaKywqcI5Mip4xtZFUoD/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1l0eHhvpwj9nifaKywqcI5Mip4xtZFUoD/edit"
   },
   {
     "noUrutAsli": 59,
@@ -703,9 +703,9 @@
     "perihal": "Perpanjangan Masa Berlaku Unit Penjaminan Mutu di Lingkungan Fakultas Ekonomi dan Bisnis Universitas Gajayana Malang",
     "unitKode": "FEB",
     "unitLabel": "Fakultas Ekonomi dan Bisnis",
-    "sumberLink": "https://drive.google.com/file/d/1uE-EYRiZFdPfBnLBcnHGfDf2g1sXwAFa/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1uE-EYRiZFdPfBnLBcnHGfDf2g1sXwAFa/view"
   },
   {
     "noUrutAsli": 60,
@@ -715,9 +715,9 @@
     "perihal": "RENCANA STRATEGIS (RENSTRA) UNIVERSITAS GAJAYANA MALANG TAHUN 2012 - 2016",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1UXfGJlO8JKlGktoUyZSjLTlGS320jJYB/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1UXfGJlO8JKlGktoUyZSjLTlGS320jJYB/edit"
   },
   {
     "noUrutAsli": 61,
@@ -727,9 +727,9 @@
     "perihal": "RENCANA OPERASIONAL (RENOP) UNIVERSITAS GAJAYANA MALANG TAHUN 2012 - 2016",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1yi_Awh1QLDyxg_b1qzatqgyI9T5PZLpH/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1yi_Awh1QLDyxg_b1qzatqgyI9T5PZLpH/edit"
   },
   {
     "noUrutAsli": 62,
@@ -739,9 +739,9 @@
     "perihal": "Susunan Unsur Pimpinan Unit Penjaminan Mutu di Lingkungan Program Pascasarjana Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1Xj5klhMwg2hBSI7MF6qYSb2F9fpFy_mU/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1Xj5klhMwg2hBSI7MF6qYSb2F9fpFy_mU/edit"
   },
   {
     "noUrutAsli": 63,
@@ -751,9 +751,9 @@
     "perihal": "Susunan Unsur Pimpinan Unit Penjaminan Mutu di Lingkungan Program Pascasarjana Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1DjAiF2nXDSQunRu0zQHCEsyy75aULYpC/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1DjAiF2nXDSQunRu0zQHCEsyy75aULYpC/view"
   },
   {
     "noUrutAsli": 64,
@@ -763,9 +763,9 @@
     "perihal": "RENCANA STRATEGIS (RENSTRA) PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG TAHUN 2012 - 2016",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1yvydXR1OhmYtcBzHTiBjp0eTBMc-QlNx/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1yvydXR1OhmYtcBzHTiBjp0eTBMc-QlNx/edit"
   },
   {
     "noUrutAsli": 65,
@@ -775,9 +775,9 @@
     "perihal": "RENCANA OPERASIONAL (RENOP) PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG TAHUN 2012 - 2016",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/107Y0nsOqyX78Pf5aGxpOMPAETV5frH9z/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/107Y0nsOqyX78Pf5aGxpOMPAETV5frH9z/edit"
   },
   {
     "noUrutAsli": 66,
@@ -787,9 +787,9 @@
     "perihal": "PEMBENTUKAN INTERNATIONAL COOPERATION OFFICE (ICO)",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1diuvIwkNT-f4NnCOf-DkTFirJcIji6z0/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1diuvIwkNT-f4NnCOf-DkTFirJcIji6z0/edit"
   },
   {
     "noUrutAsli": 67,
@@ -799,9 +799,9 @@
     "perihal": "SUSUNAN UNSUR PIMPINAN UNIVERSITAS, FAKULTAS, PELAKSANA AKADEMIK, PELAKSANA ADMINISTRASI, BADAN, LEMBAGA, UNIT PELAKSANA TEKNIK UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "YAYASAN",
     "unitLabel": "Yayasan",
-    "sumberLink": "https://docs.google.com/document/d/1kdEaOK00SilaQMjuI3VZ8HWtazIJoHtj/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1kdEaOK00SilaQMjuI3VZ8HWtazIJoHtj/edit"
   },
   {
     "noUrutAsli": 68,
@@ -811,9 +811,9 @@
     "perihal": "Pengangkatan Tim Penyusun Bahan Pengajuan Akreditasi Institusi Perguruan Tinggi (AIPT) Universitas Gajayana Malang 2013/ 2014",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/15LHVIyFAphAErV6kfHNIJ1JFjflzAGbs/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/15LHVIyFAphAErV6kfHNIJ1JFjflzAGbs/edit"
   },
   {
     "noUrutAsli": 69,
@@ -823,9 +823,9 @@
     "perihal": "Susunan Organisasi dan Pejabat Badan Pengembangan Pendidikan dan Penjaminan Mutu (BP3M) Rektor Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1YQ39iS5RKnedQjOQ_Z_ba6yO91dsvuMH/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1YQ39iS5RKnedQjOQ_Z_ba6yO91dsvuMH/edit"
   },
   {
     "noUrutAsli": 70,
@@ -835,9 +835,9 @@
     "perihal": "Pengangkatan Tim Konversi Mata Kuliah Calon Mahasiswa Baru Pindahan Program Studi di lingkungan Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1xXfdEryUFVjioGU81ca-O5VbgWp3I-LK/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1xXfdEryUFVjioGU81ca-O5VbgWp3I-LK/edit"
   },
   {
     "noUrutAsli": 71,
@@ -847,9 +847,9 @@
     "perihal": "PENGELOLAAN SARANA DAN PRASARANA PADA LEMBAGA PENELITIAN DAN PENGABDIAN MASYARAKAT UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/14nM5_4AhGBGMKlesHk-5-Jam1ASX37rq/edit",
     "catatan": "tidak ada nomor surat",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/14nM5_4AhGBGMKlesHk-5-Jam1ASX37rq/edit"
   },
   {
     "noUrutAsli": 72,
@@ -859,9 +859,9 @@
     "perihal": "Susunan Organisasi dan Pejabat Badan Pengembangan Pendidikan dan Penjaminan Mutu (BP3M) Rektor Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1zh_tN4__x-UBEqEFDfNR4_CV--W6TfBa/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1zh_tN4__x-UBEqEFDfNR4_CV--W6TfBa/edit"
   },
   {
     "noUrutAsli": 73,
@@ -871,9 +871,9 @@
     "perihal": "Susunan Organisasi dan Pejabat Badan Pengembangan Pendidikan dan Penjaminan Mutu (BP3M) Rektor Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/159xCYP5f1bUUX36s7_ZGSWpj54TG-5LD/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/159xCYP5f1bUUX36s7_ZGSWpj54TG-5LD/edit"
   },
   {
     "noUrutAsli": 74,
@@ -883,9 +883,9 @@
     "perihal": "TENAGA KONSULTAN AKREDITASI PROGRAM STUDI (APS) DAN AKREDITASI INSTITUSI PERGURUAN TINGGI (AIPT) UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1xbdYMO-SWjLsWVXUsVXww88NIdNa6FYP/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1xbdYMO-SWjLsWVXUsVXww88NIdNa6FYP/edit"
   },
   {
     "noUrutAsli": 75,
@@ -895,9 +895,9 @@
     "perihal": "Penetapan Tim Borang Fakultas, Evaluasi Diri dan Borang Program Studi Bahasa dan Sastra Inggris Fakultas Ilmu Sosial dan Budaya Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/12-Zw-7FJRZFVNZPO1MgLO849OUpIH5jx/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/12-Zw-7FJRZFVNZPO1MgLO849OUpIH5jx/edit"
   },
   {
     "noUrutAsli": 76,
@@ -907,9 +907,9 @@
     "perihal": "PENGURANGAN DANA PENGEMBANGAN PENDIDIKAN (DPP) PADA PENERIMAAN MAHASISWA BARU DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG JENJANG S1",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/10Op91R-vu_K1wnWK7CnUQRrBVk0TZFq4/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/10Op91R-vu_K1wnWK7CnUQRrBVk0TZFq4/edit"
   },
   {
     "noUrutAsli": 77,
@@ -919,9 +919,9 @@
     "perihal": "SUSUNAN TIM PENGUSUL PROGRAM STUDI BARU UNIVERSITAS GAJAYANA",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1KV-TwHBlyPNmvNceMYUytcRvBEfww_0_/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1KV-TwHBlyPNmvNceMYUytcRvBEfww_0_/edit"
   },
   {
     "noUrutAsli": 78,
@@ -931,9 +931,9 @@
     "perihal": "STANDAR DOSEN DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1GqErhlQ7uJc6xU_5l9HVLKdYZz194iiG/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1GqErhlQ7uJc6xU_5l9HVLKdYZz194iiG/edit"
   },
   {
     "noUrutAsli": 79,
@@ -943,9 +943,9 @@
     "perihal": "PENGANGKATAN PEJABAT STRUKTURAL DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/122wx8izLKILATm4_hbd1Sgy1Nb6X8cWV/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/122wx8izLKILATm4_hbd1Sgy1Nb6X8cWV/edit"
   },
   {
     "noUrutAsli": 80,
@@ -955,9 +955,9 @@
     "perihal": "PERUBAHAN HOME BASE DOSEN TETAP PROGRAM PASCA SARJANA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1Ss81Meh882caH9j2Tln3FeitY9xwZ8j9/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1Ss81Meh882caH9j2Tln3FeitY9xwZ8j9/edit"
   },
   {
     "noUrutAsli": 81,
@@ -967,9 +967,9 @@
     "perihal": "PENGANGKATAN PEJABAT STRUKTURAL DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/11_Bhz-jYQDsfeC0ha4V4xdzcodPiKzh5/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/11_Bhz-jYQDsfeC0ha4V4xdzcodPiKzh5/edit"
   },
   {
     "noUrutAsli": 82,
@@ -979,9 +979,9 @@
     "perihal": "PANITIA PENERIMAAN MAHASISWA BARU UNIVERSITAS GAJAYANA MALANG TAHUN AKADEMIK 2015/2016",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1F4JT8h_53DKiWyMHXvIP1Ehhn9J2K-bu/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1F4JT8h_53DKiWyMHXvIP1Ehhn9J2K-bu/edit"
   },
   {
     "noUrutAsli": 83,
@@ -991,9 +991,9 @@
     "perihal": "BANTUAN DANA PENELITIAN DOSEN DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1rVxvoO1Fe_Ya3XeRR-vj0pbSip-BQ3Q5/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1rVxvoO1Fe_Ya3XeRR-vj0pbSip-BQ3Q5/edit"
   },
   {
     "noUrutAsli": 84,
@@ -1003,9 +1003,9 @@
     "perihal": "RENCANA OPERASIONAL (RENOP) PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG TAHUN 2015/2016 - 2016/2017",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/19pzOENSGClW3uvdG2U5x9xse7mLILmPt/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/19pzOENSGClW3uvdG2U5x9xse7mLILmPt/edit"
   },
   {
     "noUrutAsli": 85,
@@ -1015,9 +1015,9 @@
     "perihal": "Penerimaan Maahasiswa Baru Program Pascasarjana Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1TlXBaAaKZvDM0s1Y9UR7qaFnxbaICZd5/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1TlXBaAaKZvDM0s1Y9UR7qaFnxbaICZd5/edit"
   },
   {
     "noUrutAsli": 86,
@@ -1027,9 +1027,9 @@
     "perihal": "PEMBERIAN IJIN BELAJAR PEGAWAI DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1VF8Sgq7cjKndnZv5dZJf11d0cZoP8fPn/edit",
     "catatan": "tidak ada nomor surat",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1VF8Sgq7cjKndnZv5dZJf11d0cZoP8fPn/edit"
   },
   {
     "noUrutAsli": 87,
@@ -1039,9 +1039,9 @@
     "perihal": "LAYANAN KESEJAHTERAAN FISIK DAN MENTAL UNTUK MAHASISWA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1p0HFoJoERzqcplVJsgSltILNEtmq_jDV/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1p0HFoJoERzqcplVJsgSltILNEtmq_jDV/view"
   },
   {
     "noUrutAsli": 88,
@@ -1051,9 +1051,9 @@
     "perihal": "SUSUNAN UNSUR PIMPINAN UNIVERSITAS, FAKULTAS, PELAKSANA AKADEMIK, PELAKSANA ADMINISTRASI, BADAN, LEMBAGA, UNIT PELAKSANA TEKNIK UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "YAYASAN",
     "unitLabel": "Yayasan",
-    "sumberLink": "https://docs.google.com/document/d/1JwqjBBgfyL_iuck4IrTji3ERCL3vYNgx/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1JwqjBBgfyL_iuck4IrTji3ERCL3vYNgx/edit"
   },
   {
     "noUrutAsli": 89,
@@ -1063,9 +1063,9 @@
     "perihal": "PANITIA PENERIMAAN MAHASISWA BARU UNIVERSITAS GAJAYANA MALANG TAHUN AKADEMIK 2016/2017",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1UO1CVdK1X_yVgdV-8LPRuc7DbXyB--cC/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1UO1CVdK1X_yVgdV-8LPRuc7DbXyB--cC/edit"
   },
   {
     "noUrutAsli": 90,
@@ -1075,9 +1075,9 @@
     "perihal": "Insentif Kinerja Dosen Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1W8vNHLuMyAucnjG4JEi3ZT4rnzFFRXbL/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1W8vNHLuMyAucnjG4JEi3ZT4rnzFFRXbL/edit"
   },
   {
     "noUrutAsli": 91,
@@ -1087,9 +1087,9 @@
     "perihal": "RENCANA INDUK PENGEMBANGAN (RENIP) UNIVERSITAS GAJAYANA MALANG TAHUN 2016 - 2041",
     "unitKode": "YAYASAN",
     "unitLabel": "Yayasan",
-    "sumberLink": "https://drive.google.com/file/d/ 1a3mx_fNBW7IG56O5Ud0lZIRZf h-AuEBc/view",
     "catatan": "Rencana Induk Pengembangan : 91 & 156 (mirip)",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/ 1a3mx_fNBW7IG56O5Ud0lZIRZf h-AuEBc/view"
   },
   {
     "noUrutAsli": 92,
@@ -1099,9 +1099,9 @@
     "perihal": "SUSUNAN UNSUR PIMPINAN UNIVERSITAS, FAKULTAS, PELAKSANA AKADEMIK, PELAKSANA ADMINISTRASI, BADAN, LEMBAGA, UNIT PELAKSANA TEKNIK UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "YAYASAN",
     "unitLabel": "Yayasan",
-    "sumberLink": "https://docs.google.com/document/d/1oaNxLH9OpQ4KN-GBoO491vD1iR_5OsPW/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1oaNxLH9OpQ4KN-GBoO491vD1iR_5OsPW/edit"
   },
   {
     "noUrutAsli": 93,
@@ -1111,9 +1111,9 @@
     "perihal": "Pengangkatan Tim Rekonstruksi Kurikulum Program Studi di lingkungan Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1u-xK4I5wri5PZ-p93qObSekCpRPZFSWP/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1u-xK4I5wri5PZ-p93qObSekCpRPZFSWP/edit"
   },
   {
     "noUrutAsli": 94,
@@ -1123,9 +1123,9 @@
     "perihal": "Penetapan Ijasah di lingkungan Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1-yyEY5oNKNFUeI-ubnatKshsU5MWady7/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1-yyEY5oNKNFUeI-ubnatKshsU5MWady7/edit"
   },
   {
     "noUrutAsli": 95,
@@ -1135,9 +1135,9 @@
     "perihal": "PEMBENTUKAN TIM PERUMUS PENYUSUNAN VISI, MISI, TUJUAN, DAN SASARAN PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1KRyCgQ0SGF6GyxEUTRIfA7D2EODNi_uE/edit",
     "catatan": "Pembentukan Tim Perumus Penyusunan : 95 & 174 (mirip)",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1KRyCgQ0SGF6GyxEUTRIfA7D2EODNi_uE/edit"
   },
   {
     "noUrutAsli": 96,
@@ -1147,9 +1147,9 @@
     "perihal": "Tim Penyusun Rencana Strategis (Renstra) Universitas Gajayana Malang Tahun 2017-2021",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/11eFRVBYzE-ZZwqHaoFqtajjshkNED-om/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/11eFRVBYzE-ZZwqHaoFqtajjshkNED-om/edit"
   },
   {
     "noUrutAsli": 97,
@@ -1159,9 +1159,9 @@
     "perihal": "Penerbitan Ijasah di lingkungan Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1luTmgPPO7Osi4zbOGPJihEIGGdkb6q07/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1luTmgPPO7Osi4zbOGPJihEIGGdkb6q07/edit"
   },
   {
     "noUrutAsli": 98,
@@ -1171,9 +1171,9 @@
     "perihal": "Penerbitan Surat Keterangan Pendamping Ijasah di lingkungan Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1st7E07E8ICIDQhVN2GuevWvouSJ8xzwH/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1st7E07E8ICIDQhVN2GuevWvouSJ8xzwH/edit"
   },
   {
     "noUrutAsli": 99,
@@ -1183,9 +1183,9 @@
     "perihal": "KEWAJIBAN DOSEN DALAM MELAKSANAKAN PENELITIAN DAN PKM PASCASARJANA UNIVERSITAS GAJAYANA",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1H6BUvVbA3-sKn4MGvgNhXTQiDzchjr__/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1H6BUvVbA3-sKn4MGvgNhXTQiDzchjr__/view"
   },
   {
     "noUrutAsli": 100,
@@ -1195,9 +1195,9 @@
     "perihal": "RENCANA STRATEGIS (RENSTRA) PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG TAHUN 2017 - 2021",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/10Ngd60KtRbVa8VU2xPlP8Rcnxfb09V0A/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/10Ngd60KtRbVa8VU2xPlP8Rcnxfb09V0A/edit"
   },
   {
     "noUrutAsli": 101,
@@ -1207,9 +1207,9 @@
     "perihal": "IDENTITAS/ LAMBANG/ LOGO PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1StVQKfSqyU6IWytjF0D57-kvKaAazKId/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1StVQKfSqyU6IWytjF0D57-kvKaAazKId/edit"
   },
   {
     "noUrutAsli": 102,
@@ -1219,9 +1219,9 @@
     "perihal": "IDENTITAS/ LAMBANG/ LOGO PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1StVQKfSqyU6IWytjF0D57-kvKaAazKId/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1StVQKfSqyU6IWytjF0D57-kvKaAazKId/edit"
   },
   {
     "noUrutAsli": 103,
@@ -1231,9 +1231,9 @@
     "perihal": "RENCANA STRATEGIS PENELITIAN DAN PENGABDIAN KEPADA MASYARAKAT UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/13ofp-vhQ6ZGmzPKC2ZzVwBlgCqhZExgP/view",
     "catatan": "Rencana Strategis : 21, 23, 24, 49, 51, 60, 64, 96, 100, 111, 198, 202, 203, 222 & 281 (nomor 51, 60, 64, 96, 100, 111, 198, 202, 203, 222, 281 sedikit sama, nomor 21, 23, 24, 49 sedikit berbeda)",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/13ofp-vhQ6ZGmzPKC2ZzVwBlgCqhZExgP/view"
   },
   {
     "noUrutAsli": 104,
@@ -1243,9 +1243,9 @@
     "perihal": "Susunan Organisasi Lembaga Penelitian dan Pengabdian kepada Masyarakat Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1DBjj4VV2B-J3WYHmX50ehijR28BkUAMF/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1DBjj4VV2B-J3WYHmX50ehijR28BkUAMF/edit"
   },
   {
     "noUrutAsli": 105,
@@ -1255,9 +1255,9 @@
     "perihal": "STATUTA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "YAYASAN",
     "unitLabel": "Yayasan",
-    "sumberLink": "https://drive.google.com/file/d/1x17vv9G-lnN0hZP9W2Y2dR7vX-ZomjWr/view",
     "catatan": "Statuta : 56, 58, 105, 134, & 180 (sedikit berbeda)",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1x17vv9G-lnN0hZP9W2Y2dR7vX-ZomjWr/view"
   },
   {
     "noUrutAsli": 106,
@@ -1267,9 +1267,9 @@
     "perihal": "PENERIMAAN MAHASISWA WARGA NEGARA ASING DI UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1ibAc0v5xQdC4hqhcNJhv8B1iElSTx2mA/view",
     "catatan": "Penerimaan Mahasiswa : 76, 82, 89, 106, 120, & 238 (mirip)",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1ibAc0v5xQdC4hqhcNJhv8B1iElSTx2mA/view"
   },
   {
     "noUrutAsli": 107,
@@ -1279,9 +1279,9 @@
     "perihal": "PERUBAHAN HOME BASE DOSEN TETAP FAKULTAS ILMU SOSIAL DAN BUDAYA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1YdJYz-fazNTFf5HF5F9_lHDopAUMjflL/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1YdJYz-fazNTFf5HF5F9_lHDopAUMjflL/view"
   },
   {
     "noUrutAsli": 108,
@@ -1291,9 +1291,9 @@
     "perihal": "PEMBENTUKAN SENAT UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1zq8gDY8lF2wHYFSK_rCWP4ociS1-0qiA/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1zq8gDY8lF2wHYFSK_rCWP4ociS1-0qiA/edit"
   },
   {
     "noUrutAsli": 109,
@@ -1303,9 +1303,9 @@
     "perihal": "INSENTIF DANA PUBLIKASI DOSEN DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1Ss4Kk2DKpTBvqsJ2HvNAjTnkNFp4RRvV/view",
     "catatan": "Insentif Dana : 109 & 201 (mirip)",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1Ss4Kk2DKpTBvqsJ2HvNAjTnkNFp4RRvV/view"
   },
   {
     "noUrutAsli": 110,
@@ -1315,9 +1315,9 @@
     "perihal": "PEDOMAN PENYUSUNAN VISI, MISI DAN TUJUAN UNIVERSITAS GAJAYANA MALANG TAHUN 2017",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1VNvVG5aG-BqmXc23fPJ4W59UcDRxhfj8/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1VNvVG5aG-BqmXc23fPJ4W59UcDRxhfj8/view"
   },
   {
     "noUrutAsli": 111,
@@ -1327,9 +1327,9 @@
     "perihal": "RENCANA STRATEGIS (RENSTRA) PROGRAM PASCASASARJANA UNIVERSITAS GAJAYANA MALANG TAHUN 2017-2021",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1Mk5ohWavXOi1r_lCI7Ta7BQELLoEYP4D/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1Mk5ohWavXOi1r_lCI7Ta7BQELLoEYP4D/view"
   },
   {
     "noUrutAsli": 112,
@@ -1339,9 +1339,9 @@
     "perihal": "PENETAPAN VISI, MISI, DAN TUJUAN PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG TAHUN 2017",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1Z_ZCwYzf918eYQt6aqUum6E8_CUspyny/view",
     "catatan": "Penetapan Visi, Misi, dan Tujuan : 112, 209, & 278 (mirip)",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1Z_ZCwYzf918eYQt6aqUum6E8_CUspyny/view"
   },
   {
     "noUrutAsli": 113,
@@ -1351,9 +1351,9 @@
     "perihal": "Penetapan Tim Borang Fakultas, Evaluasi Diri dan Borang Program Studi Akuntansi Fakultas Ekonomi dan Bisnis Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1kDmr0nIVUQdjkzDVfZ2lBihhtkZfAq8E/edit",
     "catatan": "tidak ada nomor surat",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1kDmr0nIVUQdjkzDVfZ2lBihhtkZfAq8E/edit"
   },
   {
     "noUrutAsli": 114,
@@ -1363,9 +1363,9 @@
     "perihal": "INSENTIF PENELITIAN DAN PENGABDIAN DOSEN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1PQQJJa1ftzaVfartUnDNR9x-Lf_wyU66/view",
     "catatan": "Insentif Penelitian : 114 & 121 (mirip)",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1PQQJJa1ftzaVfartUnDNR9x-Lf_wyU66/view"
   },
   {
     "noUrutAsli": 115,
@@ -1375,9 +1375,9 @@
     "perihal": "Program Penelitian Kompetitif untuk Dosen di Lingkungan Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/174ckefhhRFoXSHy64w06zXtmNPCYqPEF/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/174ckefhhRFoXSHy64w06zXtmNPCYqPEF/edit"
   },
   {
     "noUrutAsli": 116,
@@ -1387,9 +1387,9 @@
     "perihal": "PEDOMAN PENGELOLAAN SUMBER DAYA MANUSIA",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1qlzVsz6ECKRYrl__uLC8aLOwNw506Pt5/view",
     "catatan": "Pedoman Pengelolaan : 116 & 230 (sama)",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1qlzVsz6ECKRYrl__uLC8aLOwNw506Pt5/view"
   },
   {
     "noUrutAsli": 117,
@@ -1399,9 +1399,9 @@
     "perihal": "PENGGUNAAN GELAR BARU DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1iIpRxJ9M6dNTGxOpQGlrPZKXj6iGZJ8d/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1iIpRxJ9M6dNTGxOpQGlrPZKXj6iGZJ8d/edit"
   },
   {
     "noUrutAsli": 118,
@@ -1411,9 +1411,9 @@
     "perihal": "PROSES PENYELESAIAN TESIS, SKRIPSI/ TUGAS AKHIR DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1jTmrN1faQcAYCIOD9R6H_t5R7U0_TTQQ/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1jTmrN1faQcAYCIOD9R6H_t5R7U0_TTQQ/edit"
   },
   {
     "noUrutAsli": 119,
@@ -1423,9 +1423,9 @@
     "perihal": "KEWAJIBAN PUBLIKASI KARYA ILMIAH BAGI MAHASISWA PROGRAM PASCASARJANA (S-2) DAN PROGRAM SARJANA (S-1) DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1bI6SV2UonQOljZmHxi1hL3iZw7FP20Gt/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1bI6SV2UonQOljZmHxi1hL3iZw7FP20Gt/edit"
   },
   {
     "noUrutAsli": 120,
@@ -1435,9 +1435,9 @@
     "perihal": "PANITIA PROMOSI DAN PENERIMAAN MAHASISWA BARU UNIVERSITAS GAJAYANA MALANG TAHUN AKADEMIK 2018/2019",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1yFsNBElepUL4IAd63XPukzgwDjPR8DEw/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1yFsNBElepUL4IAd63XPukzgwDjPR8DEw/view"
   },
   {
     "noUrutAsli": 121,
@@ -1447,9 +1447,9 @@
     "perihal": "PENETAPAN NAMA DOSEN PENERIMA PENGHARGAAN/INSENTIF PENELITIAN INTERNAL DI UNIVERSITAS GAJAYANA MALANG TAHUN 2018",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1wiErWoW4xJMDBDgZmwQg2P1hDt9IW6fJ/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1wiErWoW4xJMDBDgZmwQg2P1hDt9IW6fJ/view"
   },
   {
     "noUrutAsli": 122,
@@ -1459,9 +1459,9 @@
     "perihal": "PENETAPAN KURIKULUM PROGRAM STUDI MAGISTER MANAJEMEN PASCASARJANA UNIVERSITAS GAJAYANA TAHUN AKADEMIK 2018/2019",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1k_rhO1RTBrLN85z_oyBRLMhyeMdFMSJ-/edit",
     "catatan": "Penetapan Kurikulum : 122, 217, & 221 (64 & 67 sama, 16 mirip)",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1k_rhO1RTBrLN85z_oyBRLMhyeMdFMSJ-/edit"
   },
   {
     "noUrutAsli": 123,
@@ -1471,9 +1471,9 @@
     "perihal": "PENETAPAN PERSONIL UNIT PENJAMINAN MUTU DI PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/13qrLm2xk-QB0qdPBnHONNBC4b99tXR6c/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/13qrLm2xk-QB0qdPBnHONNBC4b99tXR6c/view"
   },
   {
     "noUrutAsli": 124,
@@ -1483,9 +1483,9 @@
     "perihal": "SUSUNAN UNSUR PIMPINAN UNIVERSITAS, FAKULTAS, PELAKSANA AKADEMIK, PELAKSANA ADMINISTRASI, BADAN, LEMBAGA, BIRO, UNIT KERJA DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "YAYASAN",
     "unitLabel": "Yayasan",
-    "sumberLink": "https://drive.google.com/file/d/ 1UXM8h335bc- BKGigilHZEWHNa16H47uj/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/ 1UXM8h335bc- BKGigilHZEWHNa16H47uj/view"
   },
   {
     "noUrutAsli": 125,
@@ -1495,9 +1495,9 @@
     "perihal": "PEDOMAN PENYELENGGARAAN PENDIDIKAN UNIVERSITAS GAJAYANA TAHUN AKADEMIK 2018/2019-2022/2023",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/17wPuEFn15wlYh26G-wTdSnc4fE9wjAB5/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/17wPuEFn15wlYh26G-wTdSnc4fE9wjAB5/view"
   },
   {
     "noUrutAsli": 126,
@@ -1507,9 +1507,9 @@
     "perihal": "PEDOMAN REKRUITMEN DAN PENGEMBANGAN DOSEN DAN KARYAWAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1nQ6af1782KmH5NxazhwSsY3J2zaMRZd8/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1nQ6af1782KmH5NxazhwSsY3J2zaMRZd8/view"
   },
   {
     "noUrutAsli": 127,
@@ -1519,9 +1519,9 @@
     "perihal": "KEBIJAKAN MUTU SISTEM PENJAMINAN MUTU INTERNAL PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1-lijsvP5LfZuG_qt6-iLrvsPqcyfyuzE/view",
     "catatan": "Kebijakan Mutu : 127, 213, & 284 (127 & 213 sama, 284 mirip)",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1-lijsvP5LfZuG_qt6-iLrvsPqcyfyuzE/view"
   },
   {
     "noUrutAsli": 128,
@@ -1531,9 +1531,9 @@
     "perihal": "RENCANA OPERASIONAL (RENOP) PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG TAHUN 2018 - 2019",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1Q0GcfiGGfzY2QdHpafdEosTn2G--F2-w/view",
     "catatan": "Rencana Operasional : 50, 61, 65, 84, 128, 153, 199, 223, 225, 288 (50, 61, 65, 128 & 223 sama, 153, 199, 225, 288 mirip)",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1Q0GcfiGGfzY2QdHpafdEosTn2G--F2-w/view"
   },
   {
     "noUrutAsli": 129,
@@ -1543,9 +1543,9 @@
     "perihal": "PENGANGKATAN PEJABAT STRUKTURAL UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1uLogqOQX4t-CBJI4Nwj-thPgSzLiFPbY/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1uLogqOQX4t-CBJI4Nwj-thPgSzLiFPbY/edit"
   },
   {
     "noUrutAsli": 130,
@@ -1555,9 +1555,9 @@
     "perihal": "PENGANGKATAN PEGAWAI TETAP PENGELOLA PPDIKTI FEEDER DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1fAnTks1mjlkCmHyf09jWcRQn_mZGpsGZ/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1fAnTks1mjlkCmHyf09jWcRQn_mZGpsGZ/edit"
   },
   {
     "noUrutAsli": 131,
@@ -1567,9 +1567,9 @@
     "perihal": "PENGANGKATAN PENGELOLA DIVISI MARKETING DAN ADMISI UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/10vZEPmdu6L9VtkjWZj4FbYoWIJMEngzH/view",
     "catatan": "Pengangkatan Pengelola Divisi : 131, 177, 207, 233 & 252 (mirip)",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/10vZEPmdu6L9VtkjWZj4FbYoWIJMEngzH/view"
   },
   {
     "noUrutAsli": 132,
@@ -1579,9 +1579,9 @@
     "perihal": "Penetapan Tim Borang Fakultas, Evaluasi Diri dan Borang Program Studi Psikologi & Prodi Ilmu Komunikasi di Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1NS0YugtxUHPmaDq5OCwlsKUHdfs8d4My/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1NS0YugtxUHPmaDq5OCwlsKUHdfs8d4My/edit"
   },
   {
     "noUrutAsli": 133,
@@ -1591,9 +1591,9 @@
     "perihal": "PERUBAHAN NAMA INTERNATIONAL COOPERATION OFFICE (ICO) menjadi INTERNATIONAL OFFICE",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1uofW3sx8q4NYrtdS1hYqJJADvDWBasZf/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1uofW3sx8q4NYrtdS1hYqJJADvDWBasZf/edit"
   },
   {
     "noUrutAsli": 134,
@@ -1603,9 +1603,9 @@
     "perihal": "STATUTA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "YAYASAN",
     "unitLabel": "Yayasan",
-    "sumberLink": "https://drive.google.com/file/d/ 1ESdllew6P9ei1x3kbouvdL2BX1E -s2vE/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/ 1ESdllew6P9ei1x3kbouvdL2BX1E -s2vE/view"
   },
   {
     "noUrutAsli": 135,
@@ -1615,9 +1615,9 @@
     "perihal": "PERSETUJUAN PENGUNDURAN DIRI SEBAGAI DOSEN TETAP",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1H4ULGxesUzXnl37dVHGWKzcGjsCZjLrx/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1H4ULGxesUzXnl37dVHGWKzcGjsCZjLrx/edit"
   },
   {
     "noUrutAsli": 136,
@@ -1627,9 +1627,9 @@
     "perihal": "PENGANGKATAN PEJABAT STRUKTURAL DAN STAF DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1QSS5KkOSl9rMeHNP-iOalIycnY59FHBc/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1QSS5KkOSl9rMeHNP-iOalIycnY59FHBc/edit"
   },
   {
     "noUrutAsli": 137,
@@ -1639,9 +1639,9 @@
     "perihal": "PENGANGKATAN PEJABAT STRUKTURAL DAN STAF DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/16GYCyWW2HRU8wjxIMHbDrNAMtoVkaYxd/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/16GYCyWW2HRU8wjxIMHbDrNAMtoVkaYxd/edit"
   },
   {
     "noUrutAsli": 138,
@@ -1651,9 +1651,9 @@
     "perihal": "PERSETUJUAN PENGUNDURAN DIRI SEBAGAI DOSEN TETAP",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1q2tVrV9pib5kCAw_vQ9IxD1LpgMTKcpO/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1q2tVrV9pib5kCAw_vQ9IxD1LpgMTKcpO/edit"
   },
   {
     "noUrutAsli": 139,
@@ -1663,9 +1663,9 @@
     "perihal": "PERSETUJUAN PENGUNDURAN DIRI SEBAGAI DOSEN TETAP",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1i70VghGA35gEK6_qk7MFpzvKCSliiTQ_/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1i70VghGA35gEK6_qk7MFpzvKCSliiTQ_/edit"
   },
   {
     "noUrutAsli": 140,
@@ -1675,9 +1675,9 @@
     "perihal": "TIM PENILAI ANGKA KREDIT DAN ADMINISTRASI JABATAN FUNGSIONAL DAN ATAU PANGKAT DOSEN",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1APzh9GvlabDKlqLipfNfWRApG67RIUgg/edit",
     "catatan": "tidak ada nomor surat",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1APzh9GvlabDKlqLipfNfWRApG67RIUgg/edit"
   },
   {
     "noUrutAsli": 141,
@@ -1687,9 +1687,9 @@
     "perihal": "Penetapan Tim Borang Fakultas, Evaluasi Diri dan Borang Program Studi Manajemen Fakultas Ekonomi dan Bisnis Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1sGAbnKLjEo6UqlrQFg5-6iOSkbKTlXyL/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1sGAbnKLjEo6UqlrQFg5-6iOSkbKTlXyL/edit"
   },
   {
     "noUrutAsli": 142,
@@ -1699,9 +1699,9 @@
     "perihal": "SUSUNAN TIM PENGUSUL PROGRAM STUDI BARU UNIVERSITAS GAJAYANA",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1ZltYZmDQcJMfQulbRNLpw2qljCg9VDXO/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1ZltYZmDQcJMfQulbRNLpw2qljCg9VDXO/edit"
   },
   {
     "noUrutAsli": 143,
@@ -1711,9 +1711,9 @@
     "perihal": "PERSETUJUAN PENGUNDURAN DIRI SEBAGAI DOSEN TETAP",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1KY8wFmX0kR4m2Ew6EvccAmbkJ_25VGgh/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1KY8wFmX0kR4m2Ew6EvccAmbkJ_25VGgh/edit"
   },
   {
     "noUrutAsli": 144,
@@ -1723,9 +1723,9 @@
     "perihal": "PERSETUJUAN PENGUNDURAN DIRI SEBAGAI DOSEN TETAP",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1lAso_m-GrV9pnSlIR3bM1w3yKoTJ3_o5/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1lAso_m-GrV9pnSlIR3bM1w3yKoTJ3_o5/edit"
   },
   {
     "noUrutAsli": 145,
@@ -1735,9 +1735,9 @@
     "perihal": "PENGANGKATAN PEJABAT KOMITE DAN PENGELOLA PUSAT TEKNOLOGI INFORMASI UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1LlZ1VJLOLdqv3_X-FWd009L7dRHUgHSV/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1LlZ1VJLOLdqv3_X-FWd009L7dRHUgHSV/edit"
   },
   {
     "noUrutAsli": 146,
@@ -1747,9 +1747,9 @@
     "perihal": "Tim Penyusun Laporan Evaluasi Diri Fakultas dan Laporan Kinerja Program Studi Ilmu Komunikasi Fakultas Ilmu Sosial dan Budaya di Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1HU3Ckzrx6_da0kdDjENp4T7GrN21scbb/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1HU3Ckzrx6_da0kdDjENp4T7GrN21scbb/edit"
   },
   {
     "noUrutAsli": 147,
@@ -1759,9 +1759,9 @@
     "perihal": "INTEGRASI HASIL PENELITIAN DAN PENGABDIAN KEPADA MASYARAKAT (PKM) DALAM PROSES PEMBELAJARAN",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1TejVF3NlGr1rRfvmUSWn3qIelTrL2aN1/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1TejVF3NlGr1rRfvmUSWn3qIelTrL2aN1/view"
   },
   {
     "noUrutAsli": 148,
@@ -1771,9 +1771,9 @@
     "perihal": "PENETAPAN BUKU PEDOMAN PENGEMBANGAN KURIKULUM UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1tTgz8GwtIqkTWxlvdP1XYwECGBLhqCAk/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1tTgz8GwtIqkTWxlvdP1XYwECGBLhqCAk/view"
   },
   {
     "noUrutAsli": 149,
@@ -1783,9 +1783,9 @@
     "perihal": "PERSETUJUAN PENGUNDURAN DIRI SEBAGAI DOSEN TETAP",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1f1c6e2Lbx5185YMv8D8ULrpTBdMdLxSP/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1f1c6e2Lbx5185YMv8D8ULrpTBdMdLxSP/edit"
   },
   {
     "noUrutAsli": 150,
@@ -1795,9 +1795,9 @@
     "perihal": "PERSETUJUAN PENGUNDURAN DIRI SEBAGAI DOSEN TETAP",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1f9ui3o_55CqQMK4EkJQSexhFXh5AWZWS/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1f9ui3o_55CqQMK4EkJQSexhFXh5AWZWS/edit"
   },
   {
     "noUrutAsli": 151,
@@ -1807,9 +1807,9 @@
     "perihal": "KETERLIBATAN MAHASISWA DALAM KEGIATAN RISET DAN PKM DOSEN UNIVERSITAS GAJAYANA",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1uFNzfKuEhYZgzx4PHWMQWYDtkntDseLV/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1uFNzfKuEhYZgzx4PHWMQWYDtkntDseLV/view"
   },
   {
     "noUrutAsli": 152,
@@ -1819,9 +1819,9 @@
     "perihal": "KELEMBAGAAN/ ORGANISASI PENYELENGGARAAN SISTEM PENJAMINAN MUTU INTERNAL (SPMI) DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1YUa_0j12DsxZRFxK1JXTU699Cc 7SKp5W/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/ 1YUa_0j12DsxZRFxK1JXTU699Cc 7SKp5W/view"
   },
   {
     "noUrutAsli": 153,
@@ -1831,9 +1831,9 @@
     "perihal": "RENCANA OPERASIONAL (RENOP) PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG TAHUN 2019 - 2020",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1XVipGNskY_WJs0IrGqWBNVXzQINs6Zml/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1XVipGNskY_WJs0IrGqWBNVXzQINs6Zml/view"
   },
   {
     "noUrutAsli": 154,
@@ -1843,9 +1843,9 @@
     "perihal": "PENGANGKATAN UNSUR PIMPINAN PROGRAM STUDI DI LINGKUNGAN PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1HNP4Vg6vE3yXX46KqSKQ9l-mRBptxWt5/view",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1HNP4Vg6vE3yXX46KqSKQ9l-mRBptxWt5/view"
   },
   {
     "noUrutAsli": 155,
@@ -1855,9 +1855,9 @@
     "perihal": "PEMBENTUKAN SENAT UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/10ZPzK91nfsdx3T6aJqlcn_ldWEpqKl39/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/10ZPzK91nfsdx3T6aJqlcn_ldWEpqKl39/edit"
   },
   {
     "noUrutAsli": 156,
@@ -1867,9 +1867,9 @@
     "perihal": "RENCANA INDUK PENGEMBANGAN (RENIP) UNIVERSITAS GAJAYANA MALANG TAHUN 2020 - 2045",
     "unitKode": "YAYASAN",
     "unitLabel": "Yayasan",
-    "sumberLink": "https://drive.google.com/file/d/1eMYRJOdkOBSdENxrtfAAHzYAyTMuQ4M_/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1eMYRJOdkOBSdENxrtfAAHzYAyTMuQ4M_/view"
   },
   {
     "noUrutAsli": 157,
@@ -1879,9 +1879,9 @@
     "perihal": "PEMBENTUKAN SENAT UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1ksv4wmqKBb3nJsQwG_lWo_CzmbNKX_EM/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1ksv4wmqKBb3nJsQwG_lWo_CzmbNKX_EM/edit"
   },
   {
     "noUrutAsli": 158,
@@ -1891,9 +1891,9 @@
     "perihal": "PENGANGKATAN WAKIL REKTOR BIDANG KEMAHASISWAAN, KERJASAMA DAN PROMOSI UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "YAYASAN",
     "unitLabel": "Yayasan",
-    "sumberLink": "https://docs.google.com/document/d/1hmbJUzsYELMjmZa8bucYQAyONqUles8W/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1hmbJUzsYELMjmZa8bucYQAyONqUles8W/edit"
   },
   {
     "noUrutAsli": 159,
@@ -1903,9 +1903,9 @@
     "perihal": "PENGANGKATAN PEJABAT STRUKTURAL FAKULTAS/PASCASARJANA DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/11GLPkBGGsfiS3pd5shmAKhM91pB5up63/view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/11GLPkBGGsfiS3pd5shmAKhM91pB5up63/view"
   },
   {
     "noUrutAsli": 160,
@@ -1915,9 +1915,9 @@
     "perihal": "PENGANGKATAN PEJABAT STRUKTURAL FAKULTAS/ PASCASARJANA DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1N7C80gMfrk8dOp4gSJpfGjZLSA52bpx_/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1N7C80gMfrk8dOp4gSJpfGjZLSA52bpx_/edit"
   },
   {
     "noUrutAsli": 161,
@@ -1927,9 +1927,9 @@
     "perihal": "PENGANGKATAN PEJABAT STRUKTURAL FAKULTAS/ PASCASARJANA DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1LvBLl4z0gp6rLz41Ymuz0uEwAUO6EAXa/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1LvBLl4z0gp6rLz41Ymuz0uEwAUO6EAXa/edit"
   },
   {
     "noUrutAsli": 162,
@@ -1939,9 +1939,9 @@
     "perihal": "PENGANGKATAN UNSUR PIMPINAN PROGRAM STUDI DI LINGKUNGAN FAKULTAS EKONOMI DAN BISNIS UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1c4fhe3fpr2JFQPIe7_3tyTMg-S80MawX/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1c4fhe3fpr2JFQPIe7_3tyTMg-S80MawX/edit"
   },
   {
     "noUrutAsli": 163,
@@ -1951,9 +1951,9 @@
     "perihal": "PENGANGKATAN UNSUR PIMPINAN PROGRAM STUDI DI LINGKUNGAN FAKULTAS ILMU SOSIAL DAN BUDAYA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1cTVmr935tFLu7Ljab18j2EvmUhWMMy7G/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1cTVmr935tFLu7Ljab18j2EvmUhWMMy7G/edit"
   },
   {
     "noUrutAsli": 164,
@@ -1963,9 +1963,9 @@
     "perihal": "PENGANGKATAN PIMPINAN UNSUR PELAKSANA ADMINISTRASI DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1ChyXBx2GOqIsWWtW88sU1s9j0prbU5UY/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1ChyXBx2GOqIsWWtW88sU1s9j0prbU5UY/edit"
   },
   {
     "noUrutAsli": 165,
@@ -1975,9 +1975,9 @@
     "perihal": "PENGANGKATAN PIMPINAN BADAN PENGEMBANGAN PENDIDIKAN DAN PENJAMINAN MUTU (BP3M) UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/15bi1xrcHZ1OW2DhxuntsLJD3JHcly_2L/view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/15bi1xrcHZ1OW2DhxuntsLJD3JHcly_2L/view"
   },
   {
     "noUrutAsli": 166,
@@ -1987,9 +1987,9 @@
     "perihal": "PENGANGKATAN PIMPINAN LEMBAGA PENELITIAN DAN PENGABDIAN KEPADA MASYARAKAT (LPPM) UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1SBJ46zjBTBY6COJcu643ilDcvaGspQM8/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1SBJ46zjBTBY6COJcu643ilDcvaGspQM8/edit"
   },
   {
     "noUrutAsli": 167,
@@ -1999,9 +1999,9 @@
     "perihal": "PENGANGKATAN PIMPINAN UNSUR PENGEMBANG DAN PELAKSANA TUGAS STRATEGIS UNIVERSITAS DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1_oV3qbh_1vMryqTeUOAOfabCy8AVctjf/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1_oV3qbh_1vMryqTeUOAOfabCy8AVctjf/edit"
   },
   {
     "noUrutAsli": 168,
@@ -2011,9 +2011,9 @@
     "perihal": "PENGANGKATAN KEPALA LABORATORIUM DI LINGKUNGAN FAKULTAS EKONOMI DAN BISNIS UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/14dsQu4XPvz6I6EQHDiWanxxcEGdmXUst/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/14dsQu4XPvz6I6EQHDiWanxxcEGdmXUst/edit"
   },
   {
     "noUrutAsli": 169,
@@ -2023,9 +2023,9 @@
     "perihal": "PENGANGKATAN KEPALA LABORATORIUM DI LINGKUNGAN FAKULTAS ILMU SOSIAL DAN BUDAYA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1HBF7EhWX8dLS6XrUZPv_AVI4nqoWzp9h/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1HBF7EhWX8dLS6XrUZPv_AVI4nqoWzp9h/edit"
   },
   {
     "noUrutAsli": 170,
@@ -2035,9 +2035,9 @@
     "perihal": "PENGANGKATAN KEPALA LABORATORIUM DI LINGKUNGAN FAKULTAS TEKNIK DAN INFORMATIKA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1EJOh3Ad8ZJQIM3orfdLiIZjlE1DBy1OU/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1EJOh3Ad8ZJQIM3orfdLiIZjlE1DBy1OU/edit"
   },
   {
     "noUrutAsli": 171,
@@ -2047,9 +2047,9 @@
     "perihal": "PENGANGKATAN UNSUR PIMPINAN PROGRAM STUDI DI LINGKUNGAN FAKULTAS TEKNIK DAN INFORMATIKA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1nBC4L5hF2AQQbMENC-zQrSnAr0Qv_B4k/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1nBC4L5hF2AQQbMENC-zQrSnAr0Qv_B4k/edit"
   },
   {
     "noUrutAsli": 172,
@@ -2059,9 +2059,9 @@
     "perihal": "PENGANGKATAN UNSUR PIMPINAN PROGRAM STUDI DI LINGKUNGAN PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1MWfPQHz7JUfWRJmJdU_l_mZo8AoyLMMv/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1MWfPQHz7JUfWRJmJdU_l_mZo8AoyLMMv/edit"
   },
   {
     "noUrutAsli": 173,
@@ -2071,9 +2071,9 @@
     "perihal": "Pengangkatan Tim Penyusun Bahan Pengajuan Re Akreditasi Institusi Perguruan Tinggi (AIPT) Universitas Gajayana Malang 2020/2021",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1q3aqEocOnT5zsh3dezLDhPz7RZEJ2_8H/view",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1q3aqEocOnT5zsh3dezLDhPz7RZEJ2_8H/view"
   },
   {
     "noUrutAsli": 174,
@@ -2083,9 +2083,9 @@
     "perihal": "PEMBENTUKAN TIM PERUMUS PENYUSUNAN USULAN PEMBUKAAN PRODI DOKTOR ILMU MANAJEMEN PROGRAM PASCASARJANA",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1q3aqEocOnT5zsh3dezLDhPz7RZEJ2_8H/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1q3aqEocOnT5zsh3dezLDhPz7RZEJ2_8H/view"
   },
   {
     "noUrutAsli": 175,
@@ -2095,9 +2095,9 @@
     "perihal": "PENEMPATAN STAF ADMINISTRASI DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1EIm6fVuCnxh4TCbZZVUU707wkm9RpZhn/edit",
     "catatan": "Penetapan Pedoman : 37, 40, & 85 (37 & 40 sama, 85 mirip)",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1EIm6fVuCnxh4TCbZZVUU707wkm9RpZhn/edit"
   },
   {
     "noUrutAsli": 176,
@@ -2107,9 +2107,9 @@
     "perihal": "TIM PENILAI ANGKA KREDIT DAN ADMINISTRASI JABATAN FUNGSIONAL DAN ATAU PANGKAT DOSEN",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1WNoM20UyxrvsK334QGktEfdZHF49aE0P/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1WNoM20UyxrvsK334QGktEfdZHF49aE0P/edit"
   },
   {
     "noUrutAsli": 177,
@@ -2119,9 +2119,9 @@
     "perihal": "PENGANGKATAN PENGELOLA DIVISI MARKETING DAN ADMISI UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1DLvvwkRwTj8x0l9uk4_Eol1yUUKexqUB/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1DLvvwkRwTj8x0l9uk4_Eol1yUUKexqUB/view"
   },
   {
     "noUrutAsli": 178,
@@ -2131,9 +2131,9 @@
     "perihal": "PENINGKATAN PENCEGAHAN PENYEBARAN WABAH PENYAKIT COVID-19 DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/17VnwUmugfyofPilrGTk98omxsRJkbCRC/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/17VnwUmugfyofPilrGTk98omxsRJkbCRC/view"
   },
   {
     "noUrutAsli": 179,
@@ -2143,9 +2143,9 @@
     "perihal": "PENETAPAN PEDOMAN PENGUKURAN CAPAIAN PEMBELAJARAN LULUSAN PROGRAM STUDI DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1HXIGjiYhePMmp41EUUDKOf7YYW62etx3/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1HXIGjiYhePMmp41EUUDKOf7YYW62etx3/view"
   },
   {
     "noUrutAsli": 180,
@@ -2155,9 +2155,9 @@
     "perihal": "STATUTA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "YAYASAN",
     "unitLabel": "Yayasan",
-    "sumberLink": "https://drive.google.com/file/d/1xIrsZmGq88NOLuPcWnt3IMKhh-papUPO/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1xIrsZmGq88NOLuPcWnt3IMKhh-papUPO/view"
   },
   {
     "noUrutAsli": 181,
@@ -2167,9 +2167,9 @@
     "perihal": "PEMBELAJARAN SELAMA MASA PANDEMI COVID-19 UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/14BOv1niM5GvVhpH843uPeFzUU0mZhHBr/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/14BOv1niM5GvVhpH843uPeFzUU0mZhHBr/view"
   },
   {
     "noUrutAsli": 182,
@@ -2179,9 +2179,9 @@
     "perihal": "PENETAPAN PEDOMAN PENGUKURAN CAPAIAN PEMBELAJARAN LULUSAN PROGRAM STUDI DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1egi5heUJRHLiwwP_HqJpR5Wc7W5daN8E/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1egi5heUJRHLiwwP_HqJpR5Wc7W5daN8E/view"
   },
   {
     "noUrutAsli": 183,
@@ -2191,9 +2191,9 @@
     "perihal": "SISTEM KULIAH ONLINE PASCASARJANA UNIVERSITAS GAJAYANA",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1P3N_IOF2E465902KJObYH2ufF8-9JpMN/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1P3N_IOF2E465902KJObYH2ufF8-9JpMN/view"
   },
   {
     "noUrutAsli": 184,
@@ -2203,9 +2203,9 @@
     "perihal": "PENDIRIAN PUSAT KAJIAN MANAJEMEN DAN AKUNTANSI (PKMA)",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1diLFMQ_49p4ar1JkC5DfzXBc6WXOkN_p/view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1diLFMQ_49p4ar1JkC5DfzXBc6WXOkN_p/view"
   },
   {
     "noUrutAsli": 185,
@@ -2215,9 +2215,9 @@
     "perihal": "IMPLEMENTASI PENDIDIKAN ANTI KORUPSI DAN ANTI TOLERANSI",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/13-I5zkxAxMIpYM_8WMeRW8CQj9r-_OFv/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/13-I5zkxAxMIpYM_8WMeRW8CQj9r-_OFv/view"
   },
   {
     "noUrutAsli": 186,
@@ -2227,9 +2227,9 @@
     "perihal": "IMPLEMENTASI PENCEGAHAN KEKERASAN SEKSUAL DAN PERUNDUNGAN (BULLYING)",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1v7CEPMrCN2Q4EnEWPm-57vyr-5wc8PKr/view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1v7CEPMrCN2Q4EnEWPm-57vyr-5wc8PKr/view"
   },
   {
     "noUrutAsli": 187,
@@ -2239,9 +2239,9 @@
     "perihal": "PENGANGKATAN KEPALA LABORATORIUM DI LINGKUNGAN FAKULTAS ILMU SOSIAL DAN BUDAYA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1FDFIhNMkM5ZKMMb6D3aL8PxRbc3f7YuY/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1FDFIhNMkM5ZKMMb6D3aL8PxRbc3f7YuY/edit"
   },
   {
     "noUrutAsli": 188,
@@ -2251,9 +2251,9 @@
     "perihal": "SURAT KETERANGAN PENDAMPING IJASAH UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1l6eSL9Uxr-N1K5ugMyEP_rHKgnVvkZkx/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1l6eSL9Uxr-N1K5ugMyEP_rHKgnVvkZkx/edit"
   },
   {
     "noUrutAsli": 189,
@@ -2263,9 +2263,9 @@
     "perihal": "Surat Edaran Ujian Remidi",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1qBQgbuxfyJT4O7un8nrP4oIs6QpkmcPc/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1qBQgbuxfyJT4O7un8nrP4oIs6QpkmcPc/view"
   },
   {
     "noUrutAsli": 190,
@@ -2275,9 +2275,9 @@
     "perihal": "PENGANGKATAN TIM REKONSTRUKSI KURIKULUM PROGRAM STUDI DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1d7Zot2aUhkkRnsOjebul2Azz5DmBGhd-/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1d7Zot2aUhkkRnsOjebul2Azz5DmBGhd-/view"
   },
   {
     "noUrutAsli": 191,
@@ -2287,9 +2287,9 @@
     "perihal": "MERDEKA BELAJAR-KAMPUS MERDEKA",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1kKoUDVt6_dO82xawPMlCcNLiSOadwFuS/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1kKoUDVt6_dO82xawPMlCcNLiSOadwFuS/view"
   },
   {
     "noUrutAsli": 192,
@@ -2299,9 +2299,9 @@
     "perihal": "Implementasi Learning Management Systems Semerter Genap 2020/2021",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1JpO7V1h6uJ6-NfUV4kVX4G2tf6PLT2SM/view",
     "catatan": "Daring : 51 & 60 (mirip)",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1JpO7V1h6uJ6-NfUV4kVX4G2tf6PLT2SM/view"
   },
   {
     "noUrutAsli": 193,
@@ -2311,9 +2311,9 @@
     "perihal": "PEMBENTUKAN SENAT UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1mv8I1ZdNaJrRw5J0po9ISEzq8WFhk-4k/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1mv8I1ZdNaJrRw5J0po9ISEzq8WFhk-4k/edit"
   },
   {
     "noUrutAsli": 194,
@@ -2323,9 +2323,9 @@
     "perihal": "PENGANGKATAN PIMPINAN BADAN PENGEMBANGAN PENDIDIKAN DAN PENJAMINAN MUTU (BP3M) UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1olXnjNjaxUy0qfol7wpA2wqANFUtaQY5/view",
     "catatan": "Pengangkatan Pimpinan : 165, 167, 194 & 268 (mirip)",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1olXnjNjaxUy0qfol7wpA2wqANFUtaQY5/view"
   },
   {
     "noUrutAsli": 195,
@@ -2335,9 +2335,9 @@
     "perihal": "Pengangkatan Tim Penyusun Laporan Evaluasi Diri dan Laporan Kinerja Program Studi Program Studi Teknik Industri Fakultas Teknik dan Informatika Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1__wEBwez_Uh-e2W7VI-ZmFKgHXuyu-4Z/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1__wEBwez_Uh-e2W7VI-ZmFKgHXuyu-4Z/view"
   },
   {
     "noUrutAsli": 196,
@@ -2347,9 +2347,9 @@
     "perihal": "PEDOMAN PENELITIAN DAN PENGABDIAN KEPADA MASYARAKAT",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1olXnjNjaxUy0qfol7wpA2wqANFUtaQY5/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1olXnjNjaxUy0qfol7wpA2wqANFUtaQY5/view"
   },
   {
     "noUrutAsli": 197,
@@ -2359,9 +2359,9 @@
     "perihal": "Semester Pendek",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1nQWlSMgaCw7PrsYgnnR1b4d0pEC2VU03/view",
     "catatan": "Panitia Seleksi : 56, 78, & 88 (mirip)",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1nQWlSMgaCw7PrsYgnnR1b4d0pEC2VU03/view"
   },
   {
     "noUrutAsli": 198,
@@ -2371,9 +2371,9 @@
     "perihal": "RENCANA STRATEGIS (RENSTRA) PROGRAM PASCASARJANA UNIVERSITAS GJAYANA MALANG TAHUN 2022-2026",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1tSb4R_HaA-5-cNKRRkUeBapHH4DwKGWf/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1tSb4R_HaA-5-cNKRRkUeBapHH4DwKGWf/view"
   },
   {
     "noUrutAsli": 199,
@@ -2383,9 +2383,9 @@
     "perihal": "RENCANA OPERASIONAL PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA TAHUN 2021",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/19wF0Up5x7TU9RLNoaLme59Q3af-nBR_6/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/19wF0Up5x7TU9RLNoaLme59Q3af-nBR_6/view"
   },
   {
     "noUrutAsli": 200,
@@ -2395,9 +2395,9 @@
     "perihal": "PEMBELAJARAN DARING MENGGUNAKAN LMS",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1c68Afx_eOAfw1hwKVIFS-AjBOGCD_SVX/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1c68Afx_eOAfw1hwKVIFS-AjBOGCD_SVX/view"
   },
   {
     "noUrutAsli": 201,
@@ -2407,9 +2407,9 @@
     "perihal": "INSENTIF DANA PUBLIKASI DOSEN DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 15yVEiSU_0aOAnrqk2MGXc2Jf3d DMR-E5/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/ 15yVEiSU_0aOAnrqk2MGXc2Jf3d DMR-E5/view"
   },
   {
     "noUrutAsli": 202,
@@ -2419,9 +2419,9 @@
     "perihal": "RENCANA STRATEGIS UNIVERSITAS GAJAYANA MALANG TAHUN 2022 - 2026",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1RXZ8HixySm_O2PJOYeNuT2YoU 17Mz5y_/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/ 1RXZ8HixySm_O2PJOYeNuT2YoU 17Mz5y_/view"
   },
   {
     "noUrutAsli": 203,
@@ -2431,9 +2431,9 @@
     "perihal": "RENCANA STRATEGIS (RENSTRA) BIDANG KEUANGAN UNIVERSITAS GAJAYANA MALANG TAHUN 2022 - 2026",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1YDN-_oRNwxbVjee8FVOsl- 7vGTV-wTz9/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/ 1YDN-_oRNwxbVjee8FVOsl- 7vGTV-wTz9/view"
   },
   {
     "noUrutAsli": 204,
@@ -2443,9 +2443,9 @@
     "perihal": "PENETAPAN ALOKASI KUOTA BEASISWA BAGI CALON MAHASISWA BARU UNIVERSITAS GAJAYANA MALANG TAHUN AKADEMIK 2022/2023",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1UwMTdivvP8yXh1Tk7yevJSwQh LaWg0vZ/view",
     "catatan": "Penetapan Alokasi Kuota: 204 & 237 (mirip)",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/ 1UwMTdivvP8yXh1Tk7yevJSwQh LaWg0vZ/view"
   },
   {
     "noUrutAsli": 205,
@@ -2455,9 +2455,9 @@
     "perihal": "PANITIA SELEKSI BEASISWA UNIVERSITAS GAJAYANA MALANG TAHUN AKADEMIK 2022/2023",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1VdUJrel- gESlBPNldaX2PBFwJCj5c3wu/vie w",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/ 1VdUJrel- gESlBPNldaX2PBFwJCj5c3wu/vie w"
   },
   {
     "noUrutAsli": 206,
@@ -2467,9 +2467,9 @@
     "perihal": "Penetapan Tim Penyusun Borang Akreditasi Program Studi Pascasarjana S2 Manajemen Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/11MuiEFLMSa-7SnoV044B5Bibq3RYFK1C/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/11MuiEFLMSa-7SnoV044B5Bibq3RYFK1C/edit"
   },
   {
     "noUrutAsli": 207,
@@ -2479,9 +2479,9 @@
     "perihal": "PENGANGKATAN PENGELOLA DIVISI MARKETING DAN ADMISI UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1Yzbmahxze3HHN0bhBf1innAeromNNFbZ/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1Yzbmahxze3HHN0bhBf1innAeromNNFbZ/edit"
   },
   {
     "noUrutAsli": 208,
@@ -2491,9 +2491,9 @@
     "perihal": "PELAKSANAAN PERKULIAHAN TATAP MUKA SEMESTER GENAP 2021/2022 DILINGKUNGAN UNIVERSITAS GAJAYANA",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/16Hg2krJADrvCpX9uA5DO1B56k7RHwBkn/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/16Hg2krJADrvCpX9uA5DO1B56k7RHwBkn/view"
   },
   {
     "noUrutAsli": 209,
@@ -2503,9 +2503,9 @@
     "perihal": "PENETAPAN VISI, MISI, DAN TUJUAN PROGRAM PASCASARJANAUNIVERSITAS GAJAYANA MALANG TAHUN 2022",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1STo2WFWQ0xGdUKyyX5bmY2CXX1iJVRcY/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1STo2WFWQ0xGdUKyyX5bmY2CXX1iJVRcY/view"
   },
   {
     "noUrutAsli": 210,
@@ -2515,9 +2515,9 @@
     "perihal": "PEMBUKAAN PROGRAM STUDI DOKTOR ILMU MANAJEMEN PADA PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1s_MsGqEHz1MS9xsTo8_pkfe8ZhnFZVEV/view",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1s_MsGqEHz1MS9xsTo8_pkfe8ZhnFZVEV/view"
   },
   {
     "noUrutAsli": 211,
@@ -2527,9 +2527,9 @@
     "perihal": "Kuliah Daring Semester Genap 2021/2022",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1_OR0DkMlWHLomRFXd9nT64TQhPqoTlLs/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1_OR0DkMlWHLomRFXd9nT64TQhPqoTlLs/view"
   },
   {
     "noUrutAsli": 212,
@@ -2539,9 +2539,9 @@
     "perihal": "PENEMPATAN STAF ADMINISTRASI DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/10w9Atb5ePk6g8E6Hh4C7r9FeTJo3Ed0I/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/10w9Atb5ePk6g8E6Hh4C7r9FeTJo3Ed0I/edit"
   },
   {
     "noUrutAsli": 213,
@@ -2551,9 +2551,9 @@
     "perihal": "KEBIJAKAN MUTU SISTEM PENJAMINAN MUTU INTERNAL PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1-lijsvP5LfZuG_qt6-iLrvsPqcyfyuzE/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1-lijsvP5LfZuG_qt6-iLrvsPqcyfyuzE/view"
   },
   {
     "noUrutAsli": 214,
@@ -2563,9 +2563,9 @@
     "perihal": "PENGANGKATAN DOSEN PEMBINA MATA KULIAH SEMESTER GENAP TAHUN AKADEMIK 2021/2022 DI PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1L_vAao2gMgSsCeeJano4GYAFRVQXQuaX/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1L_vAao2gMgSsCeeJano4GYAFRVQXQuaX/view"
   },
   {
     "noUrutAsli": 215,
@@ -2575,9 +2575,9 @@
     "perihal": "TIM PENILAI ANGKA KREDIT DAN ADMINISTRASI JABATAN FUNGSIONAL DAN ATAU PANGKAT DOSEN",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/19GLg1avRucSZImJ4hPWwluwqVzjnHPvy/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/19GLg1avRucSZImJ4hPWwluwqVzjnHPvy/edit"
   },
   {
     "noUrutAsli": 216,
@@ -2587,9 +2587,9 @@
     "perihal": "PELAKSANAAN TUGAS STRUKTURAL DAN ADMINISTRATIF DARI KANTOR WFO (WORK FROM OFFICE)",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/19CLGr8oLw0wses0qXWkmHwS93Il7Bao2/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/19CLGr8oLw0wses0qXWkmHwS93Il7Bao2/view"
   },
   {
     "noUrutAsli": 217,
@@ -2599,9 +2599,9 @@
     "perihal": "PENETAPAN KURIKULUM PROGRAM STUDI MAGISTER MANAJEMEN PASCASARJANA UNIVERSITAS GAJAYANA TAHUN AKADEMIK 2022/2023",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/15uEuPbIQL3giP-VOmFHOKmGMiHAF7T3S/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/15uEuPbIQL3giP-VOmFHOKmGMiHAF7T3S/view"
   },
   {
     "noUrutAsli": 218,
@@ -2611,9 +2611,9 @@
     "perihal": "TIM PENILAI INTERNAL KEGIATAN PENELITIAN DAN PENGABDIAN KEPADA MASYARAKAT UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1i- zdabHJa1iGN5UBApQBRdI1WPff Gunk/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/ 1i- zdabHJa1iGN5UBApQBRdI1WPff Gunk/view"
   },
   {
     "noUrutAsli": 219,
@@ -2623,9 +2623,9 @@
     "perihal": "PERENCANAAN PENGEMBANGAN SUMBER DAYA MANUSIA UNIVERSITAS GAJAYANA TAHUN 2022-2026",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1mEuhuxtVGsfYSBi18XLjc796VSA qMOKs/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/ 1mEuhuxtVGsfYSBi18XLjc796VSA qMOKs/view"
   },
   {
     "noUrutAsli": 220,
@@ -2635,9 +2635,9 @@
     "perihal": "PEDOMAN PENYELENGGARAAN PENDIDIKAN UNIVERSITAS GAJAYANA TAHUN 2022/2023- 2026/2027",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/15YaJeU9LbyXJb8UIsP8vbMDLQT9OGEVw/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/15YaJeU9LbyXJb8UIsP8vbMDLQT9OGEVw/edit"
   },
   {
     "noUrutAsli": 221,
@@ -2647,9 +2647,9 @@
     "perihal": "PENETAPAN KURIKULUM PROGRAM STUDI MAGISTER AKUNTANSIPASCASARJANA UNIVERSITAS GAJAYANA TAHUN AKADEMIK 2022/2023",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1qiYqg_IkkWxpgtIeC6sKv40X7Qmcf-e3/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1qiYqg_IkkWxpgtIeC6sKv40X7Qmcf-e3/view"
   },
   {
     "noUrutAsli": 222,
@@ -2659,9 +2659,9 @@
     "perihal": "RENCANA STRATEGIS (RENSTRA) PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1MmsBT_OPvadK7m9GdZFM9ZPaIkiBNwT9/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1MmsBT_OPvadK7m9GdZFM9ZPaIkiBNwT9/view"
   },
   {
     "noUrutAsli": 223,
@@ -2671,9 +2671,9 @@
     "perihal": "RENCANA OPERASIONAL PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA TAHUN 2022",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1jsf0U2KrRTl69Qi43h_QUHGjvitMBujz/view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1jsf0U2KrRTl69Qi43h_QUHGjvitMBujz/view"
   },
   {
     "noUrutAsli": 224,
@@ -2683,9 +2683,9 @@
     "perihal": "PENETAPAN PENERIMA BEASISWA BAGI CALON MAHASISWA BARU UNIVERSITAS GAJAYANA MALANG TAHUN AKADEMIK 2022/2023",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1yX8idZMfoSB5xG5gJBB3ve3E0J HkKYUV/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/ 1yX8idZMfoSB5xG5gJBB3ve3E0J HkKYUV/view"
   },
   {
     "noUrutAsli": 225,
@@ -2695,9 +2695,9 @@
     "perihal": "RENCANA OPERASIONAL PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA TAHUN 2022",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1DlvJk4JZHtyl9n9GxlhRFKLYimH5j2Dr/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1DlvJk4JZHtyl9n9GxlhRFKLYimH5j2Dr/view"
   },
   {
     "noUrutAsli": 226,
@@ -2707,9 +2707,9 @@
     "perihal": "PENGESAHAN BUKU PEDOMAN MANAJEMEN RESIKO",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1or4S2Wh6aZG8h69dfVXuf_HSxt PaVIL4/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/ 1or4S2Wh6aZG8h69dfVXuf_HSxt PaVIL4/view"
   },
   {
     "noUrutAsli": 227,
@@ -2719,9 +2719,9 @@
     "perihal": "RENCANA KEGIATAN DAN ANGGARAN BIAYA (RKAB) PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA TAHUN 2022",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1jvZb7Srnx49hBPxbRUBdzEWiCk2Id4M8/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1jvZb7Srnx49hBPxbRUBdzEWiCk2Id4M8/view"
   },
   {
     "noUrutAsli": 228,
@@ -2731,9 +2731,9 @@
     "perihal": "PENGANGKATAN PEJABAT STRUKTURAL FAKULTAS/PASCASARJANA DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1ySqoefKI0u8F3OH7VepJkD5YmrtgtIH3/view",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1ySqoefKI0u8F3OH7VepJkD5YmrtgtIH3/view"
   },
   {
     "noUrutAsli": 229,
@@ -2743,9 +2743,9 @@
     "perihal": "PENEMPATAN STAF ADMINISTRASI DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1N4bNz00LXnFnOq4DGYvzBtqaQ5_oruCM/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1N4bNz00LXnFnOq4DGYvzBtqaQ5_oruCM/edit"
   },
   {
     "noUrutAsli": 230,
@@ -2755,9 +2755,9 @@
     "perihal": "PEDOMAN PENGELOLAAN SUMBER DAYA MANUSIA",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1BbqffgyyVuet7WC54RdV4qLH2 6-QAtAa/view",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/ 1BbqffgyyVuet7WC54RdV4qLH2 6-QAtAa/view"
   },
   {
     "noUrutAsli": 231,
@@ -2767,9 +2767,9 @@
     "perihal": "PEDOMAN PENJAMINAN KEAMANAN, KENYAMANAN, DAN KESEJAHTERAAN HIDUP SIVITAS AKADEMIKA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 11-lZ- zdp8YZnF3Vy7_CHStfvCam64yZ2 /view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/ 11-lZ- zdp8YZnF3Vy7_CHStfvCam64yZ2 /view"
   },
   {
     "noUrutAsli": 232,
@@ -2779,9 +2779,9 @@
     "perihal": "PENGANGKATAN PEJABAT SEMENTARA (Plt) STRUKTURAL PASCASARJANA DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1lvqs1a1Kfazz6NnFPKX9VPuSAXGlbohz/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1lvqs1a1Kfazz6NnFPKX9VPuSAXGlbohz/edit"
   },
   {
     "noUrutAsli": 233,
@@ -2791,9 +2791,9 @@
     "perihal": "PENGANGKATAN PENGELOLA DIVISI MARKETING DAN ADMISI UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1aL_aF7k8WAzm16gHOaGe-MOj8V5JbiSO/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1aL_aF7k8WAzm16gHOaGe-MOj8V5JbiSO/edit"
   },
   {
     "noUrutAsli": 234,
@@ -2803,9 +2803,9 @@
     "perihal": "PENGANGKATAN KOORDINATOR MERDEKA BELAJAR – KAMPUS MERDEKA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1gtwGaAWyJCiw1Nk2nF6FwS69 63Pqd6fc/view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/ 1gtwGaAWyJCiw1Nk2nF6FwS69 63Pqd6fc/view"
   },
   {
     "noUrutAsli": 235,
@@ -2815,9 +2815,9 @@
     "perihal": "PENETAPAN BIAYA KULIAH PROGRAM SARJANA TAHUN AKADEMIK 2023/2024 UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1fwf_dFgHmFF62zEaOQnFmEDpLntQaBvW/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1fwf_dFgHmFF62zEaOQnFmEDpLntQaBvW/edit"
   },
   {
     "noUrutAsli": 236,
@@ -2827,9 +2827,9 @@
     "perihal": "PANITIA SELEKSI BEASISWA UNIVERSITAS GAJAYANA MALANG TAHUN AKADEMIK 2023/2024",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1K2i5O8hjQLP2YFaYQf0loDSXqJb I1O0f/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/ 1K2i5O8hjQLP2YFaYQf0loDSXqJb I1O0f/view"
   },
   {
     "noUrutAsli": 237,
@@ -2839,9 +2839,9 @@
     "perihal": "PENETAPAN ALOKASI KUOTA BEASISWA BAGI CALON MAHASISWA BARU UNIVERSITAS GAJAYANA MALANG TAHUN AKADEMIK 2023/2024",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 15ebcZj9l4_6yeqTnjh339ybQFm dfZGdy/view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/ 15ebcZj9l4_6yeqTnjh339ybQFm dfZGdy/view"
   },
   {
     "noUrutAsli": 238,
@@ -2851,9 +2851,9 @@
     "perihal": "SISTEM PENERIMAAN MAHASISWA BARU (SPMB) DAN STANDAR MUTU CALON MAHASISWA DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 13BlQojY9o5BQJUGkB5f2opKm- YIDkwWX/view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/ 13BlQojY9o5BQJUGkB5f2opKm- YIDkwWX/view"
   },
   {
     "noUrutAsli": 239,
@@ -2863,9 +2863,9 @@
     "perihal": "PENETAPAN KEBIJAKAN PENGELOLAAN TEKNOLOGI INFORMASI DAN KOMUNIKASI UNIVERSITAS GAJAYANA TAHUN 2023",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1IKFxhJVDD- 3Lv2KTkCXk7thoPAMGP_QA/vie w",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/ 1IKFxhJVDD- 3Lv2KTkCXk7thoPAMGP_QA/vie w"
   },
   {
     "noUrutAsli": 240,
@@ -2875,9 +2875,9 @@
     "perihal": "PERSETUJUAN PENGUNDURAN DIRI SEBAGAI DOSEN TETAP",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1PCwkaaRDtHu5lfTmQVKVZ-vp9CK3OA6y/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1PCwkaaRDtHu5lfTmQVKVZ-vp9CK3OA6y/edit"
   },
   {
     "noUrutAsli": 241,
@@ -2887,9 +2887,9 @@
     "perihal": "SYARAT DAN KETENTUAN MARKETING REWARD REKTOR UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/12NvIyy4JaOaV69NzOYZaMoZVouwO1Ppu/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/12NvIyy4JaOaV69NzOYZaMoZVouwO1Ppu/edit"
   },
   {
     "noUrutAsli": 242,
@@ -2899,9 +2899,9 @@
     "perihal": "PENETAPAN KEBIJAKAN LAYANAN PENDIDIKAN INKLUSIF DAN AKSESIBILITAS BAGI MAHASISWA BERKEBUTUHAN KHUSUS DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1qYxEMxrdJfYIuyY6vPswdMjDmf Ua_GLh/view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/ 1qYxEMxrdJfYIuyY6vPswdMjDmf Ua_GLh/view"
   },
   {
     "noUrutAsli": 243,
@@ -2911,9 +2911,9 @@
     "perihal": "PENETAPAN PENERIMA BEASISWA BAGI CALON MAHASISWA BARU UNIVERSITAS GAJAYANA MALANG TAHUN AKADEMIK 2023/2024",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1WpNrF4BA7ZQ5aAtn3OK8k3cd Q_UIe9ow/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/ 1WpNrF4BA7ZQ5aAtn3OK8k3cd Q_UIe9ow/view"
   },
   {
     "noUrutAsli": 244,
@@ -2923,9 +2923,9 @@
     "perihal": "PEMBERIAN IJIN BELAJAR PEGAWAI DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1_HFFT5D4JLgJdcg66ArnsNO6szU36gyH/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1_HFFT5D4JLgJdcg66ArnsNO6szU36gyH/edit"
   },
   {
     "noUrutAsli": 245,
@@ -2935,9 +2935,9 @@
     "perihal": "PEMBERIAN IJIN BELAJAR PEGAWAI DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1iVDa3sWyYCTW6O_q0INSdHgNPIhttti6/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1iVDa3sWyYCTW6O_q0INSdHgNPIhttti6/edit"
   },
   {
     "noUrutAsli": 246,
@@ -2947,9 +2947,9 @@
     "perihal": "PENGANGKATAN PEJABAT STRUKTURAL FAKULTAS/ PASCASARJANA DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1HkVHdrlEkoWXZxXL9vw_kOeD6EB_7k5p/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1HkVHdrlEkoWXZxXL9vw_kOeD6EB_7k5p/edit"
   },
   {
     "noUrutAsli": 247,
@@ -2959,9 +2959,9 @@
     "perihal": "PERATURAN PEDOMAN PENGENALAN KEHIDUPAN KAMPUS MAHASISWA BARU (PKKMB) UNIVERSITAS GAJAYANA MALANG TAHUN 2023/2024",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1nxHX9SqiouXDULqw8_SlwA6wP k0YItsj/view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/ 1nxHX9SqiouXDULqw8_SlwA6wP k0YItsj/view"
   },
   {
     "noUrutAsli": 248,
@@ -2971,9 +2971,9 @@
     "perihal": "BEASISWA OSC DAN KIP KULIAH UNIVERSITAS GAJAYANA UNTUK PROGRAM SARJANA TAHUN AKADEMIK 2023/2024 UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1BudbDyi1tZcbAiCsP37M4VwuftqJaCHP/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1BudbDyi1tZcbAiCsP37M4VwuftqJaCHP/edit"
   },
   {
     "noUrutAsli": 249,
@@ -2983,9 +2983,9 @@
     "perihal": "PENETAPAN PEDOMAN DAN PROSEDUR PENYUSUNAN STRATEGI PENGEMBANGAN DI LINGKUNGAN UNIVERSITAS GAJAYANA",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1jIyl__vn1Bq8WEa-WsaoUG2Goc7Ggu0R/view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1jIyl__vn1Bq8WEa-WsaoUG2Goc7Ggu0R/view"
   },
   {
     "noUrutAsli": 250,
@@ -2995,9 +2995,9 @@
     "perihal": "PENETAPAN MAHASISWA BARU PROGRAM PASCASARJANA ANGKATAN TAHUN 2023 UNIVERSITAS GAJAYANA MALANG TAHUN AKADEMIK 2023/2024",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1brVzhpXi2PZTHquRsqEjwiHHI6WVBD8Q/view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1brVzhpXi2PZTHquRsqEjwiHHI6WVBD8Q/view"
   },
   {
     "noUrutAsli": 251,
@@ -3007,9 +3007,9 @@
     "perihal": "PENGANGKATAN KETUA DIVISI MARKETING DAN ADMISI UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1gYEKvyQ2Yw817Qre4iMexbQ_XnoJL0T-/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1gYEKvyQ2Yw817Qre4iMexbQ_XnoJL0T-/edit"
   },
   {
     "noUrutAsli": 252,
@@ -3019,9 +3019,9 @@
     "perihal": "PENGANGKATAN PENGELOLA DIVISI MARKETING DAN ADMISI UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1gYEKvyQ2Yw817Qre4iMexbQ_XnoJL0T-/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1gYEKvyQ2Yw817Qre4iMexbQ_XnoJL0T-/edit"
   },
   {
     "noUrutAsli": 253,
@@ -3031,9 +3031,9 @@
     "perihal": "Penetapan Tim Penyusun Borang Akreditasi Program Studi Pascasarjana S3 Ilmu Manajemen Universitas Gajayana Malang",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1kjuAReDHxT5P8ur9nGHQ5V-v0AVcaq0L/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1kjuAReDHxT5P8ur9nGHQ5V-v0AVcaq0L/edit"
   },
   {
     "noUrutAsli": 254,
@@ -3043,9 +3043,9 @@
     "perihal": "PERPANJANGAN JABATAN STRUKTURAL FAKULTAS DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/14Hu1K_mBNGZKn82jcNdLIK-GGuH59uPC/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/14Hu1K_mBNGZKn82jcNdLIK-GGuH59uPC/edit"
   },
   {
     "noUrutAsli": 255,
@@ -3055,9 +3055,9 @@
     "perihal": "PERPANJANGAN JABATAN UNSUR PIMPINAN PROGRAM STUDI DI LINGKUNGAN FAKULTAS EKONOMI DAN BISNIS UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1j0uGG-frKvNvGo6NPripWfzPcyStEVpO/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1j0uGG-frKvNvGo6NPripWfzPcyStEVpO/edit"
   },
   {
     "noUrutAsli": 256,
@@ -3067,9 +3067,9 @@
     "perihal": "PERPANJANGAN JABATAN UNSUR PIMPINAN PROGRAM STUDI DI LINGKUNGAN FAKULTAS ILMU SOSIAL DAN BUDAYA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/19Rcnzc3nhItBAAIeOh8SD0U73UXF5wEI/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/19Rcnzc3nhItBAAIeOh8SD0U73UXF5wEI/edit"
   },
   {
     "noUrutAsli": 257,
@@ -3079,9 +3079,9 @@
     "perihal": "PERPANJANGAN JABATAN UNSUR PIMPINAN PROGRAM STUDI DI LINGKUNGAN FAKULTAS TEKNIK DAN INFORMATIKA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1AjcbKZWzLB5UVpBWnVf36FYSS-gw2uuu/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1AjcbKZWzLB5UVpBWnVf36FYSS-gw2uuu/edit"
   },
   {
     "noUrutAsli": 258,
@@ -3091,9 +3091,9 @@
     "perihal": "PERPANJANGAN JABATAN UNSUR PIMPINAN PROGRAM STUDI DI LINGKUNGAN PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1qnMYCp5bW2p40FyWF1YMF284fXdWmPbv/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1qnMYCp5bW2p40FyWF1YMF284fXdWmPbv/edit"
   },
   {
     "noUrutAsli": 259,
@@ -3103,9 +3103,9 @@
     "perihal": "PERPANJANGAN JABATAN PIMPINAN LEMBAGA PENELITIAN DAN PENGABDIAN KEPADA MASYARAKAT (LPPM) UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1RwlJdRtmonRSmPW_rCn4U7aCqNcZgVBz/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1RwlJdRtmonRSmPW_rCn4U7aCqNcZgVBz/edit"
   },
   {
     "noUrutAsli": 260,
@@ -3115,9 +3115,9 @@
     "perihal": "PERPANJANGAN JABATAN PIMPINAN BADAN PENGEMBANGAN PENDIDIKAN DAN PENJAMINAN MUTU (BP3M) UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1MP5l2v-aZ3cT4mc-m3iNEHfKmZuyDNFh/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1MP5l2v-aZ3cT4mc-m3iNEHfKmZuyDNFh/edit"
   },
   {
     "noUrutAsli": 261,
@@ -3127,9 +3127,9 @@
     "perihal": "PERPANJANGAN JABATAN KEPALA LABORATORIUM DI LINGKUNGAN FAKULTAS EKONOMI DAN BISNIS UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1dUJyaRHX-CRz80cWT5UDH4taidnD1bFu/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1dUJyaRHX-CRz80cWT5UDH4taidnD1bFu/edit"
   },
   {
     "noUrutAsli": 262,
@@ -3139,9 +3139,9 @@
     "perihal": "PERPANJANGAN JABATAN KEPALA LABORATURIUM DI LINGKUNGAN FAKULTAS ILMU SOSIAL DAN BUDAYA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1siG7nBHagBJy5Uhx2bSAYdSWJp8-adtA/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1siG7nBHagBJy5Uhx2bSAYdSWJp8-adtA/edit"
   },
   {
     "noUrutAsli": 263,
@@ -3151,9 +3151,9 @@
     "perihal": "PERPANJANGAN JABATAN KEPALA LABORATORIUM DI LINGKUNGAN FAKULTAS TEKNIK DAN INFORMATIKA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/157ckRw9EFpLVIk9GEp3ZDZhla6bRVt2p/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/157ckRw9EFpLVIk9GEp3ZDZhla6bRVt2p/edit"
   },
   {
     "noUrutAsli": 264,
@@ -3163,9 +3163,9 @@
     "perihal": "PENGANGKATAN PEJABAT (Plt) KETUA PRODI PDIM (S3) dan KETUA PRODI MANAJEMEN (S1) UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1BlBa6mBqogHQXUYH_LKG4OlETKWFXwJ5/edit",
     "catatan": "Pengangkatan Pejabat : 145, 159, 228, 264, 270, & 271 (mirip)",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1BlBa6mBqogHQXUYH_LKG4OlETKWFXwJ5/edit"
   },
   {
     "noUrutAsli": 265,
@@ -3175,9 +3175,9 @@
     "perihal": "PENGANGKATAN PIMPINAN BADAN PENGEMBANGAN PENDIDIKAN DAN PENJAMINAN MUTU (BP3M) UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1aHhxs5ytH6FZvkW0kYLtCN2PFbfQDydL/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1aHhxs5ytH6FZvkW0kYLtCN2PFbfQDydL/edit"
   },
   {
     "noUrutAsli": 266,
@@ -3187,9 +3187,9 @@
     "perihal": "PERPANJANGAN JABATAN PIMPINAN UNSUR PELAKSANA ADMINISTRASI DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1X_gyzctS9uywYnAIBLSflb1Ma6mhs1E6/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1X_gyzctS9uywYnAIBLSflb1Ma6mhs1E6/edit"
   },
   {
     "noUrutAsli": 267,
@@ -3199,9 +3199,9 @@
     "perihal": "PERPANJANGAN JABATAN PIMPINAN UNSUR PENGEMBANG DAN PELAKSANA TUGAS STRATEGIS UNIVERSITAS DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1FEJN6vbQmo1tPczKvQhTYf43ewo8twpY/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1FEJN6vbQmo1tPczKvQhTYf43ewo8twpY/edit"
   },
   {
     "noUrutAsli": 268,
@@ -3211,9 +3211,9 @@
     "perihal": "PENGANGKATAN PIMPINAN UNSUR PENGEMBANG DAN PELAKSANA TUGAS STRATEGIS UNIVERSITAS DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1u6dikBDT2xU5ihXcWvkwEsQXNAtfQ-2-/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1u6dikBDT2xU5ihXcWvkwEsQXNAtfQ-2-/edit"
   },
   {
     "noUrutAsli": 269,
@@ -3223,9 +3223,9 @@
     "perihal": "PERPANJANGAN JABATAN STRUKTURAL FAKULTAS/ WAKIL DEKAN DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1J8yiZtahX7f3yC0P7Qt93NFRs2XacbHi/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1J8yiZtahX7f3yC0P7Qt93NFRs2XacbHi/edit"
   },
   {
     "noUrutAsli": 270,
@@ -3235,9 +3235,9 @@
     "perihal": "PENGANGKATAN PEJABAT (Plt.) UNSUR PELAKSANA ADMINISTRASI DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1p5IqlqxvhLEMmLfeuKMdoL_kUo0TXgAm/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1p5IqlqxvhLEMmLfeuKMdoL_kUo0TXgAm/edit"
   },
   {
     "noUrutAsli": 271,
@@ -3247,9 +3247,9 @@
     "perihal": "PENGANGKATAN PEJABAT PELAKSANA TUGAS KETUA PRODI DAN SEKRETARIS PRODI MANAJEMEN (S1) dan PIMPINAN LEMBAGA PENELITIAN DAN PENGABDIAN MASYARAKAT UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1x4G6NrVgZp9uuS68aBlSUZHJFBGnloRa/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1x4G6NrVgZp9uuS68aBlSUZHJFBGnloRa/edit"
   },
   {
     "noUrutAsli": 272,
@@ -3259,9 +3259,9 @@
     "perihal": "PANITIA SELEKSI BEASISWA UNIVERSITAS GAJAYANA MALANG TAHUN AKADEMIK 2024/2025",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1gmcgYAIBCpNa4OHj5krQWawtf LlS-Ow7/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/ 1gmcgYAIBCpNa4OHj5krQWawtf LlS-Ow7/view"
   },
   {
     "noUrutAsli": 273,
@@ -3271,9 +3271,9 @@
     "perihal": "PENETAPAN PANITIA SELEKSI ANGGOTA SATUAN TUGAS PENCEGAHAN DAN PENANGANAN KEKERASAN SEKSUAL DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1Dv6I3Etbh7mcrBU-yganizm2z5TG-WmO/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1Dv6I3Etbh7mcrBU-yganizm2z5TG-WmO/edit"
   },
   {
     "noUrutAsli": 274,
@@ -3283,9 +3283,9 @@
     "perihal": "PENETAPAN ANGGOTA SATUAN TUGAS PENCEGAHAN DAN PENANGANAN KEKERASAN SEKSUAL UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1LJE0T3OAN2PU9pxrjYF61px5QnJYciMD/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1LJE0T3OAN2PU9pxrjYF61px5QnJYciMD/edit"
   },
   {
     "noUrutAsli": 275,
@@ -3295,9 +3295,9 @@
     "perihal": "Formasi dan Kebutuhan Jabatan Fungsional Akademik Dosen Universitas Gajayana tahun 2024-2028",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1SFTNvtf5DYGZxn1kzjKarPsI1qz9RgmP/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1SFTNvtf5DYGZxn1kzjKarPsI1qz9RgmP/edit"
   },
   {
     "noUrutAsli": 276,
@@ -3307,9 +3307,9 @@
     "perihal": "TIM PENGELOLA REKOGNISI PEMBELAJARAN LAMPAU (RPL) UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1iJLWnGwFo5Vs6AEngkRwCr2iSS pYcgbq/view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/ 1iJLWnGwFo5Vs6AEngkRwCr2iSS pYcgbq/view"
   },
   {
     "noUrutAsli": 277,
@@ -3319,9 +3319,9 @@
     "perihal": "REKOGNISI PEMBELAJARAN LAMPAU DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1KlyqL- jBt3r4lLUex3CVpKW38OoG5bcC/ view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/ 1KlyqL- jBt3r4lLUex3CVpKW38OoG5bcC/ view"
   },
   {
     "noUrutAsli": 278,
@@ -3331,9 +3331,9 @@
     "perihal": "PENETAPAN VISI, MISI, DAN TUJUAN UNIVERSITAS GAJAYANA",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1NHRPslFVYUqH2sr9JZ0ar7w6hc eLW70K/view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/ 1NHRPslFVYUqH2sr9JZ0ar7w6hc eLW70K/view"
   },
   {
     "noUrutAsli": 279,
@@ -3343,9 +3343,9 @@
     "perihal": "TIM PENGELOLA JURNAL ILMIAH FAKULTAS EKONOMI DAN BISNIS UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1oA4H4gNUCV5sRSR_hH0KfjyBhB_gr_qD/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1oA4H4gNUCV5sRSR_hH0KfjyBhB_gr_qD/edit"
   },
   {
     "noUrutAsli": 280,
@@ -3355,9 +3355,9 @@
     "perihal": "BUKU PEDOMAN PENYELENGGARAAN REKOGNISI PEMBELAJARAN LAMPAU (RPL) TIPE A UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1VI1F-9oAbUoxGb901mgNfpw9wnXmfJ MG/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/ 1VI1F-9oAbUoxGb901mgNfpw9wnXmfJ MG/view"
   },
   {
     "noUrutAsli": 281,
@@ -3367,9 +3367,9 @@
     "perihal": "PENETAPAN RENCANA STRATEGIS PERUBAHAN 2024 – 2026",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1jnWurGCgarF7TDq3cU1Vdk8ITX yFVm_v/view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/ 1jnWurGCgarF7TDq3cU1Vdk8ITX yFVm_v/view"
   },
   {
     "noUrutAsli": 282,
@@ -3379,9 +3379,9 @@
     "perihal": "PENETAPAN PENERIMA BEASISWA BAGI CALON MAHASISWA BARU UNIVERSITAS GAJAYANA MALANG TAHUN AKADEMIK 2024/2025",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1oJ8-37fFPp- iMDs2YKkFV3plYxqS5VxT/view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/ 1oJ8-37fFPp- iMDs2YKkFV3plYxqS5VxT/view"
   },
   {
     "noUrutAsli": 283,
@@ -3391,9 +3391,9 @@
     "perihal": "PENETAPAN STANDAR SISTEM PENJAMINAN MUTU INTERNAL (SPMI) UNIVERSITAS GAJAYANA TAHUN 2024",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1aqgZo902RY2tLPbFEdDdMhaGu j1yP9Ll/view",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/ 1aqgZo902RY2tLPbFEdDdMhaGu j1yP9Ll/view"
   },
   {
     "noUrutAsli": 284,
@@ -3403,9 +3403,9 @@
     "perihal": "TENTANG PENGESAHAN KEBIJAKAN MUTU SISTEM PENJAMINAN MUTU INTERNAL (SPMI) DI LINGKUNGAN UNIVERSITAS GAJAYANA",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1QqCquiV6MODZVjmCvh6FIPTfU Q7ULZQa/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/ 1QqCquiV6MODZVjmCvh6FIPTfU Q7ULZQa/view"
   },
   {
     "noUrutAsli": 285,
@@ -3415,9 +3415,9 @@
     "perihal": "TIM PENILAI ANGKA KREDIT DAN ADMINISTRASI JABATAN FUNGSIONAL DAN ATAU PANGKAT DOSEN",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1hs1O8b-uWCku8o1bPWOp7IH2s4bnXgBq/view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1hs1O8b-uWCku8o1bPWOp7IH2s4bnXgBq/view"
   },
   {
     "noUrutAsli": 286,
@@ -3427,9 +3427,9 @@
     "perihal": "KOMITE INTEGRITAS AKADEMIK UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1Avt1IgbAGKueh5dJY6xBfTivZNIK jZG1/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/ 1Avt1IgbAGKueh5dJY6xBfTivZNIK jZG1/view"
   },
   {
     "noUrutAsli": 287,
@@ -3439,9 +3439,9 @@
     "perihal": "PENGANGKATAN ANGGOTA SENAT UNIVERSITAS GAJAYANA MALANG TAHUN 2024 – 2027",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1piJju3WPFo98Lu67jznhn6X15cC0WMtg/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1piJju3WPFo98Lu67jznhn6X15cC0WMtg/edit"
   },
   {
     "noUrutAsli": 288,
@@ -3451,9 +3451,9 @@
     "perihal": "PENETAPAN RENCANA OPERASIONAL 2024 – 2026",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1l5- 3aTBV9EfCmtYRsAEWhZB1108z9 h7g/view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/ 1l5- 3aTBV9EfCmtYRsAEWhZB1108z9 h7g/view"
   },
   {
     "noUrutAsli": 289,
@@ -3463,9 +3463,9 @@
     "perihal": "PELAKSANAAN RENCANA PEMBELAJARAN SEMESTER DI LEARNING MANAJEMEN SYSTEMS REKTOR UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1VbnnDxr70Kc0f4iWAT6YFA4SYA8Tic7H/view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/1VbnnDxr70Kc0f4iWAT6YFA4SYA8Tic7H/view"
   },
   {
     "noUrutAsli": 290,
@@ -3475,9 +3475,9 @@
     "perihal": "PENETAPAN ANGGOTA SATUAN TUGAS PENCEGAHAN DAN PENANGANAN KEKERASAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 1ZwtkNbRKD6ogdBk6Z6cpzgYVK zc7ilGt/view",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/ 1ZwtkNbRKD6ogdBk6Z6cpzgYVK zc7ilGt/view"
   },
   {
     "noUrutAsli": 291,
@@ -3487,9 +3487,9 @@
     "perihal": "PERPANJANGAN MASA JABATAN WAKIL REKTOR BIDANG AKADEMIK DAN UMUM UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "YAYASAN",
     "unitLabel": "Yayasan",
-    "sumberLink": "https://docs.google.com/document/d/1d_razauPPJsbmvJgrTbD89ODillEEhLJ/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1d_razauPPJsbmvJgrTbD89ODillEEhLJ/edit"
   },
   {
     "noUrutAsli": 292,
@@ -3499,9 +3499,9 @@
     "perihal": "PERPANJANGAN MASA JABATAN WAKIL REKTOR BIDANG AKADEMIK DAN UMUM UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "YAYASAN",
     "unitLabel": "Yayasan",
-    "sumberLink": "https://docs.google.com/document/d/1d_razauPPJsbmvJgrTbD89ODillEEhLJ/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1d_razauPPJsbmvJgrTbD89ODillEEhLJ/edit"
   },
   {
     "noUrutAsli": 293,
@@ -3511,9 +3511,9 @@
     "perihal": "PENGANGKATAN PENGELOLA AKUN MASTER PDDIKTI UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1grkpDKlMVB1vEqcrWqOKwJH-CaUKvgJe/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1grkpDKlMVB1vEqcrWqOKwJH-CaUKvgJe/edit"
   },
   {
     "noUrutAsli": 294,
@@ -3523,9 +3523,9 @@
     "perihal": "PENGANGKATAN PERSONEL SATUAN PENGAWAS INTERNAL UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/16odSPlNzwnTRKwQPVwuGnE3Qwhy4kqmS/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/16odSPlNzwnTRKwQPVwuGnE3Qwhy4kqmS/edit"
   },
   {
     "noUrutAsli": 295,
@@ -3535,9 +3535,9 @@
     "perihal": "PERPANJAGAN OPERATOR PAK UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1bdR1gXhd7dnuyV2qjnmDgAwfslyym4_T/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1bdR1gXhd7dnuyV2qjnmDgAwfslyym4_T/edit"
   },
   {
     "noUrutAsli": 296,
@@ -3547,9 +3547,9 @@
     "perihal": "PENGANGKATAN KETUA DIVISI MARKETING DAN ADMISI UNIVERSITAS GAJAYANA MALANG TAHUN 2025",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/193QP2wSdq4C1oBhqIo7gaOHHtv02ANLZ/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/193QP2wSdq4C1oBhqIo7gaOHHtv02ANLZ/edit"
   },
   {
     "noUrutAsli": 297,
@@ -3559,9 +3559,9 @@
     "perihal": "PENGANGKATAN TIM AUDITOR MUTU INTERNAL (AMI) SEMESTER GANJIL TAHUN AKADEMIK 2024/2025",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/ 17H1W- PjjE0VU2_jGu2nk1rwkWLWIAcd n/view",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://drive.google.com/file/d/ 17H1W- PjjE0VU2_jGu2nk1rwkWLWIAcd n/view"
   },
   {
     "noUrutAsli": 298,
@@ -3571,9 +3571,9 @@
     "perihal": "PERSETUJUAN PENGUNDURAN DIRI SEBAGAI DOSEN TETAP",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1sPHtRP3912Y-YzrbN4c0bg06m6j6_gx4/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1sPHtRP3912Y-YzrbN4c0bg06m6j6_gx4/edit"
   },
   {
     "noUrutAsli": 299,
@@ -3583,9 +3583,9 @@
     "perihal": "PERPANJAGAN OPERATOR PAK SIAP JAFA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/18Q0awF3K2546O6b8BTfS8w6hFuoXE_V7/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/18Q0awF3K2546O6b8BTfS8w6hFuoXE_V7/edit"
   },
   {
     "noUrutAsli": 300,
@@ -3595,9 +3595,9 @@
     "perihal": "PENETAPAN BIAYA KULIAH PROGRAM STUDI SARJANA AKUNTANSI TAHUN AKADEMIK 2025/2026 UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1WWofLXYj6Gc4N1_jZ1gSHPMbchTZvSXc/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1WWofLXYj6Gc4N1_jZ1gSHPMbchTZvSXc/edit"
   },
   {
     "noUrutAsli": 301,
@@ -3607,9 +3607,9 @@
     "perihal": "PENETAPAN BIAYA KULIAH PROGRAM STUDI SARJANA REGULER TAHUN AKADEMIK 2025/2026 UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/18_Ls5uEytUHkV1dX87AC9HsRgYz8Jwap/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/18_Ls5uEytUHkV1dX87AC9HsRgYz8Jwap/edit"
   },
   {
     "noUrutAsli": 302,
@@ -3619,9 +3619,9 @@
     "perihal": "PENETAPAN BIAYA KULIAH PROGRAM KEMITRAAN TAHUN AKADEMIK 2025/2026 UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1dud3G-WB0KfPtQz2oKKgtIMif6H9_B9B/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1dud3G-WB0KfPtQz2oKKgtIMif6H9_B9B/edit"
   },
   {
     "noUrutAsli": 303,
@@ -3631,9 +3631,9 @@
     "perihal": "PENETAPAN BIAYA KULIAH PROGRAM STUDI PROGRAM DOKTOR ILMU MANAJEMEN TAHUN AKADEMIK 2025/2026 UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1Vn3-HK9zt3gpyhXma1pCObBytrSa4P0-/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1Vn3-HK9zt3gpyhXma1pCObBytrSa4P0-/edit"
   },
   {
     "noUrutAsli": 304,
@@ -3643,9 +3643,9 @@
     "perihal": "PENGANGKATAN PELAKSANA TUGAS (Plt) JABATAN STRUKTURAL DEKAN DAN WAKIL DEKAN DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1-l7KLAwp5JoHscWNr6Q3bvPM2jV7d6qJ/edit",
     "catatan": "tidak ada nomor surat & ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/1-l7KLAwp5JoHscWNr6Q3bvPM2jV7d6qJ/edit"
   },
   {
     "noUrutAsli": 305,
@@ -3655,9 +3655,9 @@
     "perihal": "PENGANGKATAN PELAKSANA TUGAS (Plt) JABATAN UNSUR PIMPINAN PROGRAM STUDI DAN SEKRETARIS DI LINGKUNGAN FAKULTAS EKONOMI DAN BISNIS DAN PROGRAM PASCASARJANA UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/18mDkakajIBcg3XeHxNC9do_zickWoxJ4/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/18mDkakajIBcg3XeHxNC9do_zickWoxJ4/edit"
   },
   {
     "noUrutAsli": 306,
@@ -3667,9 +3667,9 @@
     "perihal": "SUSUNAN PENGURUS IKATAN ALUMNI UNIVERSITAS GAJAYANA MALANG (IKA UNIGA) PERIODE TAHUN 2025 - 2029",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1XXCMkPmkLuLnZkDE85w6YMkLlLIuTwHs/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1XXCMkPmkLuLnZkDE85w6YMkLlLIuTwHs/edit"
   },
   {
     "noUrutAsli": 307,
@@ -3679,9 +3679,9 @@
     "perihal": "PENETAPAN BIAYA KULIAH PROGRAM STUDI SARJANA REGULER TAHUN AKADEMIK 2025/2026 UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/18WYkp1NQGtxNyFXmj6uKVVHbMJqwdA6i/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/18WYkp1NQGtxNyFXmj6uKVVHbMJqwdA6i/edit"
   },
   {
     "noUrutAsli": 308,
@@ -3691,9 +3691,9 @@
     "perihal": "PENGANGKATAN ASESOR TUNJANGAN KINERJA DOSEN PNS",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/188fYvU7KhNfPaaYVgRJZCOfRwO-aM2cy/edit",
     "catatan": "tidak ada ttd",
-    "lengkap": false
+    "lengkap": false,
+    "sourceLink": "https://docs.google.com/document/d/188fYvU7KhNfPaaYVgRJZCOfRwO-aM2cy/edit"
   },
   {
     "noUrutAsli": 309,
@@ -3703,9 +3703,9 @@
     "perihal": "PERPANJANGAN JABATAN PIMPINAN BADAN PENGEMBANGAN PENDIDIKAN DAN PENJAMINAN MUTU (BP3M) UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://drive.google.com/file/d/1BK_GFNFQzJYwakzb9nxj6SgH3kiQUkOf/view",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://drive.google.com/file/d/1BK_GFNFQzJYwakzb9nxj6SgH3kiQUkOf/view"
   },
   {
     "noUrutAsli": 310,
@@ -3715,9 +3715,9 @@
     "perihal": "PENGANGKATAN PANITIA SELEKSI CALON MAHASISWA BARU PROGRAM BEASISWA KIP KULIAH TAHUN 2025",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1tEqsT3IKap8-3tCs_p4htfnjMsGtcql4/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1tEqsT3IKap8-3tCs_p4htfnjMsGtcql4/edit"
   },
   {
     "noUrutAsli": 311,
@@ -3727,9 +3727,9 @@
     "perihal": "TIM ASESOR REKOGNISI PEMBELAJARAN LAMPAU (RPL) PROGRAM STUDI AKUNTANSI, PROGRAM STUDI MANAJEMEN, DAN PROGRAM STUDI SISTEM INFORMASI UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1r7yopaSTQuQTpOgBfN9KCInc_Ax8SjRs/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1r7yopaSTQuQTpOgBfN9KCInc_Ax8SjRs/edit"
   },
   {
     "noUrutAsli": 312,
@@ -3739,9 +3739,9 @@
     "perihal": "PEMBERIAN IJIN BELAJAR DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1ZWeGCx7kV19OfNAye-jg1hnMQBSEO4zE/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1ZWeGCx7kV19OfNAye-jg1hnMQBSEO4zE/edit"
   },
   {
     "noUrutAsli": 313,
@@ -3751,9 +3751,9 @@
     "perihal": "PENETAPAN TIM PENYUSUN BORANG AKREDITASI PROGRAM STUDI S1 PSIKOLOGI UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1lmeVazX8HOIWjJX5B0rGKqpLXA6NMbKu/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1lmeVazX8HOIWjJX5B0rGKqpLXA6NMbKu/edit"
   },
   {
     "noUrutAsli": 314,
@@ -3763,9 +3763,9 @@
     "perihal": "PEMBERIAN TUGAS BELAJAR DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1Y3PHi65tifbV9x6wDiwJjuCO9z2-SsMh/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1Y3PHi65tifbV9x6wDiwJjuCO9z2-SsMh/edit"
   },
   {
     "noUrutAsli": 315,
@@ -3775,9 +3775,9 @@
     "perihal": "PENEMPATAN PEGAWAI UNTUK STAF ADMINISTRASI DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1qcX3Y9kuKpMTv2Lww8wmUVQ_BUyKxd_M/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1qcX3Y9kuKpMTv2Lww8wmUVQ_BUyKxd_M/edit"
   },
   {
     "noUrutAsli": 316,
@@ -3787,9 +3787,9 @@
     "perihal": "PENETAPAN DOSEN PENERIMA PROGRAM BANTUAN PUBLIKASI PADA JURNAL BEREPUTASI TAHUN ANGGARAN 2025 KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI DI UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1FQhbQ5QRccymR7TNdRQaTY5G5DxUalms/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1FQhbQ5QRccymR7TNdRQaTY5G5DxUalms/edit"
   },
   {
     "noUrutAsli": 317,
@@ -3799,9 +3799,9 @@
     "perihal": "TIM PENGELOLA JURNAL ILMIAH FAKULTAS EKONOMI DAN BISNIS UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1dHJb-2VaCIkUUzCSB33w_cAumxrHQk_9/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1dHJb-2VaCIkUUzCSB33w_cAumxrHQk_9/edit"
   },
   {
     "noUrutAsli": 318,
@@ -3811,9 +3811,9 @@
     "perihal": "PENETAPAN TIM PENYUSUN BORANG AKREDITASI INSTITUSI PERGURUAN TINGGI UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1nfD7egJZW3qa8ZoLl_XjhRtko_e8GJ7I/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1nfD7egJZW3qa8ZoLl_XjhRtko_e8GJ7I/edit"
   },
   {
     "noUrutAsli": 319,
@@ -3823,9 +3823,9 @@
     "perihal": "PENGANGKATAN DAN PEMBERHENTIAN ANGGOTA SENAT DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1q5uapSRoU-AMVE6Px1Q9HPSQjGYYrMgQ/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1q5uapSRoU-AMVE6Px1Q9HPSQjGYYrMgQ/edit"
   },
   {
     "noUrutAsli": 320,
@@ -3835,9 +3835,9 @@
     "perihal": "PEMBERIAN IJIN BELAJAR DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/16M8gOzvqLnd7bkJ1EDi3BtDTF7IXQqli/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/16M8gOzvqLnd7bkJ1EDi3BtDTF7IXQqli/edit"
   },
   {
     "noUrutAsli": 321,
@@ -3847,9 +3847,9 @@
     "perihal": "PENETAPAN BIAYA TAHAPAN PENYELESAIAN DISERTASI PADA PROGRAM DOKTOR ILMU MANAJEMEN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1ApbziuCqhuKtwTNEcPnFGignKLLITBEN/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1ApbziuCqhuKtwTNEcPnFGignKLLITBEN/edit"
   },
   {
     "noUrutAsli": 322,
@@ -3859,9 +3859,9 @@
     "perihal": "PENGANGKATAN DAN PEMBERHENTIAN ANGGOTA SENAT DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1wAHCGDL9GqsI_fAGrbdnonjrlDxBmD8D/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1wAHCGDL9GqsI_fAGrbdnonjrlDxBmD8D/edit"
   },
   {
     "noUrutAsli": 323,
@@ -3871,9 +3871,9 @@
     "perihal": "PENGANGKATAN PELAKSANA TUGAS (Plt) JABATAN STRUKTURAL DEKAN FAKULTAS EKONOMI DAN BISNIS DI LINGKUNGAN UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1EVOWlul5Xko6pGDMiE1-s9DqICkYwibZ/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1EVOWlul5Xko6pGDMiE1-s9DqICkYwibZ/edit"
   },
   {
     "noUrutAsli": 324,
@@ -3883,9 +3883,9 @@
     "perihal": "PEMBERIAN SANKSI DISIPLIN KEPADA MAHASISWA ATAS PELANGGARAN PELECEHAN SEKSUAL",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1n8vpYv_lvUmje3KuaBFmCmfN34sZ0Px6/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1n8vpYv_lvUmje3KuaBFmCmfN34sZ0Px6/edit"
   },
   {
     "noUrutAsli": 325,
@@ -3895,8 +3895,8 @@
     "perihal": "PENGURUS TAX CENTER UNIVERSITAS GAJAYANA MALANG",
     "unitKode": "UNIGA",
     "unitLabel": "Universitas / Rektorat",
-    "sumberLink": "https://docs.google.com/document/d/1s1zoJBB0G50xDx45c2DIF9L8jNA2Uvxj/edit",
     "catatan": "",
-    "lengkap": true
+    "lengkap": true,
+    "sourceLink": "https://docs.google.com/document/d/1s1zoJBB0G50xDx45c2DIF9L8jNA2Uvxj/edit"
   }
 ]

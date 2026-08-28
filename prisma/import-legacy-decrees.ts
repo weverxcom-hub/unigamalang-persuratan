@@ -60,11 +60,56 @@ function detectLetterTypeCode(nomor: string): "SK" | "EDAR" {
   return /\bSE\b/i.test(nomor) ? "EDAR" : "SK";
 }
 
+// Deliberately broad keyword heuristic, not a precision classifier: this
+// controls a public-safety default (see schema.prisma comment on
+// LegacyDecree.isPublic), so false negatives (a sensitive row slipping
+// through as public) are the failure mode to avoid. False positives (a
+// harmless row hidden until BP3M manually reviews it) cost someone a
+// lookup in the admin view — asymmetric on purpose. Audit trigger: row
+// #324 in the source recap is a student sexual-harassment disciplinary
+// sanction that was publicly linked before this existed.
+const SENSITIVE_PERIHAL_PATTERNS = [
+  /\bsaudara\s*:/i, // "... Saudara: <name>" — names an individual directly
+  /sanksi/i,
+  /disiplin/i,
+  /pelecehan/i,
+  /skorsing/i,
+  /pemberhentian/i,
+  /pengunduran diri/i,
+  /\bcuti\b/i,
+  /ijin belajar/i,
+  /izin belajar/i,
+  /tugas belajar/i,
+  /pemecatan/i,
+  /pelanggaran/i,
+];
+
+function looksPersonalOrSensitive(perihal: string): boolean {
+  return SENSITIVE_PERIHAL_PATTERNS.some((re) => re.test(perihal));
+}
+
 async function main() {
   const filePath = path.join(__dirname, "legacy-data", "sk-bp3m-1987-2026.json");
   const rows: SourceRow[] = JSON.parse(fs.readFileSync(filePath, "utf-8"));
 
   console.log(`[import-legacy-decrees] ${rows.length} rows loaded from ${filePath}`);
+
+  // JSON.parse() returns `any`, so `SourceRow[]` above is an unchecked type
+  // assertion — a key rename/typo in the source file (this happened once
+  // already: sumberLink vs sourceLink, silently importing 325 nulls) would
+  // otherwise pass straight through with no error. Spot-check the first row
+  // actually has every expected key before trusting the rest.
+  const expectedKeys: (keyof SourceRow)[] = [
+    "noUrutAsli", "tanggalRaw", "nomorSk", "perihal", "unitKode",
+    "unitLabel", "sourceLink", "catatan", "lengkap",
+  ];
+  const missingKeys = expectedKeys.filter((k) => !(k in (rows[0] ?? {})));
+  if (rows.length === 0 || missingKeys.length > 0) {
+    throw new Error(
+      `[import-legacy-decrees] Source JSON shape mismatch — missing key(s): ${missingKeys.join(", ")}. ` +
+        `Refusing to import (would silently write nulls for every row).`
+    );
+  }
 
   const [skType, edarType] = await Promise.all([
     prisma.letterType.findUniqueOrThrow({ where: { code: "SK" } }),
@@ -112,15 +157,27 @@ async function main() {
 
     const existing = await prisma.legacyDecree.findUnique({ where: { noUrutAsli: row.noUrutAsli } });
     if (existing) {
+      // isPublic is intentionally NOT included in the update — once BP3M
+      // has manually reviewed a row via the admin UI and set isPublic
+      // explicitly, a re-run of this script (e.g. after fixing a typo in
+      // perihal) must not silently recompute and overwrite that human
+      // judgment call from the keyword heuristic.
       await prisma.legacyDecree.update({ where: { noUrutAsli: row.noUrutAsli }, data });
       updated++;
     } else {
-      await prisma.legacyDecree.create({ data: { noUrutAsli: row.noUrutAsli, ...data } });
+      await prisma.legacyDecree.create({
+        data: { noUrutAsli: row.noUrutAsli, ...data, isPublic: !looksPersonalOrSensitive(row.perihal) },
+      });
       created++;
     }
   }
 
-  console.log(`[import-legacy-decrees] Done. created=${created} updated=${updated} skipped=${skipped}`);
+  const hiddenCount = await prisma.legacyDecree.count({ where: { isPublic: false } });
+  console.log(
+    `[import-legacy-decrees] Done. created=${created} updated=${updated} skipped=${skipped} ` +
+      `(${hiddenCount} row(s) currently isPublic=false — review via admin UI once it exists; ` +
+      `for now, flip manually in the DB after reading sourceLink)`
+  );
 }
 
 main()

@@ -389,6 +389,19 @@ model LegacyDecree {
   // with a "belum terverifikasi" badge until someone checks sourceLink
   // against the original and fills in what's missing via the admin UI.
   isComplete Boolean  @default(false)
+  // Safety default: TRUE means visible on the public, unauthenticated
+  // /publik/sk search. Set FALSE for rows whose `perihal` names an
+  // individual or concerns personnel/disciplinary matters (resignation,
+  // sanctions, study leave, harassment cases, etc.) — the 1987–2026 BP3M
+  // recap includes decrees with actual names or personal-HR content
+  // (audit found e.g. row #324, a student sexual-harassment disciplinary
+  // sanction, sitting fully public with a direct doc link before this
+  // field existed). Flagged rows still exist for internal/admin lookup —
+  // this only controls the public route's query filter. Import script
+  // applies a keyword heuristic on (re-)import; err on the side of
+  // isPublic=false and let BP3M flip it back on per-row after a manual
+  // read, not the other way around.
+  isPublic   Boolean  @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
