@@ -22,6 +22,7 @@ import {
   Inbox,
   Send,
   FileBarChart2,
+  ShieldAlert,
 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
@@ -84,6 +85,7 @@ const MASTER_DATA_NAV: NavItem[] = [
 const SYSTEM_NAV: NavItem[] = [
   { href: "/dashboard/tickets", label: "Tiket Laporan", icon: Inbox },
   { href: "/dashboard/audit", label: "Audit Log", icon: History },
+  { href: "/dashboard/legacy-decrees", label: "Review SK Legacy", icon: ShieldAlert },
 ];
 
 // Apply notification badges from server-fetched counters to the nav items by
