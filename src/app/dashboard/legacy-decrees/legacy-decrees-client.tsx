@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -13,6 +14,67 @@ import {
 } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
+
+type ImportResult = {
+  total: number;
+  created: number;
+  updated: number;
+  skipped: number;
+  hiddenCount: number;
+};
+
+// One-click trigger for src/lib/legacy-import.ts, run server-side (see
+// that route's comment for why: production's DATABASE_URL can't be read
+// out of Vercel to run the equivalent CLI script locally). Safe to click
+// more than once — the underlying import is idempotent.
+export function ImportButton() {
+  const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [result, setResult] = useState<ImportResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function run() {
+    setState("loading");
+    setError(null);
+    try {
+      const res = await fetch("/api/legacy-decrees/import", { method: "POST" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Gagal menjalankan impor");
+      setResult(json);
+      setState("done");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Terjadi kesalahan");
+      setState("error");
+    }
+  }
+
+  return (
+    <Card className="border-primary/30 bg-primary/5">
+      <CardContent className="flex flex-col items-start gap-3 pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="font-semibold">Impor / Sinkronkan Data SK BP3M</p>
+          <p className="text-sm text-muted-foreground">
+            Klik ini sekali untuk mengisi database dengan 325 SK BP3M dan 3 unit yang dibutuhkan
+            (Fakultas Sastra, Teknik, Ilmu Komputer). Aman diklik berkali-kali — data yang sudah ada
+            tidak akan dobel.
+          </p>
+          {state === "done" && result && (
+            <p className="mt-2 text-sm font-medium text-emerald-600">
+              Selesai — {result.total} data diproses ({result.created} baru, {result.updated}{" "}
+              diperbarui), {result.hiddenCount} baris disembunyikan otomatis dari publik karena
+              menyangkut hal personel/disipliner.
+            </p>
+          )}
+          {state === "error" && error && (
+            <p className="mt-2 text-sm font-medium text-destructive">Gagal: {error}</p>
+          )}
+        </div>
+        <Button onClick={run} disabled={state === "loading"} className="shrink-0">
+          {state === "loading" ? "Sedang memproses..." : "Jalankan Impor"}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
 
 type Row = {
   id: string;
