@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LegacyDecreesClient } from "./legacy-decrees-client";
+import { LegacyDecreesClient, ImportButton } from "./legacy-decrees-client";
 
 // SUPER_ADMIN-only review queue for the BP3M legacy SK/SE import — see
 // prisma/import-legacy-decrees.ts and src/app/api/publik/sk/route.ts.
@@ -31,6 +31,8 @@ export default async function LegacyDecreesPage() {
           ternyata aman ditampilkan.
         </p>
       </div>
+
+      <ImportButton />
 
       <Card>
         <CardHeader>
