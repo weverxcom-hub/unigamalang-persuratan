@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "db:seed": "tsx prisma/seed.ts",
     "db:import-legacy-sk": "tsx prisma/import-legacy-decrees.ts",
+    "db:ensure-legacy-units": "tsx prisma/ensure-legacy-units.ts",
     "db:reset": "prisma migrate reset --force",
     "postinstall": "prisma generate"
   },
