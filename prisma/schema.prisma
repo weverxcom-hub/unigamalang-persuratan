@@ -181,6 +181,7 @@ model Unit {
   tickets      Ticket[]
   letterTypes  LetterTypeUnit[]
   letterTypeRequestsSent     LetterTypeRequest[] @relation("LetterTypeRequestUnit")
+  legacyDecrees LegacyDecree[]
 
   @@index([deletedAt])
 }
@@ -201,6 +202,7 @@ model LetterType {
   archives  Archive[]
   sequences NumberingSequence[]
   units     LetterTypeUnit[]
+  legacyDecrees LegacyDecree[]
 
   @@index([deletedAt])
 }
@@ -340,6 +342,74 @@ model Archive {
   @@index([status])
   @@index([date])
   // number already has an index via @unique above
+}
+
+/// Historical SK/SE (Surat Keputusan / Surat Edaran) records recapped by BP3M
+/// from an old spreadsheet (1987–2026), imported so units don't recreate a
+/// decree that already exists. Deliberately kept OUT of `Archive`:
+///   - `nomor` here is frequently incomplete or duplicated across rows
+///     (missing document numbers in the source), which would collide with
+///     Archive.number's @unique constraint — a guarantee the live numbering
+///     system depends on. LegacyDecree.nomor carries no such guarantee.
+///   - These never went through this system's numbering/disposition
+///     workflow, so forcing them into ArchiveStatus/Direction would be
+///     fiction.
+/// Powers the public, unauthenticated search (`/publik/sk`) alongside
+/// Archive rows of letterType SK/EDAR issued going forward.
+model LegacyDecree {
+  id         String   @id @default(cuid())
+  // Row number in the original BP3M spreadsheet — kept for traceability
+  // back to the source when questions come up about a specific entry.
+  noUrutAsli Int      @unique
+  // Null when the source date itself was invalid (e.g. "31 September" —
+  // 2 rows in the 1987–2026 recap). tanggalRaw preserves what BP3M wrote
+  // so it can be corrected once the original document is checked.
+  tanggal    DateTime?
+  tanggalRaw String
+  // As recapped — may be missing a sequence number or otherwise partial.
+  // NOT unique; do not use as a lookup key.
+  nomor      String
+  perihal    String     @db.Text
+  letterTypeId String
+  letterType   LetterType @relation(fields: [letterTypeId], references: [id], onDelete: Restrict)
+  // Nullable: some source rows carry a unit label (e.g. "P4KG", panitia
+  // ad-hoc) with no matching Unit row. unitLabelRaw keeps the original
+  // text either way so nothing is lost when unitId is null.
+  unitId       String?
+  unit         Unit?    @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  unitLabelRaw String
+  // Link to the scanned original (Google Docs/Drive) for manual
+  // verification. Query-string params stripped on import (they can carry
+  // the uploader's Google account id).
+  sourceLink String?
+  // Data-quality note from the BP3M recap itself (e.g. "tidak ada nomor
+  // surat & ttd") — not a bug flag, a fact about the source document.
+  catatan    String?  @db.Text
+  // From the source recap's `lengkap` flag. false = shown in public search
+  // with a "belum terverifikasi" badge until someone checks sourceLink
+  // against the original and fills in what's missing via the admin UI.
+  isComplete Boolean  @default(false)
+  // Safety default: TRUE means visible on the public, unauthenticated
+  // /publik/sk search. Set FALSE for rows whose `perihal` names an
+  // individual or concerns personnel/disciplinary matters (resignation,
+  // sanctions, study leave, harassment cases, etc.) — the 1987–2026 BP3M
+  // recap includes decrees with actual names or personal-HR content
+  // (audit found e.g. row #324, a student sexual-harassment disciplinary
+  // sanction, sitting fully public with a direct doc link before this
+  // field existed). Flagged rows still exist for internal/admin lookup —
+  // this only controls the public route's query filter. Import script
+  // applies a keyword heuristic on (re-)import; err on the side of
+  // isPublic=false and let BP3M flip it back on per-row after a manual
+  // read, not the other way around.
+  isPublic   Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([unitId])
+  @@index([letterTypeId])
+  @@index([isComplete])
+  @@index([tanggal])
 }
 
 model Disposition {

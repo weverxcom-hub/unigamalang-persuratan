@@ -48,6 +48,12 @@ async function main() {
     { code: "YAS", name: "Yayasan Gajayana Malang" },
     { code: "FE", name: "Fakultas Ekonomi" },
     { code: "FH", name: "Fakultas Hukum" },
+    // Added for the BP3M legacy SK/SE import (prisma/import-legacy-decrees.ts)
+    // — these units show up in the 1987–2026 decree recap but had no Unit
+    // row yet.
+    { code: "FS", name: "Fakultas Sastra" },
+    { code: "FT", name: "Fakultas Teknik" },
+    { code: "FIK", name: "Fakultas Ilmu Komputer" },
   ];
   for (const u of units) {
     await prisma.unit.upsert({
