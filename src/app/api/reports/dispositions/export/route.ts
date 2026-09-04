@@ -81,7 +81,12 @@ export async function GET(req: Request) {
   } else if (unitId) {
     where.toUnitId = unitId;
   }
-  if (status) where.status = status as Prisma.DispositionWhereInput["status"];
+  // Whitelist — same class of fix as audit M8 on /api/archives/export: an
+  // unrecognised value here reaches Prisma unvalidated and throws a 500.
+  const ALLOWED_STATUSES = new Set(["PENDING", "ACKNOWLEDGED", "COMPLETED", "REJECTED"]);
+  if (status && ALLOWED_STATUSES.has(status)) {
+    where.status = status as Prisma.DispositionWhereInput["status"];
+  }
   const dateFilter = rangeFilter(range);
   if (dateFilter) where.createdAt = dateFilter;
 

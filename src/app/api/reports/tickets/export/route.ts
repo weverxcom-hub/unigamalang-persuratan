@@ -68,7 +68,12 @@ export async function GET(req: Request) {
 
   const where: Prisma.TicketWhereInput = {};
   if (unitId) where.unitId = unitId;
-  if (status) where.status = status as Prisma.TicketWhereInput["status"];
+  // Whitelist — same class of fix as audit M8 on /api/archives/export: an
+  // unrecognised value here reaches Prisma unvalidated and throws a 500.
+  const ALLOWED_STATUSES = new Set(["NEW", "IN_PROGRESS", "RESOLVED", "CLOSED"]);
+  if (status && ALLOWED_STATUSES.has(status)) {
+    where.status = status as Prisma.TicketWhereInput["status"];
+  }
   const dateFilter = rangeFilter(range);
   if (dateFilter) where.createdAt = dateFilter;
 

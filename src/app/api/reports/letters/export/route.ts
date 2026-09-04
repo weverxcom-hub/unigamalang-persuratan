@@ -88,7 +88,22 @@ export async function GET(req: Request) {
   }
   if (letterTypeId) where.letterTypeId = letterTypeId;
   if (direction === "OUTGOING" || direction === "INCOMING") where.direction = direction;
-  if (status) where.status = status as Prisma.ArchiveWhereInput["status"];
+  // Whitelist — mirrors the same fix (audit M8) already applied to
+  // /api/archives/export: an unrecognised value here reaches Prisma
+  // unvalidated and throws, surfacing as a raw 500 instead of an
+  // empty/ignored filter.
+  const ALLOWED_STATUSES = new Set([
+    "DRAFT",
+    "PENDING",
+    "PENDING_PROOF",
+    "APPROVED",
+    "ISSUED",
+    "OVERDUE",
+    "VOID",
+  ]);
+  if (status && ALLOWED_STATUSES.has(status)) {
+    where.status = status as Prisma.ArchiveWhereInput["status"];
+  }
   const dateFilter = rangeFilter(range);
   if (dateFilter) where.date = dateFilter;
 

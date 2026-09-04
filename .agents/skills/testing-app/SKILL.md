@@ -6,7 +6,11 @@
 
 ## Seed Accounts (from `prisma/seed.ts`)
 
-All accounts share password: `Password123!`
+Security fix (audit B1, 2026-08-27): the seed script no longer hashes a
+fixed literal password. It now generates a random password per run and
+prints it once to the terminal (or reads `SEED_DEMO_PASSWORD` if set) — it
+is never hardcoded or committed. Run `npm run db:seed` yourself and read the
+password from its output; do not assume a fixed value.
 
 | Email | Role | Unit |
 |---|---|---|
@@ -15,7 +19,7 @@ All accounts share password: `Password123!`
 | `admin.yayasan@unigamalang.ac.id` | ADMIN_UNIT | YAS (Yayasan) |
 | `staff@unigamalang.ac.id` | USER | UNIGA (Rektorat) |
 
-Note: These are demo/seed credentials and may not exist if the database was re-seeded or migrated. Always check `prisma/seed.ts` for the latest accounts.
+Note: These are demo/seed accounts and may not exist if the database was re-seeded or migrated. Always check `prisma/seed.ts` for the latest accounts.
 
 ## Accessing Vercel Preview Deployments
 
