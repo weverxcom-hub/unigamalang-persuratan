@@ -471,12 +471,19 @@ Sebelum go-live, pastikan env variables berikut diset:
 
 ## 7. Akun Demo (Seed)
 
-| Peran | Email | Password |
-|---|---|---|
-| Super Admin | `superadmin@unigamalang.ac.id` | `Password123!` |
-| Admin Unit (Rektorat) | `admin.rektorat@unigamalang.ac.id` | `Password123!` |
-| Admin Unit (Yayasan) | `admin.yayasan@unigamalang.ac.id` | `Password123!` |
-| User (Staf) | `staff@unigamalang.ac.id` | `Password123!` |
+> **Update keamanan (27 Agustus 2026, audit B1):** `prisma/seed.ts` tidak lagi
+> memakai password literal tetap. Password demo kini dibuat **acak setiap
+> seed dijalankan** dan hanya ditampilkan sekali di output terminal — tidak
+> pernah disimpan di repo. Tabel di bawah sengaja tidak lagi mencantumkan
+> password. Untuk password tetap (mis. kebutuhan CI), set env
+> `SEED_DEMO_PASSWORD` sebelum `npm run db:seed`.
+
+| Peran | Email |
+|---|---|
+| Super Admin | `superadmin@unigamalang.ac.id` |
+| Admin Unit (Rektorat) | `admin.rektorat@unigamalang.ac.id` |
+| Admin Unit (Yayasan) | `admin.yayasan@unigamalang.ac.id` |
+| User (Staf) | `staff@unigamalang.ac.id` |
 
 Unit seed: UNIGA (Rektorat), YAS (Yayasan), FE (Fakultas Ekonomi), FH (Fakultas Hukum).
 Jenis surat seed: SK, ST, SP, UND, EDAR, UMUM (semua GLOBAL).
