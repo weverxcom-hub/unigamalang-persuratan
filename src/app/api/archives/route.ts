@@ -11,6 +11,7 @@ import { renameFile as renameGdriveFile } from "@/lib/gdrive";
 import { buildArchiveFilename } from "@/lib/archive-filename";
 import type { ArchiveListItem } from "@/lib/types";
 import { runAfter } from "@/lib/after";
+import { validateDataUrlContent } from "@/lib/file-signature";
 import { serialiseArchive, serialiseArchiveList } from "./serialise";
 
 function clientIp(req: Request): string | null {
@@ -296,6 +297,18 @@ async function postImpl(req: Request) {
     );
   }
   const input = parsed.data;
+
+  // Content-sniff the inline base64 fallback: it's the only upload path
+  // where this server ever holds the raw bytes (Blob/GDrive uploads go
+  // straight from the browser to storage), so it's the only path where a
+  // client can lie about the MIME type in the `data:` prefix. Reject a
+  // mismatch before it's ever persisted. See src/lib/file-signature.ts.
+  if (input.fileDataUrl) {
+    const check = validateDataUrlContent(input.fileDataUrl);
+    if (!check.ok) {
+      return NextResponse.json({ error: check.reason }, { status: 422 });
+    }
+  }
 
   if (session.role !== "SUPER_ADMIN") {
     if (!session.unitId || session.unitId !== input.unitId) {

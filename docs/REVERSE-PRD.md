@@ -339,47 +339,56 @@ PENDING ──> ACKNOWLEDGED ──> COMPLETED
 
 ## 5. Peringatan Pra-Peluncuran
 
+> **Catatan pembaruan (22 Agustus 2026):** Bagian ini awalnya ditulis 23 Mei
+> 2026 sebagai snapshot temuan sebelum audit pra-peluncuran. Sejak itu commit
+> `728d705` ("fix: pre-launch audit — 17 perbaikan keamanan, fungsionalitas,
+> dan UX", PR #33) dan beberapa commit susulan sudah menutup mayoritas
+> temuan kritis di bawah. Tabel di bawah kini menyertakan kolom **Status**
+> yang mencerminkan kondisi kode saat ini, bukan lagi kondisi Mei 2026.
+> Kolom Rekomendasi dipertahankan sebagai jejak historis dari apa yang
+> diminta, bukan lagi daftar tugas terbuka untuk butir yang sudah ✅.
+
 Berdasarkan analisis kode, berikut temuan yang perlu diperhatikan sebelum peluncuran produksi:
 
 ### 5.1 Keamanan — KRITIS
 
-| # | Temuan | Risiko | Rekomendasi |
-|---|---|---|---|
-| **S1** | **Tidak ada rate limiting** pada endpoint login (`/api/auth/login`), register (`/api/auth/register`), dan seluruh API. | Brute-force attack pada password. | Tambahkan rate limiter (mis. `@upstash/ratelimit` atau middleware Vercel Edge) minimal pada endpoint auth. |
-| **S2** | **Tidak ada CSRF protection.** Cookie session bersifat `httpOnly` + `sameSite=lax`, tapi tidak ada CSRF token pada form/API. | Risiko CSRF rendah (sameSite=lax sudah cukup untuk GET, tapi POST dari cross-origin masih mungkin dalam beberapa skenario browser). | Pertimbangkan CSRF token atau verifikasi `Origin`/`Referer` header pada API mutasi. |
-| **S3** | **Registrasi terbuka** — siapa pun dengan email `@unigamalang.ac.id` dapat mendaftar sendiri dan langsung mendapat role `USER`. | Staf yang tidak berwenang bisa mendaftar dan melihat arsip unit mereka. | Pertimbangkan (a) menonaktifkan self-registration dan hanya izinkan Super Admin membuat akun, atau (b) menambahkan approval flow untuk registrasi baru, atau (c) menambahkan daftar putih email yang diizinkan. |
-| **S4** | **Default `AUTH_SECRET`** di kode: `"unigamalang-dev-secret-change-me-in-production-0123456789"`. | Jika lupa diubah di production, JWT bisa dipalsukan. | Pastikan `AUTH_SECRET` di-set ke random string ≥32 karakter di env Vercel. Tambahkan validasi startup yang gagal jika nilai default terdeteksi di `NODE_ENV=production`. |
-| **S5** | **Cron endpoint** `/api/cron/mark-overdue` diamankan dengan `CRON_SECRET`, tapi jika env tidak diset, token check gagal tertutup (401). | Baik — gagal tertutup. | Pastikan `CRON_SECRET` diset di Vercel production env agar cron berjalan. |
+| # | Status | Temuan | Risiko | Rekomendasi / Kondisi Saat Ini |
+|---|---|---|---|---|
+| **S1** | ✅ Selesai | **Tidak ada rate limiting** pada endpoint login (`/api/auth/login`), register (`/api/auth/register`), dan seluruh API. | Brute-force attack pada password. | Diimplementasikan di `src/lib/rate-limit.ts` (in-memory sliding window) dan dipakai di `/api/auth/login` (10/15 menit), `/api/auth/register` (5/jam), `/api/auth/forgot-password` & `/api/auth/reset-password` (5/15 menit). Lihat `__tests__/rate-limit.test.ts`. |
+| **S2** | ✅ Selesai | **Tidak ada CSRF protection.** Cookie session bersifat `httpOnly` + `sameSite=lax`, tapi tidak ada CSRF token pada form/API. | Risiko CSRF rendah (sameSite=lax sudah cukup untuk GET, tapi POST dari cross-origin masih mungkin dalam beberapa skenario browser). | `src/middleware.ts` kini memverifikasi header `Origin`/`Host` untuk setiap request `/api/*` selain GET/HEAD/OPTIONS dan menolak dengan 403 jika tidak cocok. |
+| **S3** | ✅ Selesai | **Registrasi terbuka** — siapa pun dengan email `@unigamalang.ac.id` dapat mendaftar sendiri dan langsung mendapat role `USER`. | Staf yang tidak berwenang bisa mendaftar dan melihat arsip unit mereka. | Flag `REGISTRATION_DISABLED=true` (lihat `.env.example`) menonaktifkan self-registration; `/api/auth/register` menolak dengan 403 saat flag aktif, sehingga hanya Super Admin yang bisa membuat akun via `/api/users`. |
+| **S4** | ✅ Selesai | **Default `AUTH_SECRET`** di kode: `"unigamalang-dev-secret-change-me-in-production-0123456789"`. | Jika lupa diubah di production, JWT bisa dipalsukan. | `src/lib/auth.ts` memvalidasi saat runtime (`validateSecret()`) dan **throw fatal error** jika `NODE_ENV=production` dan `AUTH_SECRET` kosong/masih default. Lihat `__tests__/auth-secret.test.ts`. |
+| **S5** | ✅ Selesai (sudah baik sejak awal) | **Cron endpoint** `/api/cron/mark-overdue` diamankan dengan `CRON_SECRET`, tapi jika env tidak diset, token check gagal tertutup (401). | Baik — gagal tertutup. | Tidak berubah — perilaku ini sudah benar (fail-closed). Pastikan `CRON_SECRET` diset di Vercel production env agar cron berjalan; endpoint `/api/cron/cleanup-audit` yang baru memakai pola sama. |
 
 ### 5.2 Fitur & Fungsionalitas — PERHATIAN
 
-| # | Temuan | Dampak | Rekomendasi |
-|---|---|---|---|
-| **F1** | **Tidak ada pagination pada API archives** — `take: 500` (list) dan `take: 5000` (export). | Seiring data bertambah, response akan membesar. Untuk universitas aktif, arsip bisa mencapai ribuan per tahun. | Implementasikan cursor-based atau offset pagination pada `/api/archives`. |
-| **F2** | **Tidak ada pagination pada dispositions** (`take: 200`) dan letter-type-requests (`take: 200`). | Potensi masalah performa di masa depan. | Tambahkan pagination saat data melampaui limit. |
-| **F3** | **Tidak ada unit test / integration test** — tidak ditemukan framework testing (jest/vitest/playwright) di project. | Tidak ada jaring pengaman untuk regresi saat ada perubahan kode. | Prioritaskan minimal integration test untuk alur kritis: penomoran, disposisi, dan auth. |
-| **F4** | **Password minimal 8 karakter** tanpa aturan kompleksitas (uppercase, angka, simbol). | Password lemah bisa digunakan. | Tambahkan validasi kompleksitas password (mis. minimal 1 huruf besar, 1 angka, 1 simbol). |
-| **F5** | **Self-registration langsung dapat role USER** tanpa approval. | Lihat S3 di atas. | Pertimbangkan penambahan approval flow oleh admin. |
-| **F6** | **SSO auto-creates user** dari identity SSO tanpa validasi unit. | User SSO baru tidak ter-assign ke unit manapun, sehingga tidak bisa melihat arsip apapun (gagal tertutup — baik). | Pertimbangkan flow untuk assign unit setelah auto-create, atau mapping SSO role → unit. |
-| **F7** | **Tidak ada notifikasi real-time** (polling / WebSocket) — sidebar badges hanya refresh pada navigasi halaman. | Badge notifikasi (pending archives, disposisi, tiket) bisa stale selama user tetap di satu halaman. | Pertimbangkan polling interval atau Server-Sent Events untuk badge counter. |
+| # | Status | Temuan | Dampak | Rekomendasi / Kondisi Saat Ini |
+|---|---|---|---|---|
+| **F1** | ✅ Selesai | **Tidak ada pagination pada API archives** — `take: 500` (list) dan `take: 5000` (export). | Seiring data bertambah, response akan membesar. Untuk universitas aktif, arsip bisa mencapai ribuan per tahun. | `/api/archives` kini menggunakan `page`/`pageSize` (lihat `take: pageSize` di `src/app/api/archives/route.ts`) dengan metadata `totalPages`. |
+| **F2** | ✅ Selesai | **Tidak ada pagination pada dispositions** (`take: 200`) dan letter-type-requests (`take: 200`). | Potensi masalah performa di masa depan. | Kedua endpoint (`/api/dispositions`, `/api/letter-type-requests`) sudah memakai `page`/`pageSize` yang sama. |
+| **F3** | ✅ Selesai | **Tidak ada unit test / integration test** — tidak ditemukan framework testing (jest/vitest/playwright) di project. | Tidak ada jaring pengaman untuk regresi saat ada perubahan kode. | Vitest terpasang (`npm test`) dengan suite di `__tests__/`: `auth-secret`, `password-policy`, `rate-limit`, dan `file-signature` (baru). Masih terbatas pada unit test lib murni — integration test untuk alur penomoran/disposisi end-to-end belum ada, jadi ini **sebagian** selesai. |
+| **F4** | ✅ Selesai | **Password minimal 8 karakter** tanpa aturan kompleksitas (uppercase, angka, simbol). | Password lemah bisa digunakan. | `src/lib/password-policy.ts` (`PASSWORD_REGEX`) mewajibkan huruf besar + huruf kecil + angka, dipakai di register, user creation, dan ganti password. |
+| **F5** | ✅ Selesai | **Self-registration langsung dapat role USER** tanpa approval. | Lihat S3 di atas. | Ditangani via `REGISTRATION_DISABLED` (S3) — bukan approval flow terpisah, tapi mencapai tujuan yang sama untuk kampus yang mengaktifkannya. |
+| **F6** | ⚠️ Belum berubah | **SSO auto-creates user** dari identity SSO tanpa validasi unit. | User SSO baru tidak ter-assign ke unit manapun, sehingga tidak bisa melihat arsip apapun (gagal tertutup — baik). | Masih berlaku apa adanya. Pertimbangkan flow untuk assign unit setelah auto-create, atau mapping SSO role → unit. |
+| **F7** | ⚠️ Belum berubah | **Tidak ada notifikasi real-time** (polling / WebSocket) — sidebar badges hanya refresh pada navigasi halaman. | Badge notifikasi (pending archives, disposisi, tiket) bisa stale selama user tetap di satu halaman. | Pertimbangkan polling interval atau Server-Sent Events untuk badge counter. |
 
 ### 5.3 Data & Operasional — PERINGATAN
 
-| # | Temuan | Dampak | Rekomendasi |
-|---|---|---|---|
-| **D1** | **Tidak ada backup strategy** yang terlihat di kode/konfigurasi. | Risiko kehilangan data jika terjadi masalah di Neon Postgres. | Konfigurasikan automated backup di Neon (point-in-time recovery) dan export periodik. |
-| **D2** | **Audit log tanpa retention policy** — tabel `AuditLog` bersifat immutable dan akan terus membesar. | Potensi masalah storage dan performa query. | Pertimbangkan arsip/partisi berdasarkan tanggal setelah periode tertentu (mis. > 2 tahun). |
-| **D3** | **Webhook delivery tanpa retry mechanism** — jika POST gagal, status dicatat `FAILED` tapi tidak ada retry. | Event bisa hilang jika n8n sedang down saat webhook dikirim. | Implementasikan retry dengan exponential backoff (3-5 kali). |
-| **D4** | **File storage tanpa virus scanning** — file upload langsung disimpan ke Drive/Blob tanpa pemeriksaan malware. | Risiko file berbahaya diunggah dan diakses oleh pengguna lain. | Pertimbangkan integrasi ClamAV atau layanan scanning lainnya. |
-| **D5** | **`fileDataUrl` inline base64** masih ada sebagai fallback — menyimpan file besar di database langsung. | Inflates ukuran database, memperlambat query. | Fase keluar inline base64: migrasi data lama ke Drive/Blob, kemudian nonaktifkan fallback. |
+| # | Status | Temuan | Dampak | Rekomendasi / Kondisi Saat Ini |
+|---|---|---|---|---|
+| **D1** | ✅ Selesai | **Tidak ada backup strategy** yang terlihat di kode/konfigurasi. | Risiko kehilangan data jika terjadi masalah di Neon Postgres. | Didokumentasikan di `docs/BACKUP-STRATEGY.md`: Neon PITR bawaan + skrip `pg_dump` mingguan opsional. |
+| **D2** | ✅ Selesai | **Audit log tanpa retention policy** — tabel `AuditLog` bersifat immutable dan akan terus membesar. | Potensi masalah storage dan performa query. | Cron `/api/cron/cleanup-audit` (mingguan, Minggu 03:00 UTC — lihat `vercel.json`) menghapus audit log > 2 tahun dan webhook delivery > 90 hari. |
+| **D3** | ✅ Selesai | **Webhook delivery tanpa retry mechanism** — jika POST gagal, status dicatat `FAILED` tapi tidak ada retry. | Event bisa hilang jika n8n sedang down saat webhook dikirim. | `src/lib/webhook.ts` melakukan retry dengan exponential backoff hingga `MAX_RETRIES` kali sebelum menandai `FAILED`. |
+| **D4** | ⚠️ Sebagian | **File storage tanpa virus scanning** — file upload langsung disimpan ke Drive/Blob tanpa pemeriksaan malware. | Risiko file berbahaya diunggah dan diakses oleh pengguna lain. | **Baru ditambahkan:** `src/lib/file-signature.ts` memverifikasi magic-byte konten terhadap MIME yang dideklarasikan pada jalur inline base64 (satu-satunya jalur di mana server benar-benar memegang bytes-nya — upload Drive/Blob langsung dari browser ke storage). Ini menutup celah "file disamarkan sebagai gambar", **tapi bukan pemindaian malware sungguhan**. Integrasi ClamAV/VirusTotal sungguhan (lihat `docs/FILE-UPLOAD-SECURITY.md`) tetap jadi follow-up — perlu layanan eksternal karena Vercel serverless tidak bisa menjalankan ClamAV daemon persisten. |
+| **D5** | ⚠️ Belum berubah (disengaja) | **`fileDataUrl` inline base64** masih ada sebagai fallback — menyimpan file besar di database langsung. | Inflates ukuran database, memperlambat query. | Masih dipertahankan sebagai fallback terakhir saat Drive & Blob tidak dikonfigurasi. Fase keluar inline base64 tetap direkomendasikan sebagai pekerjaan terpisah. |
 
 ### 5.4 UX & Frontend — MINOR
 
-| # | Temuan | Dampak | Rekomendasi |
-|---|---|---|---|
-| **U1** | **Konfirmasi hapus** hanya via `window.confirm()` (browser native dialog). | UX kurang halus, tidak konsisten dengan UI shadcn/ui lainnya. | Ganti dengan custom dialog component. |
-| **U2** | **Tidak ada loading skeleton** pada tabel data — hanya spinner generik. | Flash of empty content saat data dimuat. | Tambahkan skeleton loader pada tabel arsip, disposisi, dll. |
-| **U3** | **Tidak ada fitur "Lupa Password"** — pengguna harus menghubungi Super Admin untuk reset. | Beban manual pada Super Admin. | Implementasikan self-service password reset via email. |
+| # | Status | Temuan | Dampak | Rekomendasi / Kondisi Saat Ini |
+|---|---|---|---|---|
+| **U1** | ✅ Selesai | **Konfirmasi hapus** hanya via `window.confirm()` (browser native dialog). | UX kurang halus, tidak konsisten dengan UI shadcn/ui lainnya. | Tidak ada lagi pemakaian `window.confirm()` di `src/app` — sudah diganti dialog kustom (shadcn `AlertDialog`) di seluruh alur hapus/void. |
+| **U2** | ⚠️ Belum berubah | **Tidak ada loading skeleton** pada tabel data — hanya spinner generik. | Flash of empty content saat data dimuat. | Pertimbangkan skeleton loader pada tabel arsip, disposisi, dll. |
+| **U3** | ✅ Selesai | **Tidak ada fitur "Lupa Password"** — pengguna harus menghubungi Super Admin untuk reset. | Beban manual pada Super Admin. | Self-service password reset via email diimplementasikan: `/forgot-password`, `/reset-password`, dan endpoint `/api/auth/forgot-password` + `/api/auth/reset-password`. |
 
 ### 5.5 Konfigurasi Production Checklist
 
