@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { audit } from "@/lib/audit";
+import { unitCodeSchema } from "@/lib/unit-code";
 import { DEFAULT_FORMAT_TEMPLATE } from "@/lib/format";
 
 export async function GET() {
@@ -35,11 +36,7 @@ export async function GET() {
 }
 
 const schema = z.object({
-  code: z
-    .string()
-    .min(2, "Kode minimal 2 karakter")
-    .max(10, "Kode maksimal 10 karakter")
-    .regex(/^[A-Z0-9]+$/, "Kode harus huruf kapital/angka (mis. UNIGA, YAS)"),
+  code: unitCodeSchema,
   name: z.string().min(3, "Nama unit minimal 3 karakter"),
   formatTemplate: z.string().min(3).optional(),
 });
