@@ -90,6 +90,11 @@ export function formatSequence(template: string, sequence: number): string {
   return token === "[SEQ]" ? String(sequence) : pad3(sequence);
 }
 
+/** The first number of the year for Rektor's SK under `template`, for help text. */
+export function formatExample(template: string, month: number, year: number): string {
+  return renderFormat(template, { sequence: 1, unitCode: "UNIGA", letterTypeCode: "SK", month, year });
+}
+
 const REQUIRED_PARTS: { label: string; tokens: RegExp }[] = [
   { label: "nomor urut ([NO] atau [SEQ])", tokens: SEQUENCE_TOKEN },
   { label: "kode unit ([UNIT_CODE])", tokens: /\[UNIT_CODE\]|\[UNIT\]/i },
