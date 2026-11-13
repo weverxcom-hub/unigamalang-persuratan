@@ -1,28 +1,38 @@
 import { PrismaClient, Role, type ArchiveStatus } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { spawnSync } from "node:child_process";
 import { allocateNextNumber } from "../src/lib/numbering";
+import { importLegacyDecrees } from "../src/lib/legacy-import";
 import { TEMPLATE_2027 } from "../src/lib/numbering-2027/catalog";
 import { applyNumberingRule } from "../src/lib/numbering-2027/apply-rule";
 
 /**
- * Demo data for presenting the 2027 numbering rule. Run AFTER `npm run db:seed`
- * on a database made for the demo:
+ * Demo data for presenting the 2027 numbering rule, on a database made for
+ * the demo:
  *
- *   DEMO_SEED_CONFIRM=demo SEED_DEMO_PASSWORD=... npm run db:seed-demo
+ *   DEMO_SEED_CONFIRM=demo npm run db:seed-demo
  *
+ * On the demo Vercel project this runs from vercel.json's build command when
+ * DEMO_SEED_CONFIRM=demo is set there; no other project sets it.
+ *
+ * 0. On an empty database, runs prisma/seed.ts (units, letter types and the
+ *    superadmin account; its generated password is printed once, in this
+ *    run's output) and imports the 325 legacy SK.
  * 1. Issues a few letters in the current (legacy) format, so the demo shows
  *    old numbers staying valid.
  * 2. Applies the 2027 rule, exactly as the "Terapkan" button does.
  * 3. Adds one account per demo role and letters in the new format, so
- *    Wakil Rektor I and II letters can be told apart.
+ *    Wakil Rektor I and II letters can be told apart. The accounts get
+ *    SEED_DEMO_PASSWORD when set, otherwise the superadmin's password.
  *
- * Safe to re-run: it stops at step 1 and 3 when their letters already exist,
- * and applying the rule twice changes nothing. Refuses to touch a database
- * that looks like real data (more than 50 letters) or a production env.
+ * Safe to re-run: every step checks before writing, and applying the rule
+ * twice changes nothing. Refuses a database holding more than 50 letters
+ * that are not demo letters, so it cannot be pointed at real data.
  */
 
 const prisma = new PrismaClient();
 const MARK = "Contoh demo:";
+const SUPERADMIN_EMAIL = "superadmin@unigamalang.ac.id";
 const MAX_EXISTING_ARCHIVES = 50;
 
 const DEMO_ACCOUNTS: { email: string; name: string; role: Role; unitCode: string }[] = [
@@ -88,14 +98,6 @@ async function main() {
   if (process.env.DEMO_SEED_CONFIRM !== "demo") {
     throw new Error("Set DEMO_SEED_CONFIRM=demo to confirm this database is a demo database.");
   }
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("Refusing to run with NODE_ENV=production.");
-  }
-  const password = process.env.SEED_DEMO_PASSWORD;
-  if (!password) {
-    throw new Error("Set SEED_DEMO_PASSWORD (the password for every demo account).");
-  }
-
   const realLetters = await prisma.archive.count({ where: { subject: { not: { startsWith: MARK } } } });
   if (realLetters > MAX_EXISTING_ARCHIVES) {
     throw new Error(
@@ -104,8 +106,21 @@ async function main() {
     );
   }
 
-  const superAdmin = await prisma.user.findUnique({ where: { email: "superadmin@unigamalang.ac.id" } });
-  if (!superAdmin) throw new Error('Run "npm run db:seed" first (no superadmin account found).');
+  if (!(await prisma.user.findUnique({ where: { email: SUPERADMIN_EMAIL } }))) {
+    console.log("0. Empty database: running prisma/seed.ts");
+    const seed = spawnSync("npx", ["tsx", "prisma/seed.ts"], {
+      stdio: "inherit",
+      shell: process.platform === "win32",
+      env: { ...process.env, SEED_CONFIRM: "true" },
+    });
+    if (seed.status !== 0) throw new Error("prisma/seed.ts failed");
+  }
+  const superAdmin = await prisma.user.findUniqueOrThrow({ where: { email: SUPERADMIN_EMAIL } });
+
+  if ((await prisma.legacyDecree.count()) === 0) {
+    const imported = await importLegacyDecrees(prisma);
+    console.log(`0. Imported ${imported.total} legacy SK.`);
+  }
 
   const policy = await prisma.numberingPolicy.findUnique({ where: { id: 1 } });
   const demoLetters = await prisma.archive.count({ where: { subject: { startsWith: MARK } } });
@@ -126,7 +141,9 @@ async function main() {
   console.log(`   untouched units: ${result.plan.untouchedUnits.map((u) => u.code).join(", ") || "-"}`);
 
   console.log("3. Demo accounts:");
-  const passwordHash = await bcrypt.hash(password, 10);
+  const passwordHash = process.env.SEED_DEMO_PASSWORD
+    ? await bcrypt.hash(process.env.SEED_DEMO_PASSWORD, 10)
+    : superAdmin.passwordHash;
   for (const account of DEMO_ACCOUNTS) {
     const unit = await prisma.unit.findUniqueOrThrow({ where: { code: account.unitCode } });
     await prisma.user.upsert({
@@ -147,7 +164,11 @@ async function main() {
     console.log("   Skipped: new-format demo letters already exist.");
   }
 
-  console.log("\nDone. Every demo account uses SEED_DEMO_PASSWORD.");
+  console.log(
+    process.env.SEED_DEMO_PASSWORD
+      ? "\nDone. New demo accounts use SEED_DEMO_PASSWORD."
+      : "\nDone. New demo accounts use the superadmin's password."
+  );
 }
 
 main()

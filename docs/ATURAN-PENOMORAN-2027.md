@@ -33,23 +33,24 @@ Catatan: login Google/SSO dan pengiriman email terikat ke domain. Di situs demo,
 
 ### Alternatif: database demo kosong berisi data contoh
 
-Bila tidak ingin menyalin data produksi (data asli ikut tampil di layar presentasi), pakai database baru yang kosong:
+Bila tidak ingin menyalin data produksi (data asli ikut tampil di layar presentasi), pakai database baru yang kosong. Build mengisinya sendiri:
 
-1. Buat database Postgres baru (misalnya dari Vercel → Storage → Neon) dan pasang `DATABASE_URL`/`DIRECT_URL`-nya ke proyek demo. Build pertama membuat semua tabel.
-2. Dari komputer, dengan `DATABASE_URL` dan `DIRECT_URL` mengarah ke database demo:
-
-   ```bash
-   SEED_DEMO_PASSWORD='<kata sandi demo>' npm run db:seed
-   DEMO_SEED_CONFIRM=demo SEED_DEMO_PASSWORD='<kata sandi demo>' npm run db:seed-demo
-   ```
-
-   `db:seed` membuat 7 unit lama, 6 jenis surat lama, dan 4 akun (termasuk `superadmin@unigamalang.ac.id`). `db:seed-demo` lalu:
-   - menerbitkan 4 surat dengan format sekarang (`001/ST/UNIGA/XI/2026`),
+1. Buat proyek Vercel terpisah untuk demo dari repositori yang sama.
+2. Di proyek demo, buat database lewat Storage → Neon dan hubungkan ke proyek. Integrasi itu mengisi `DATABASE_URL` dan `DATABASE_URL_UNPOOLED`; build memakai `DATABASE_URL_UNPOOLED` sebagai `DIRECT_URL` bila `DIRECT_URL` tidak diisi.
+3. Tambahkan variabel lingkungan di proyek demo:
+   - `DEMO_SEED_CONFIRM` = `demo` (hanya di proyek demo, jangan di produksi)
+   - `AUTH_SECRET` = string acak minimal 32 karakter, misalnya hasil `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+   - `TZ` = `Asia/Jakarta`, `REGISTRATION_DISABLED` = `true`
+4. Deploy. Karena `DEMO_SEED_CONFIRM=demo`, perintah build di `vercel.json` menjalankan `npm run db:seed-demo` setelah migrasi:
+   - membuat 7 unit lama, 6 jenis surat lama, akun super admin dan admin contoh,
+   - mengimpor 325 SK lama untuk pencarian publik,
+   - menerbitkan 4 surat format sekarang (`001/ST/UNIGA/XI/2026`),
    - menerapkan aturan baru seperti tombol Terapkan,
    - membuat akun admin WR1, WR2, BAU, FEB, Prodi Manajemen, dan staf FEB,
    - menerbitkan 10 surat format baru (`1/UNIGA.WR1/ST/2026`, `1/UNIGA.WR2/ST/2026`, ...).
+5. Buka log build pertama dan cari baris "Demo password (generated, only shown once". Itu kata sandi `superadmin@unigamalang.ac.id`, dan semua akun demo memakai kata sandi yang sama. Simpan; build berikutnya tidak menampilkannya lagi dengan benar.
 
-   Semua akun memakai kata sandi `SEED_DEMO_PASSWORD`. `db:seed-demo` menolak jalan bila database berisi lebih dari 50 surat asli, sehingga tidak bisa tidak sengaja dijalankan ke produksi. Menjalankannya dua kali tidak menambah apa pun.
+`db:seed-demo` menolak jalan bila database berisi lebih dari 50 surat yang bukan surat contoh, sehingga tidak bisa tidak sengaja mengisi data produksi. Menjalankannya ulang tidak menambah apa pun. Bisa juga dijalankan dari komputer: `DEMO_SEED_CONFIRM=demo npm run db:seed-demo` dengan `DATABASE_URL`/`DIRECT_URL` mengarah ke database demo.
 
 Tahun pada nomor mengikuti tanggal hari ini, jadi demo bulan Desember menampilkan `/2026`. Mulai 1 Januari nomor kembali ke 1 dengan `/2027`.
 

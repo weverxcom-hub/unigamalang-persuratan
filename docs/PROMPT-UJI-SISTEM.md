@@ -5,8 +5,8 @@ Cara pakai: isi tiga isian di bagian **Isian** di bawah, lalu salin seluruh blok
 ## Isian
 
 - `URL_DEMO`: alamat situs demo, misalnya `https://persuratan-demo.vercel.app`
-- `KATA_SANDI_DEMO`: nilai `SEED_DEMO_PASSWORD` yang dipakai saat `npm run db:seed` dan `npm run db:seed-demo`
-- `FORMAT_SUDAH_DITERAPKAN`: `ya` bila database demo diisi dengan `db:seed-demo` (aturan baru sudah diterapkan), `tidak` bila belum
+- `KATA_SANDI_DEMO`: kata sandi super admin dari log build pertama situs demo (baris "Demo password (generated, only shown once"), atau nilai `SEED_DEMO_PASSWORD` bila diisi saat seeding
+- `FORMAT_SUDAH_DITERAPKAN`: `ya` bila database demo diisi dengan `db:seed-demo` (situs demo yang dibuat dengan `DEMO_SEED_CONFIRM=demo` selalu `ya`), `tidak` bila belum
 
 ---
 
