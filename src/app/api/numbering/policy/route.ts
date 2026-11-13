@@ -2,31 +2,12 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { audit } from "@/lib/audit";
 import { validateNumberTemplate } from "@/lib/format";
 import { TEMPLATE_2027 } from "@/lib/numbering-2027/catalog";
-import { planApply, type ExistingRow } from "@/lib/numbering-2027/plan";
-import { executePlan, prismaApplyOps } from "@/lib/numbering-2027/apply";
-import type { Prisma } from "@prisma/client";
+import { planApply } from "@/lib/numbering-2027/plan";
+import { applyNumberingRule, loadExisting, POLICY_ID } from "@/lib/numbering-2027/apply-rule";
 
-const POLICY_ID = 1;
 const CONFIRM_WORD = "TERAPKAN";
-
-type Db = Prisma.TransactionClient | typeof prisma;
-
-async function loadExisting(db: Db): Promise<{ units: ExistingRow[]; letterTypes: ExistingRow[] }> {
-  const [units, letterTypes] = await Promise.all([
-    db.unit.findMany({
-      select: { id: true, code: true, name: true, deletedAt: true, formatTemplate: true },
-      orderBy: { code: "asc" },
-    }),
-    db.letterType.findMany({
-      select: { id: true, code: true, name: true, deletedAt: true },
-      orderBy: { code: "asc" },
-    }),
-  ]);
-  return { units, letterTypes };
-}
 
 function serialisePolicy(
   policy: { template: string; appliedAt: Date; appliedByEmail: string | null } | null
@@ -104,38 +85,10 @@ export async function POST(req: Request) {
   }
 
   try {
-    const result = await prisma.$transaction(
-      async (tx) => {
-        const plan = planApply({ ...(await loadExisting(tx)), template });
-        const summary = await executePlan(plan, prismaApplyOps(tx));
-        const applied = { template, appliedAt: new Date(), appliedByEmail: session.email };
-        const policy = await tx.numberingPolicy.upsert({
-          where: { id: POLICY_ID },
-          create: { id: POLICY_ID, ...applied },
-          update: applied,
-        });
-        await audit(
-          {
-            action: "UPDATE",
-            actorId: session.userId,
-            actorEmail: session.email,
-            targetType: "NumberingPolicy",
-            targetId: String(POLICY_ID),
-            metadata: {
-              template,
-              summary: { ...summary },
-              untouchedUnits: plan.untouchedUnits.map((u) => u.code),
-              untouchedLetterTypes: plan.untouchedLetterTypes.map((t) => t.code),
-            },
-          },
-          tx
-        );
-        return { policy, summary, plan };
-      },
-      // Up to ~60 sequential writes over a pooled connection; the 5 s
-      // default is too tight.
-      { maxWait: 10_000, timeout: 30_000 }
-    );
+    const result = await applyNumberingRule(prisma, template, {
+      userId: session.userId,
+      email: session.email,
+    });
 
     return NextResponse.json({
       policy: serialisePolicy(result.policy),
