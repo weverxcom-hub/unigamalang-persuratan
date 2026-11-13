@@ -78,6 +78,36 @@ export function splitTemplate(
   };
 }
 
+const SEQUENCE_TOKEN = /\[NO\]|\[SEQ\]/i;
+
+/**
+ * The sequence number as `template` would print it: zero-padded for `[NO]`,
+ * bare for `[SEQ]`. Follows the first sequence token, like `splitTemplate`,
+ * so a client-side preview matches what `renderFormat` produces on the server.
+ */
+export function formatSequence(template: string, sequence: number): string {
+  const token = (template ?? "").match(SEQUENCE_TOKEN)?.[0].toUpperCase();
+  return token === "[SEQ]" ? String(sequence) : pad3(sequence);
+}
+
+const REQUIRED_PARTS: { label: string; tokens: RegExp }[] = [
+  { label: "nomor urut ([NO] atau [SEQ])", tokens: SEQUENCE_TOKEN },
+  { label: "kode unit ([UNIT_CODE])", tokens: /\[UNIT_CODE\]|\[UNIT\]/i },
+  { label: "kode jenis ([TYPE_CODE])", tokens: /\[TYPE_CODE\]|\[TYPE\]/i },
+  { label: "tahun ([YEAR])", tokens: /\[YEAR\]/i },
+];
+
+/**
+ * Counters run per (unit, letter type, year), so a template that leaves any
+ * of those out — or the sequence itself — can render the same number twice.
+ * Returns the first missing part as a user-facing message, or null when the
+ * template is safe.
+ */
+export function validateNumberTemplate(template: string): string | null {
+  const missing = REQUIRED_PARTS.find((part) => !part.tokens.test(template ?? ""));
+  return missing ? `Template harus memuat ${missing.label}` : null;
+}
+
 function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

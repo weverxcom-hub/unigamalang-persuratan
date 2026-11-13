@@ -1498,7 +1498,7 @@ function ManualArchiveDialog({
   // longer visible (e.g. UNIT_SPECIFIC type not available for new unit).
   useEffect(() => {
     if (visibleLetterTypes.length > 0 && !visibleLetterTypes.some((lt) => lt.id === letterTypeId)) {
-      const preferredCodes = ["UMUM", "SP", "UND"];
+      const preferredCodes = ["UMUM", "SD", "SP", "UND", "SU"];
       const preferred = visibleLetterTypes.find((lt) => preferredCodes.includes(lt.code));
       setLetterTypeId(preferred?.id ?? visibleLetterTypes[0].id);
     }
@@ -1509,7 +1509,7 @@ function ManualArchiveDialog({
       setUnitId(defaultUnitId);
       // Default to a "generic" letter type if one exists (UMUM/UND/SP) so
       // INCOMING tidak memaksa user memilih klasifikasi yang tidak mereka tahu.
-      const preferredCodes = ["UMUM", "SP", "UND"];
+      const preferredCodes = ["UMUM", "SD", "SP", "UND", "SU"];
       const preferred = letterTypes.find((lt) => preferredCodes.includes(lt.code));
       setLetterTypeId(preferred?.id ?? letterTypes[0]?.id ?? "");
       setManualNumber("");

@@ -14,8 +14,7 @@ import {
   UploadError,
   GDRIVE_MAX_BYTES,
 } from "@/lib/upload-client";
-import { splitTemplate } from "@/lib/format";
-import { pad3 } from "@/lib/utils";
+import { formatSequence, splitTemplate } from "@/lib/format";
 
 interface UnitOption {
   id: string;
@@ -202,8 +201,8 @@ export function GenerateForm({
 
   const previewNumber = useMemo(() => {
     if (previewSeq == null) return null;
-    return `${templateSplit.prefix}${pad3(previewSeq)}${templateSplit.suffix}`;
-  }, [previewSeq, templateSplit]);
+    return `${templateSplit.prefix}${formatSequence(selectedUnit?.formatTemplate ?? "", previewSeq)}${templateSplit.suffix}`;
+  }, [previewSeq, templateSplit, selectedUnit]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -627,7 +626,7 @@ export function GenerateForm({
               />
             ) : (
               <span className="rounded bg-background px-2 py-0.5 font-semibold">
-                {loadingPreview ? "…" : previewSeq != null ? pad3(previewSeq) : "—"}
+                {loadingPreview ? "…" : previewSeq != null ? formatSequence(selectedUnit?.formatTemplate ?? "", previewSeq) : "—"}
               </span>
             )}
             <span className="select-none text-muted-foreground">{templateSplit.suffix}</span>
@@ -642,9 +641,9 @@ export function GenerateForm({
           )}
           {isInsert && (
             <p className="mt-2 text-xs text-amber-800">
-              Counter saat ini berhenti di <span className="font-mono">{previewSeq != null ? pad3(previewSeq - 1) : "—"}</span>;
+              Counter saat ini berhenti di <span className="font-mono">{previewSeq != null ? formatSequence(selectedUnit?.formatTemplate ?? "", previewSeq - 1) : "—"}</span>;
               setelah surat sisipan ini disimpan, generate berikutnya tetap menjadi{" "}
-              <span className="font-mono">{previewSeq != null ? pad3(previewSeq) : "—"}</span>.
+              <span className="font-mono">{previewSeq != null ? formatSequence(selectedUnit?.formatTemplate ?? "", previewSeq) : "—"}</span>.
             </p>
           )}
         </div>
