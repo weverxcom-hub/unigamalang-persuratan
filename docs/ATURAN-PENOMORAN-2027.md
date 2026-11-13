@@ -31,6 +31,30 @@ Situs demo memakai salinan database, sehingga produksi tidak tersentuh.
 
 Catatan: login Google/SSO dan pengiriman email terikat ke domain. Di situs demo, masuk dengan email dan kata sandi.
 
+### Alternatif: database demo kosong berisi data contoh
+
+Bila tidak ingin menyalin data produksi (data asli ikut tampil di layar presentasi), pakai database baru yang kosong:
+
+1. Buat database Postgres baru (misalnya dari Vercel → Storage → Neon) dan pasang `DATABASE_URL`/`DIRECT_URL`-nya ke proyek demo. Build pertama membuat semua tabel.
+2. Dari komputer, dengan `DATABASE_URL` dan `DIRECT_URL` mengarah ke database demo:
+
+   ```bash
+   SEED_DEMO_PASSWORD='<kata sandi demo>' npm run db:seed
+   DEMO_SEED_CONFIRM=demo SEED_DEMO_PASSWORD='<kata sandi demo>' npm run db:seed-demo
+   ```
+
+   `db:seed` membuat 7 unit lama, 6 jenis surat lama, dan 4 akun (termasuk `superadmin@unigamalang.ac.id`). `db:seed-demo` lalu:
+   - menerbitkan 4 surat dengan format sekarang (`001/ST/UNIGA/XI/2026`),
+   - menerapkan aturan baru seperti tombol Terapkan,
+   - membuat akun admin WR1, WR2, BAU, FEB, Prodi Manajemen, dan staf FEB,
+   - menerbitkan 10 surat format baru (`1/UNIGA.WR1/ST/2026`, `1/UNIGA.WR2/ST/2026`, ...).
+
+   Semua akun memakai kata sandi `SEED_DEMO_PASSWORD`. `db:seed-demo` menolak jalan bila database berisi lebih dari 50 surat asli, sehingga tidak bisa tidak sengaja dijalankan ke produksi. Menjalankannya dua kali tidak menambah apa pun.
+
+Tahun pada nomor mengikuti tanggal hari ini, jadi demo bulan Desember menampilkan `/2026`. Mulai 1 Januari nomor kembali ke 1 dengan `/2027`.
+
+Setelah menekan Terapkan, daftar unit dan jenis surat di beberapa halaman bisa tertinggal sampai dua menit karena tersimpan di cache peramban. Muat ulang halaman bila unit baru belum muncul.
+
 ## Go-live (bila format disetujui)
 
 1 Januari 2027 jatuh pada hari Jumat; hari kerja pertama Senin 4 Januari. Lakukan antara 1 dan 3 Januari, sebelum ada nomor 2027 yang terbit.
