@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatSequence, renderFormat, validateNumberTemplate } from "@/lib/format";
+import { formatExample, formatSequence, renderFormat, validateNumberTemplate } from "@/lib/format";
 
 const NEW = "[SEQ]/[UNIT_CODE]/[TYPE_CODE]/[YEAR]";
 const OLD = "[NO]/[TYPE_CODE]/[UNIT_CODE]/[ROMAN_MONTH]/[YEAR]";
@@ -37,5 +37,14 @@ describe("validateNumberTemplate", () => {
     ["[SEQ]/[UNIT_CODE]/[TYPE_CODE]", "tahun"],
   ])("rejects %s", (template, missing) => {
     expect(validateNumberTemplate(template)).toContain(missing);
+  });
+});
+
+describe("formatExample", () => {
+  it("shows a first number for the 2027 template", () => {
+    expect(formatExample(NEW, 1, 2027)).toBe("1/UNIGA/SK/2027");
+  });
+  it("shows a first number for the legacy template", () => {
+    expect(formatExample(OLD, 11, 2026)).toBe("001/SK/UNIGA/XI/2026");
   });
 });

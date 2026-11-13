@@ -612,13 +612,15 @@ export function GenerateForm({
             {isInsert ? "Format nomor sisipan (hanya kolom angka di bawah yang dapat diketik):" : "Nomor yang akan dihasilkan:"}
           </div>
           <div className="flex flex-wrap items-center gap-1 font-mono text-sm sm:text-base">
-            <span className="select-none text-muted-foreground">{templateSplit.prefix || "—"}</span>
+            {templateSplit.prefix && (
+              <span className="select-none text-muted-foreground">{templateSplit.prefix}</span>
+            )}
             {isInsert ? (
               <input
                 type="text"
                 value={manualNo}
                 onChange={(e) => setManualNo(e.target.value)}
-                placeholder="024.1"
+                placeholder={`${formatSequence(selectedUnit?.formatTemplate ?? "", 24)}.1`}
                 pattern="^[0-9].*$"
                 aria-label="Nomor urut sisipan"
                 className="w-28 rounded border border-amber-400 bg-background px-2 py-0.5 text-center font-mono text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400"

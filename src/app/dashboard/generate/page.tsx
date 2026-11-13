@@ -3,7 +3,8 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GenerateForm } from "./generate-form";
-import { toRoman } from "@/lib/utils";
+import { DEFAULT_FORMAT_TEMPLATE, formatExample, formatSequence } from "@/lib/format";
+import { getJakartaParts } from "@/lib/timezone";
 
 export default async function GeneratePage() {
   const session = await getSession();
@@ -14,7 +15,7 @@ export default async function GeneratePage() {
   // changes — without an extra round-trip per change. Fetch units + their
   // allowlist of UNIT_SPECIFIC letter types, plus all GLOBAL types, in one
   // server roundtrip; then partition on the client.
-  const [unitsRaw, letterTypesRaw] = await Promise.all([
+  const [unitsRaw, letterTypesRaw, policy] = await Promise.all([
     prisma.unit.findMany({
       where: { deletedAt: null },
       orderBy: { code: "asc" },
@@ -24,6 +25,8 @@ export default async function GeneratePage() {
       where: { deletedAt: null },
       orderBy: { code: "asc" },
     }),
+    // Set once the 2027 numbering rule is applied (/dashboard/numbering-rule).
+    prisma.numberingPolicy.findUnique({ where: { id: 1 } }),
   ]);
   const visibleUnits = unitsRaw
     .filter((u) => session.role === "SUPER_ADMIN" || u.id === session.unitId)
@@ -45,17 +48,18 @@ export default async function GeneratePage() {
     createdAt: lt.createdAt.toISOString(),
   }));
 
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
+  const { year, month } = getJakartaParts();
+  const template = policy?.template ?? DEFAULT_FORMAT_TEMPLATE;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Penomoran Surat Otomatis</h1>
         <p className="text-sm text-muted-foreground">
-          Format default: <code className="rounded bg-muted px-1.5 py-0.5">[NO]/[TYPE_CODE]/[UNIT_CODE]/[ROMAN_MONTH]/[YEAR]</code>
-          &nbsp;&mdash; contoh: <strong>001/SK/UNIGA/{toRoman(month)}/{year}</strong>. Format dapat dikustomisasi per unit; nomor urut reset ke 001 setiap 1 Januari.
+          {policy ? "Format yang berlaku" : "Format default"}:{" "}
+          <code className="rounded bg-muted px-1.5 py-0.5">{template}</code>
+          &nbsp;&mdash; contoh: <strong>{formatExample(template, month, year)}</strong>. Nomor urut berjalan per
+          unit dan jenis surat, kembali ke {formatSequence(template, 1)} setiap 1 Januari.
         </p>
       </div>
 
