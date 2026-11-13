@@ -39,7 +39,7 @@ Catatan: login Google/SSO dan pengiriman email terikat ke domain. Di situs demo,
 2. Buat cabang Neon dari produksi sebagai cadangan.
 3. Buka **Aturan Penomoran**, periksa pratinjau, terapkan.
 4. Periksa bagian **Tidak disentuh**. Unit lama yang sudah tidak dipakai bisa dinonaktifkan dari halaman Unit; yang masih dipakai dengan format lama (misalnya Yayasan) dibiarkan.
-5. Pindahkan akun pengguna ke unit barunya bila unit lamanya tidak ikut diubah.
+5. Pindahkan akun ke unit barunya dari halaman Akun Pengguna. Yang pasti perlu dipindah: akun Wakil Rektor I dan II, yang sekarang berada di unit `UNIGA`, ke `UNIGA.WR1` dan `UNIGA.WR2`. Tanpa langkah ini surat mereka tetap terbit dengan kode `UNIGA`. Begitu juga akun yang unit lamanya masuk daftar **Tidak disentuh**.
 6. Buat satu nomor uji, lalu batalkan nomor itu dengan alasan "uji go-live".
 
 Bila penerapan dilakukan sebelum pergantian tahun, nomor Desember 2026 ikut memakai kode dan template baru. Karena itu lakukan setelah 31 Desember.
