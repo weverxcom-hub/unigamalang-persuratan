@@ -202,7 +202,7 @@ export function GenerateForm({
   const previewNumber = useMemo(() => {
     if (previewSeq == null) return null;
     return `${templateSplit.prefix}${formatSequence(selectedUnit?.formatTemplate ?? "", previewSeq)}${templateSplit.suffix}`;
-  }, [previewSeq, templateSplit]);
+  }, [previewSeq, templateSplit, selectedUnit]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
