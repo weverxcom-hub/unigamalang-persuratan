@@ -4,7 +4,7 @@ Cara pakai: isi tiga isian di bagian **Isian** di bawah, lalu salin seluruh blok
 
 ## Isian
 
-- `URL_DEMO`: alamat situs demo, misalnya `https://persuratan-demo.vercel.app`
+- `URL_DEMO`: alamat situs demo, `https://persuratan-demo.vercel.app`
 - `KATA_SANDI_DEMO`: kata sandi super admin dari log build pertama situs demo (baris "Demo password (generated, only shown once"), atau nilai `SEED_DEMO_PASSWORD` bila diisi saat seeding
 - `FORMAT_SUDAH_DITERAPKAN`: `ya` bila database demo diisi dengan `db:seed-demo` (situs demo yang dibuat dengan `DEMO_SEED_CONFIRM=demo` selalu `ya`), `tidak` bila belum
 
@@ -90,7 +90,7 @@ Kerjakan berurutan. Untuk tiap skenario catat: langkah, hasil yang terlihat (sal
 **G. Laporan, ekspor, dan pencarian publik**
 1. Sebagai super admin, buka Laporan → Surat. Harapan: jumlah per unit dan per jenis tampil, termasuk kode baru. Catat bila unit yang berganti kode tampil dua kali (kode lama dan baru); ini perilaku yang sudah diketahui.
 2. Ekspor laporan ke Excel/CSV. Harapan: berkas terunduh dan berisi nomor format baru. Jangan buka berkasnya di luar browser; cukup catat nama dan ukurannya.
-3. Tanpa masuk (jendela penyamaran atau setelah keluar), buka `URL_DEMO/publik/sk` dan cari "wisuda". Harapan: hasil SK lama muncul; tidak ada data pribadi seperti nama pegawai pada perkara disiplin.
+3. Tanpa masuk (jendela penyamaran atau setelah keluar), buka `URL_DEMO/publik/sk` dan cari "senat". Harapan: sekitar 5 SK lama muncul (misalnya `001.1 /SK/UNIGA/IX/2024`); tidak ada data pribadi seperti nama pegawai pada perkara disiplin.
 
 **H. Data induk**
 1. Sebagai super admin, buka Unit. Harapan: 40 unit berawalan UNIGA tampil, plus unit lama yang tidak disentuh.
