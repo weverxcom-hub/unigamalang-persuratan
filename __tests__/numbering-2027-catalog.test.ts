@@ -4,6 +4,7 @@ import {
   LETTER_TYPES_2027,
   letterTypeCodeCandidates,
   TEMPLATE_2027,
+  unitCodeCandidates,
   UNITS_2027,
 } from "@/lib/numbering-2027/catalog";
 import { UNIT_CODE_MAX, UNIT_CODE_PATTERN } from "@/lib/unit-code";
@@ -51,5 +52,15 @@ describe("2027 catalog", () => {
       "34/UNIGA/SK/2027",
       "112/UNIGA.FEB.MN/SKET/2027",
     ]);
+  });
+  it("recognises FE as today's code for the economics faculty", () => {
+    // src/lib/legacy-import.ts files the faculty's legacy decrees under FE.
+    expect(UNITS_2027.find((u) => u.code === "UNIGA.FEB")!.aliases).toEqual(["FEB", "FE"]);
+  });
+  it("resolves a legacy unit code to its 2027 code", () => {
+    expect(unitCodeCandidates("FEB")).toEqual(["FEB", "UNIGA.FEB"]);
+    expect(unitCodeCandidates("FE")).toEqual(["FE", "UNIGA.FEB"]);
+    expect(unitCodeCandidates("UNIGA")).toEqual(["UNIGA"]);
+    expect(unitCodeCandidates("YAS")).toEqual(["YAS"]);
   });
 });

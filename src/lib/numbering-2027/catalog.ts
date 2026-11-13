@@ -20,9 +20,9 @@ const UNIT_PREFIX = "UNIGA.";
 // A unit is recognised by its code without the UNIGA. prefix when that bare
 // code has no dot (FEB -> UNIGA.FEB). Dotted codes (prodi, UPM) could not
 // exist before dots were allowed, so they have no alias.
-function unit(code: string, name: string): CatalogEntry {
+function unit(code: string, name: string, extraAliases: string[] = []): CatalogEntry {
   const bare = code.startsWith(UNIT_PREFIX) ? code.slice(UNIT_PREFIX.length) : "";
-  return { code, name, aliases: bare && !bare.includes(".") ? [bare] : [] };
+  return { code, name, aliases: [...(bare && !bare.includes(".") ? [bare] : []), ...extraAliases] };
 }
 
 export const UNITS_2027: CatalogEntry[] = [
@@ -38,7 +38,9 @@ export const UNITS_2027: CatalogEntry[] = [
   unit("UNIGA.PPS.MM", "Program Studi Magister Manajemen"),
   unit("UNIGA.PPS.MAK", "Program Studi Magister Akuntansi"),
   unit("UNIGA.PPS.UPM", "UPM Pascasarjana"),
-  unit("UNIGA.FEB", "Fakultas Ekonomi dan Bisnis"),
+  // FE is the code the faculty carries today: src/lib/legacy-import.ts files
+  // its legacy decrees (source label "FEB") under unit FE.
+  unit("UNIGA.FEB", "Fakultas Ekonomi dan Bisnis", ["FE"]),
   unit("UNIGA.FEB.AK", "Program Studi Akuntansi"),
   unit("UNIGA.FEB.EP", "Program Studi Ekonomi Pembangunan"),
   unit("UNIGA.FEB.MN", "Program Studi Manajemen"),
@@ -104,6 +106,15 @@ export const LETTER_TYPES_2027: CatalogEntry[] = [
 export function letterTypeCodeCandidates(code: string): string[] {
   const entry = LETTER_TYPES_2027.find((t) => t.code === code);
   return entry ? [entry.code, ...entry.aliases] : [code];
+}
+
+/**
+ * Codes a unit may carry before or after the rule is applied, given the code
+ * it has (or had) today. For lookups that must work in both states.
+ */
+export function unitCodeCandidates(code: string): string[] {
+  const entry = UNITS_2027.find((u) => u.aliases.includes(code));
+  return entry ? [code, entry.code] : [code];
 }
 
 const EXAMPLES = [

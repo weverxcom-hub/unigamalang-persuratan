@@ -1,5 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import legacyRows from "../../prisma/legacy-data/sk-bp3m-1987-2026.json";
+import { letterTypeCodeCandidates, unitCodeCandidates } from "./numbering-2027/catalog";
 
 // Shared logic behind:
 //   - prisma/ensure-legacy-units.ts / prisma/import-legacy-decrees.ts (CLI,
@@ -80,18 +81,20 @@ export async function importLegacyDecrees(prisma: PrismaClient) {
 
   const [skType, edarType] = await Promise.all([
     prisma.letterType.findUnique({ where: { code: "SK" } }),
-    prisma.letterType.findUnique({ where: { code: "EDAR" } }),
+    // "EDAR" before the 2027 numbering rule is applied, "SE" after.
+    prisma.letterType.findFirst({ where: { code: { in: letterTypeCodeCandidates("SE") } } }),
   ]);
   if (!skType || !edarType) {
     throw new Error(
-      "LetterType SK dan/atau EDAR tidak ditemukan. Database ini sepertinya belum pernah " +
+      "LetterType SK dan/atau SE/EDAR tidak ditemukan. Database ini sepertinya belum pernah " +
         "menjalankan seed dasar (unit/jenis surat) — impor SK legacy butuh itu lebih dulu."
     );
   }
 
   const unitCache = new Map<string, string | null>();
   for (const [unitKode, code] of Object.entries(UNIT_KODE_TO_CODE)) {
-    const unit = await prisma.unit.findUnique({ where: { code } });
+    // The unit may already carry its 2027 code (FE -> UNIGA.FEB).
+    const unit = await prisma.unit.findFirst({ where: { code: { in: unitCodeCandidates(code) } } });
     if (!unit) {
       throw new Error(`Unit dengan kode "${code}" tidak ditemukan. Jalankan "Pastikan Unit" dulu.`);
     }

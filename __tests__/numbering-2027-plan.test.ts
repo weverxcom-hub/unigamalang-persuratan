@@ -64,12 +64,12 @@ describe("planApply", () => {
 
   it("leaves rows outside the catalog untouched and lists them", () => {
     const p = plan(
-      [unit("u3", "YAS", "Yayasan Gajayana Malang"), unit("u4", "FE", "Fakultas Ekonomi")],
+      [unit("u3", "YAS", "Yayasan Gajayana Malang"), unit("u4", "FH", "Fakultas Hukum")],
       [type("t3", "MOU", "Nota Kesepahaman")]
     );
     expect(p.untouchedUnits).toEqual([
       { id: "u3", code: "YAS", name: "Yayasan Gajayana Malang" },
-      { id: "u4", code: "FE", name: "Fakultas Ekonomi" },
+      { id: "u4", code: "FH", name: "Fakultas Hukum" },
     ]);
     expect(p.untouchedLetterTypes).toEqual([{ id: "t3", code: "MOU", name: "Nota Kesepahaman" }]);
     expect(p.units.some((s) => s.id === "u3" || s.id === "u4")).toBe(false);
