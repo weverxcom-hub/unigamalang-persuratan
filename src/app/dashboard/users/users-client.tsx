@@ -300,8 +300,9 @@ function CreateDialog({
         <DialogHeader>
           <DialogTitle>Tambah Akun Baru</DialogTitle>
           <DialogDescription>
-            Email harus berakhiran <code>@unigamalang.ac.id</code>. Pengguna dapat mengganti kata
-            sandi setelah login pertama.
+            Gunakan email <code>@unigamalang.ac.id</code>. Email pribadi (misalnya Gmail) boleh
+            atas izin Super Admin; pemiliknya masuk dengan tombol &ldquo;Masuk dengan Google&rdquo;.
+            Pengguna dapat mengganti kata sandi setelah login pertama.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">

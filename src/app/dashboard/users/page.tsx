@@ -51,7 +51,8 @@ export default async function UsersPage() {
           <CardTitle>Pengguna Sistem</CardTitle>
           <CardDescription>
             Akun yang dinonaktifkan tidak dapat login namun riwayat arsip dan disposisi tetap
-            tersimpan. Email wajib menggunakan domain <code>@unigamalang.ac.id</code>.
+            tersimpan. Gunakan email <code>@unigamalang.ac.id</code>; email pribadi hanya atas izin
+            Super Admin dan masuk dengan tombol Google.
           </CardDescription>
         </CardHeader>
         <CardContent>
