@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { allocateNextNumber } from "@/lib/numbering";
+import { draftPlaceholderNumber } from "@/lib/draft-number";
 import { audit } from "@/lib/audit";
 import { fireWebhook } from "@/lib/webhook";
 import { sendEmail, renderIncomingLetterEmail } from "@/lib/email";
@@ -443,6 +444,11 @@ async function postImpl(req: Request) {
         if (clash) {
           throw new DuplicateNumberError(number);
         }
+      } else if (status === "PENDING") {
+        // USER draft: no sequence number yet. The real one is allocated when
+        // an admin approves (PATCH /api/archives/[id]); allocating here too
+        // burned two numbers per approved draft and one per rejected draft.
+        number = draftPlaceholderNumber();
       } else {
         const allocated = await allocateNextNumber(input.unitId, input.letterTypeId, tx);
         number = allocated.number;
