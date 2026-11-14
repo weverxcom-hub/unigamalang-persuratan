@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
-import { ALLOWED_EMAIL_DOMAIN, getSession, isAllowedEmail } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { audit } from "@/lib/audit";
 import type { Role } from "@prisma/client";
@@ -73,7 +73,8 @@ const createSchema = z.object({
 
 /**
  * POST /api/users — Super Admin creates a new account with role + unit.
- * Email domain restricted to @unigamalang.ac.id (same as self-register).
+ * Any email is accepted here (personal emails only with Super Admin's
+ * approval, which this route is); self-registration stays campus-only.
  */
 export async function POST(req: Request) {
   const session = await getSession();
@@ -90,9 +91,9 @@ export async function POST(req: Request) {
     );
   }
   const { name, email, password, role, unitId } = parsed.data;
-  if (!isAllowedEmail(email)) {
-    return NextResponse.json({ error: `Hanya email ${ALLOWED_EMAIL_DOMAIN} yang diizinkan` }, { status: 400 });
-  }
+  // No domain restriction here: only Super Admin reaches this point, and an
+  // account on a personal email (e.g. Gmail) is exactly the "atas izin admin
+  // utama" exception. Such an account signs in with Google.
   const normalisedEmail = email.toLowerCase();
   const existing = await prisma.user.findUnique({ where: { email: normalisedEmail } });
   if (existing) {

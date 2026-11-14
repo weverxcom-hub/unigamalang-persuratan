@@ -6,12 +6,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { SiteFooter } from "@/components/app/footer";
 import { LoginForm } from "./login-form";
 import { SSOButton } from "./sso-button";
+import { GoogleButton } from "./google-button";
 import { getSession } from "@/lib/auth";
 import { ssoAvailable } from "@/lib/sso-client";
+import { googleAuthAvailable } from "@/lib/google-auth";
 
 export const dynamic = "force-dynamic";
 
-export default async function LoginPage() {
+const GOOGLE_ERRORS: Record<string, string> = {
+  google_not_registered:
+    "Email Google ini belum terdaftar di sistem persuratan. Hubungi PIC unit atau Super Admin untuk dibuatkan akun.",
+  google_domain:
+    "Alamat @unigamalang.ac.id harus masuk dengan akun Google kampus. Pilih akun Google kampus Anda, lalu coba lagi.",
+  google_unverified: "Email akun Google ini belum terverifikasi oleh Google.",
+  google_deactivated: "Akun ini sudah dinonaktifkan. Hubungi Super Admin.",
+  google_cancelled: "Masuk dengan Google dibatalkan.",
+  google_failed: "Masuk dengan Google gagal. Silakan coba lagi.",
+};
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
+  const googleError = error ? GOOGLE_ERRORS[error] : undefined;
+  const google = googleAuthAvailable();
   // Already-active session => skip the form. getSession also rejects
   // soft-deleted users so they fall through to the form (and won't loop).
   const session = await getSession();
@@ -39,6 +59,24 @@ export default async function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {googleError && (
+              <p role="alert" className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                {googleError}
+              </p>
+            )}
+            {google && (
+              <>
+                <GoogleButton />
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">atau dengan kata sandi</span>
+                  </div>
+                </div>
+              </>
+            )}
             {ssoUrl && (
               <>
                 <SSOButton ssoUrl={ssoUrl} />
