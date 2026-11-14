@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { letterTypeCodeCandidates } from "@/lib/numbering-2027/catalog";
 
 // -----------------------------------------------------------------------
 // GET /api/publik/sk — public, unauthenticated search over SK/SE decrees.
@@ -54,11 +55,13 @@ export async function GET(req: Request) {
   const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
   const pageSize = Math.min(50, Math.max(1, Number(url.searchParams.get("pageSize")) || 20));
 
-  const [skType, edarType] = await Promise.all([
-    prisma.letterType.findUnique({ where: { code: "SK" } }),
-    prisma.letterType.findUnique({ where: { code: "EDAR" } }),
-  ]);
-  const eligibleLetterTypeIds = [skType?.id, edarType?.id].filter((v): v is string => Boolean(v));
+  // Surat Edaran is "EDAR" before the 2027 numbering rule is applied and
+  // "SE" after; accept both so the public search survives the rename.
+  const eligibleLetterTypes = await prisma.letterType.findMany({
+    where: { code: { in: [...letterTypeCodeCandidates("SK"), ...letterTypeCodeCandidates("SE")] } },
+    select: { id: true },
+  });
+  const eligibleLetterTypeIds = eligibleLetterTypes.map((t) => t.id);
 
   const yearRange =
     year && !Number.isNaN(year)

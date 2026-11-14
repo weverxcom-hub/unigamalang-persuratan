@@ -544,3 +544,13 @@ model Ticket {
   @@index([unitId])
   @@index([createdAt])
 }
+
+/// Single row (id = 1) recording that the 2027 numbering rule was applied
+/// from /dashboard/numbering-rule. Absent row = legacy numbering.
+model NumberingPolicy {
+  id             Int      @id @default(1)
+  template       String
+  appliedAt      DateTime @default(now())
+  appliedByEmail String?
+  updatedAt      DateTime @updatedAt
+}

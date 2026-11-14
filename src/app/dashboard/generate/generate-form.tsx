@@ -14,8 +14,7 @@ import {
   UploadError,
   GDRIVE_MAX_BYTES,
 } from "@/lib/upload-client";
-import { splitTemplate } from "@/lib/format";
-import { pad3 } from "@/lib/utils";
+import { formatSequence, splitTemplate } from "@/lib/format";
 import { CcUnitPicker, type CcUnitOption } from "@/components/app/cc-unit-picker";
 
 interface UnitOption {
@@ -212,8 +211,8 @@ export function GenerateForm({
 
   const previewNumber = useMemo(() => {
     if (previewSeq == null) return null;
-    return `${templateSplit.prefix}${pad3(previewSeq)}${templateSplit.suffix}`;
-  }, [previewSeq, templateSplit]);
+    return `${templateSplit.prefix}${formatSequence(selectedUnit?.formatTemplate ?? "", previewSeq)}${templateSplit.suffix}`;
+  }, [previewSeq, templateSplit, selectedUnit]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -625,13 +624,15 @@ export function GenerateForm({
             {isInsert ? "Format nomor sisipan (hanya kolom angka di bawah yang dapat diketik):" : "Nomor yang akan dihasilkan:"}
           </div>
           <div className="flex flex-wrap items-center gap-1 font-mono text-sm sm:text-base">
-            <span className="select-none text-muted-foreground">{templateSplit.prefix || "—"}</span>
+            {templateSplit.prefix && (
+              <span className="select-none text-muted-foreground">{templateSplit.prefix}</span>
+            )}
             {isInsert ? (
               <input
                 type="text"
                 value={manualNo}
                 onChange={(e) => setManualNo(e.target.value)}
-                placeholder="024.1"
+                placeholder={`${formatSequence(selectedUnit?.formatTemplate ?? "", 24)}.1`}
                 pattern="^[0-9].*$"
                 aria-label="Nomor urut sisipan"
                 className="w-28 rounded border border-amber-400 bg-background px-2 py-0.5 text-center font-mono text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400"
@@ -639,7 +640,7 @@ export function GenerateForm({
               />
             ) : (
               <span className="rounded bg-background px-2 py-0.5 font-semibold">
-                {loadingPreview ? "…" : previewSeq != null ? pad3(previewSeq) : "—"}
+                {loadingPreview ? "…" : previewSeq != null ? formatSequence(selectedUnit?.formatTemplate ?? "", previewSeq) : "—"}
               </span>
             )}
             <span className="select-none text-muted-foreground">{templateSplit.suffix}</span>
@@ -654,9 +655,9 @@ export function GenerateForm({
           )}
           {isInsert && (
             <p className="mt-2 text-xs text-amber-800">
-              Counter saat ini berhenti di <span className="font-mono">{previewSeq != null ? pad3(previewSeq - 1) : "—"}</span>;
+              Counter saat ini berhenti di <span className="font-mono">{previewSeq != null ? formatSequence(selectedUnit?.formatTemplate ?? "", previewSeq - 1) : "—"}</span>;
               setelah surat sisipan ini disimpan, generate berikutnya tetap menjadi{" "}
-              <span className="font-mono">{previewSeq != null ? pad3(previewSeq) : "—"}</span>.
+              <span className="font-mono">{previewSeq != null ? formatSequence(selectedUnit?.formatTemplate ?? "", previewSeq) : "—"}</span>.
             </p>
           )}
         </div>

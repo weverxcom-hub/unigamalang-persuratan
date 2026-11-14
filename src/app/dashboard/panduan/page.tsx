@@ -18,6 +18,9 @@ import {
   XCircle,
 } from "lucide-react";
 import type { Role } from "@/lib/types";
+import { prisma } from "@/lib/prisma";
+import { formatExample } from "@/lib/format";
+import { getJakartaParts } from "@/lib/timezone";
 
 export const metadata = {
   title: "Panduan Pengguna — Sistem Persuratan Universitas Gajayana",
@@ -62,6 +65,10 @@ const CAPS = {
 export default async function PanduanPage() {
   const session = await getSession();
   if (!session) redirect("/login");
+
+  // Set once the 2027 numbering rule is applied (/dashboard/numbering-rule).
+  const policy = await prisma.numberingPolicy.findUnique({ where: { id: 1 } });
+  const { year, month } = getJakartaParts();
 
   const caps = CAPS[session.role];
   const roleLabel: Record<Role, string> = {
@@ -460,6 +467,21 @@ export default async function PanduanPage() {
         <h2 className="text-xl font-semibold">Format Nomor Surat</h2>
         <Card>
           <CardContent className="space-y-3 p-4 text-sm">
+            {policy && (
+              <div className="rounded-md border border-emerald-500/40 bg-emerald-500/5 p-3">
+                <p className="font-medium text-foreground">
+                  Format yang berlaku sejak{" "}
+                  {policy.appliedAt.toLocaleDateString("id-ID", { timeZone: "Asia/Jakarta", dateStyle: "long" })}:{" "}
+                  <code>{policy.template}</code>
+                </p>
+                <p className="mt-1 text-muted-foreground">
+                  Contoh: <code>{formatExample(policy.template, month, year)}</code>. Kode unit memakai
+                  awalan UNIGA dengan jenjang dipisah titik (<code>UNIGA.WR1</code>,{" "}
+                  <code>UNIGA.FEB.MN</code>). Nomor yang terbit sebelumnya tetap sah dengan bentuk lamanya.
+                  Penjelasan di bawah ini menerangkan format sebelumnya.
+                </p>
+              </div>
+            )}
             <p>
               Format default UNIGA (April 2026):{" "}
               <code>[NO]/[TYPE_CODE]/[UNIT_CODE]/[ROMAN_MONTH]/[YEAR]</code>

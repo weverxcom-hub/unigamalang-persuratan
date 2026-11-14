@@ -23,6 +23,7 @@ import {
   Send,
   FileBarChart2,
   ShieldAlert,
+  ListOrdered,
 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
@@ -79,6 +80,7 @@ const ADMIN_UNIT_NAV: NavItem[] = [
 const MASTER_DATA_NAV: NavItem[] = [
   { href: "/dashboard/units", label: "Unit", icon: Building2 },
   { href: "/dashboard/letter-types", label: "Jenis Surat", icon: FileType },
+  { href: "/dashboard/numbering-rule", label: "Aturan Penomoran", icon: ListOrdered },
   { href: "/dashboard/users", label: "Akun Pengguna", icon: Users },
 ];
 
