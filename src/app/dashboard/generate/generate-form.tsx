@@ -405,11 +405,11 @@ export function GenerateForm({
               {isIssued
                 ? "Surat berhasil diarsipkan dan disertai bukti."
                 : isUser
-                ? `Draf diajukan dengan nomor tentatif ${allocated.number}.`
+                ? "Draf diajukan. Nomor surat resmi diberikan setelah Admin Unit menyetujui."
                 : "Nomor berhasil dialokasikan. Unggah bukti surat untuk menyelesaikan arsip."}
             </p>
             <p>
-              <span className="font-medium">Nomor:</span>{" "}
+              <span className="font-medium">{isUser && !isIssued ? "Kode draf:" : "Nomor:"}</span>{" "}
               <code className="rounded bg-background/60 px-1.5 py-0.5 font-mono text-xs">
                 {allocated.number}
               </code>
