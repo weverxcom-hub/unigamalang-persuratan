@@ -64,7 +64,7 @@ export async function verifySession(token: string): Promise<SessionPayload | nul
 export const getSession = cache(
   async (): Promise<SessionPayload | null> => {
     validateSecret();
-    const token = cookies().get(COOKIE_NAME)?.value;
+    const token = (await cookies()).get(COOKIE_NAME)?.value;
     if (!token) return null;
     const payload = await verifySession(token);
     if (!payload) return null;
@@ -84,7 +84,7 @@ export const getSession = cache(
 
 export async function setSessionCookie(payload: SessionPayload) {
   const token = await signSession(payload);
-  cookies().set(COOKIE_NAME, token, {
+  (await cookies()).set(COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -93,8 +93,8 @@ export async function setSessionCookie(payload: SessionPayload) {
   });
 }
 
-export function clearSessionCookie() {
-  cookies().delete(COOKIE_NAME);
+export async function clearSessionCookie() {
+  (await cookies()).delete(COOKIE_NAME);
 }
 
 export async function authenticate(

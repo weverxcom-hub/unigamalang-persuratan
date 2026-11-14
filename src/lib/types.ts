@@ -93,6 +93,8 @@ export interface Archive {
   overdueMarkedAt: string | null;
   isInsert: boolean;
   insertReason: string | null;
+  /** Unit tembusan (CC). Kosong bila surat tidak ditembuskan. */
+  ccUnits: { id: string; code: string; name: string }[];
 }
 
 /** List-view projection: no heavy binary data, just a `hasProof` flag. */

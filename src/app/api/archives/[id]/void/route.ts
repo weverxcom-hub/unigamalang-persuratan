@@ -36,7 +36,8 @@ function clientIp(req: Request): string | null {
   );
 }
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
 

@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
+import { ccReadableWhere } from "@/lib/cc";
 import { Logo } from "@/components/brand/logo";
 import { PrintButton } from "./print-button";
 
@@ -10,13 +11,19 @@ import { PrintButton } from "./print-button";
  * print:break-inside-avoid semantics. Users open this directly in a new
  * tab and use the browser's "Print to PDF" to save a copy.
  */
-export default async function ReceiptPage({ params }: { params: { id: string } }) {
+export default async function ReceiptPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const session = await getSession();
   if (!session) redirect("/login");
 
   const archive = await prisma.archive.findFirst({
     where: { id: params.id, deletedAt: null },
-    include: { unit: true, letterType: true, createdBy: { select: { name: true } } },
+    include: {
+      unit: true,
+      letterType: true,
+      createdBy: { select: { name: true } },
+      ccUnits: { select: { unit: { select: { code: true, name: true } } }, orderBy: { unit: { code: "asc" } } },
+    },
   });
   if (!archive) notFound();
 
@@ -37,6 +44,13 @@ export default async function ReceiptPage({ params }: { params: { id: string } }
       select: { id: true },
     });
     if (dispo) canRead = true;
+  }
+  if (!canRead && session.unitId) {
+    const cc = await prisma.archive.findFirst({
+      where: { id: archive.id, ...ccReadableWhere(session.unitId) },
+      select: { id: true },
+    });
+    if (cc) canRead = true;
   }
   if (!canRead) redirect("/dashboard");
 
@@ -95,6 +109,14 @@ export default async function ReceiptPage({ params }: { params: { id: string } }
               </td>
               <td className="py-1">{archive.recipient}</td>
             </tr>
+            {archive.ccUnits.length > 0 && (
+              <tr>
+                <td className="py-1 align-top text-zinc-500">Tembusan</td>
+                <td className="py-1">
+                  {archive.ccUnits.map((c) => `${c.unit.name} (${c.unit.code})`).join(", ")}
+                </td>
+              </tr>
+            )}
             <tr>
               <td className="py-1 align-top text-zinc-500">Unit</td>
               <td className="py-1">{archive.unit.name} ({archive.unit.code})</td>

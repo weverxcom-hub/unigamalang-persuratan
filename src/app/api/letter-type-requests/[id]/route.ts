@@ -39,7 +39,8 @@ const patchSchema = z.discriminatedUnion("action", [
   }),
 ]);
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
   if (session.role !== "SUPER_ADMIN") {

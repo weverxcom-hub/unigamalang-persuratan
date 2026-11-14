@@ -12,7 +12,8 @@ import { buildArchiveFilename } from "@/lib/archive-filename";
 import type { ArchiveListItem } from "@/lib/types";
 import { runAfter } from "@/lib/after";
 import { validateDataUrlContent } from "@/lib/file-signature";
-import { serialiseArchive, serialiseArchiveList } from "./serialise";
+import { serialiseArchive, serialiseArchiveList, ccInclude } from "./serialise";
+import { MAX_CC_UNITS, ccReadableWhere, normaliseCcUnitIds } from "@/lib/cc";
 
 function clientIp(req: Request): string | null {
   return (
@@ -56,7 +57,12 @@ export async function GET(req: Request) {
     // query param is ignored to prevent IDOR. If they have no unit assigned
     // (session.unitId === null), they see no archives — fail closed rather
     // than open.
-    where.unitId = session.unitId ?? "__no_unit__";
+    //
+    // Exception: letters this unit was CC'd on (tembusan) are readable once
+    // ISSUED. Wrapped in OR so the q-search AND below still composes.
+    where.OR = session.unitId
+      ? [{ unitId: session.unitId }, ccReadableWhere(session.unitId)]
+      : [{ unitId: "__no_unit__" }];
   } else if (unitId) {
     where.unitId = unitId;
   }
@@ -126,6 +132,7 @@ export async function GET(req: Request) {
       orderBy: { date: "desc" },
       skip,
       take: pageSize,
+      include: ccInclude,
     }),
     prisma.archive.count({ where }),
   ]);
@@ -168,6 +175,8 @@ const createSchema = z
   .object({
     subject: z.string().min(3, "Perihal minimal 3 karakter"),
     recipient: z.string().min(2, "Tujuan wajib diisi"),
+    // Tembusan: id unit lain yang menerima salinan (hanya surat keluar).
+    ccUnitIds: z.array(z.string().min(1)).max(MAX_CC_UNITS, `Tembusan maksimal ${MAX_CC_UNITS} unit`).optional(),
     externalSender: z.string().max(200).nullable().optional(),
     unitId: z.string().min(1),
     letterTypeId: z.string().min(1),
@@ -345,6 +354,21 @@ async function postImpl(req: Request) {
     );
   }
 
+  // Tembusan (CC): hanya surat keluar, unit harus aktif.
+  const ccUnitIds =
+    input.direction === "OUTGOING" ? normaliseCcUnitIds(input.ccUnitIds, unit.id) : [];
+  if (ccUnitIds.length > 0) {
+    const found = await prisma.unit.count({
+      where: { id: { in: ccUnitIds }, deletedAt: null },
+    });
+    if (found !== ccUnitIds.length) {
+      return NextResponse.json(
+        { error: "Salah satu unit tembusan tidak ditemukan atau telah dinonaktifkan" },
+        { status: 400 }
+      );
+    }
+  }
+
   // Storage identifiers (blobPathname, gdriveFileId) are received from the
   // client and used later for storage cleanup on archive delete. Without
   // ownership validation, a hostile client could attach another archive's
@@ -400,7 +424,7 @@ async function postImpl(req: Request) {
   const status: Prisma.ArchiveCreateInput["status"] =
     session.role === "USER" ? "PENDING" : hasFile ? "ISSUED" : "PENDING_PROOF";
 
-  let archive: Awaited<ReturnType<typeof prisma.archive.create>>;
+  let archive: Prisma.ArchiveGetPayload<{ include: typeof ccInclude }>;
   try {
     archive = await prisma.$transaction(async (tx) => {
       let number: string;
@@ -460,7 +484,9 @@ async function postImpl(req: Request) {
           createdById: session.userId,
           isInsert: isInsertArchive,
           insertReason: isInsertArchive ? input.insertReason!.trim() : null,
+          ccUnits: { create: ccUnitIds.map((id) => ({ unitId: id })) },
         },
+        include: ccInclude,
       });
 
       await audit(
@@ -479,6 +505,7 @@ async function postImpl(req: Request) {
             letterTypeCode: created.letterTypeCode,
             isInsert: created.isInsert,
             insertReason: created.insertReason,
+            ccUnitIds,
           },
           ip: clientIp(req),
           userAgent: req.headers.get("user-agent"),
@@ -553,6 +580,7 @@ async function postImpl(req: Request) {
       letterTypeCode: archive.letterTypeCode,
       externalSender: archive.externalSender,
       recipient: archive.recipient,
+      ccUnitCodes: archive.ccUnits.map((c) => c.unit.code),
       date: archive.date.toISOString(),
       createdAt: archive.createdAt.toISOString(),
     });

@@ -6,6 +6,7 @@ import { audit } from "@/lib/audit";
 import { fireWebhook } from "@/lib/webhook";
 import { renderDispositionEmail, sendEmail } from "@/lib/email";
 import { runAfter } from "@/lib/after";
+import { ccReadableWhere } from "@/lib/cc";
 
 const schema = z
   .object({
@@ -34,7 +35,8 @@ function appUrl(req: Request): string {
 /**
  * GET /api/archives/[id]/dispositions — list dispositions for an archive.
  */
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
 
@@ -57,6 +59,13 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
       select: { id: true },
     });
     if (dispo) canRead = true;
+  }
+  if (!canRead && session.unitId) {
+    const cc = await prisma.archive.findFirst({
+      where: { id: archive.id, ...ccReadableWhere(session.unitId) },
+      select: { id: true },
+    });
+    if (cc) canRead = true;
   }
   if (!canRead) return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
 
@@ -97,7 +106,8 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
  * target (user if specified, otherwise all admins of the target unit) and
  * fires a webhook.
  */
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
   if (session.role === "USER") {

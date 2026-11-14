@@ -31,10 +31,11 @@ export const metadata = {
 const VIEW_LIMIT = 500;
 
 interface PageProps {
-  searchParams: { from?: string; to?: string; status?: string; unitId?: string };
+  searchParams: Promise<{ from?: string; to?: string; status?: string; unitId?: string }>;
 }
 
-export default async function TicketsReportPage({ searchParams }: PageProps) {
+export default async function TicketsReportPage({ searchParams: searchParamsPromise }: PageProps) {
+  const searchParams = await searchParamsPromise;
   const session = await getSession();
   if (!session) redirect("/login");
   // Hanya superadmin yang dapat mengakses laporan tiket lintas org.

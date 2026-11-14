@@ -11,6 +11,7 @@ import {
 import { buildArchiveFilename } from "@/lib/archive-filename";
 import { validateDataUrlContent } from "@/lib/file-signature";
 import { serialiseArchive } from "../../serialise";
+import { canViewProof, proofFileUrl } from "@/lib/archive-access";
 
 const MAX_DATA_URL_LEN = 4 * 1024 * 1024;
 const DATA_URL_PATTERN = /^data:(image\/(png|jpe?g|webp|gif)|application\/pdf);base64,/i;
@@ -56,7 +57,8 @@ const schema = z
     path: ["fileUrl"],
   });
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
 
@@ -65,10 +67,10 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   });
   if (!archive) return NextResponse.json({ error: "Arsip tidak ditemukan" }, { status: 404 });
 
-  const canRead =
-    session.role === "SUPER_ADMIN" ||
-    (session.unitId && session.unitId === archive.unitId);
-  if (!canRead) return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
+  // SUPER_ADMIN, same unit, or a Tembusan (CC) unit once ISSUED.
+  if (!(await canViewProof(session, archive))) {
+    return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
+  }
 
   if (!archive.fileUrl && !archive.fileDataUrl) {
     return NextResponse.json({ error: "Bukti belum diunggah" }, { status: 404 });
@@ -78,12 +80,15 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     id: archive.id,
     number: archive.number,
     fileName: archive.fileName,
-    fileUrl: archive.fileUrl,
+    // Drive files are private: hand out the in-app streaming URL (which
+    // re-checks access) instead of the Drive link.
+    fileUrl: archive.gdriveFileId ? proofFileUrl(archive.id) : archive.fileUrl,
     fileDataUrl: archive.fileDataUrl,
   });
 }
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
 

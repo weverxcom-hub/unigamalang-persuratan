@@ -8,7 +8,8 @@ import { deleteFile as deleteGdriveFile } from "@/lib/gdrive";
 import { fireWebhook } from "@/lib/webhook";
 import { runAfter } from "@/lib/after";
 import { allocateNextNumber } from "@/lib/numbering";
-import { serialiseArchive } from "../serialise";
+import { serialiseArchive, ccInclude } from "../serialise";
+import { ccReadableWhere } from "@/lib/cc";
 
 function clientIp(req: Request): string | null {
   return (
@@ -18,12 +19,14 @@ function clientIp(req: Request): string | null {
   );
 }
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
 
   const archive = await prisma.archive.findFirst({
     where: { id: params.id, deletedAt: null },
+    include: ccInclude,
   });
   if (!archive) return NextResponse.json({ error: "Arsip tidak ditemukan" }, { status: 404 });
 
@@ -47,6 +50,14 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
       select: { id: true },
     });
     if (dispo) canRead = true;
+  }
+  // Tembusan (CC): unit yang ditembuskan boleh membaca setelah ISSUED.
+  if (!canRead && session.unitId) {
+    const cc = await prisma.archive.findFirst({
+      where: { id: archive.id, ...ccReadableWhere(session.unitId) },
+      select: { id: true },
+    });
+    if (cc) canRead = true;
   }
   if (!canRead) return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
 
@@ -72,7 +83,8 @@ const patchSchema = z.object({
   rejectReason: z.string().trim().max(500).optional(),
 });
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
 
@@ -245,7 +257,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
  * Soft-delete. Archives are never hard-deleted; we set `deletedAt` and the Blob
  * file (if any) is removed from storage for GDPR-style cleanup.
  */
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
 

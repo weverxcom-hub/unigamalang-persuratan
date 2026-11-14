@@ -92,7 +92,8 @@ async function tryGdriveUpload(file: File): Promise<UploadedAsset | null> {
     throw new UploadError("Drive tidak mengembalikan ID file");
   }
 
-  // Step 3: ask the server to mark the file public-readable + return URL.
+  // Step 3: ask the server to verify the file and return its metadata. The
+  // file stays private; it is viewed through the app's own proof route.
   const finRes = await fetch("/api/gdrive/finalise", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

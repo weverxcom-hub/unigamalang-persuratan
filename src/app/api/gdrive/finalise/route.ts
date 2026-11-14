@@ -11,9 +11,8 @@ const schema = z.object({
  * POST /api/gdrive/finalise
  *
  * Called by the browser after a successful resumable PUT. Validates that
- * the file actually lives under our parent folder, grants "anyone with the
- * link" read access, and returns the canonical `webViewLink` to be saved
- * on the Archive row.
+ * the file actually lives under our parent folder and returns its metadata
+ * to be saved on the Archive row. The file is NOT shared publicly.
  */
 export async function POST(req: Request) {
   if (!gdriveAvailable()) {

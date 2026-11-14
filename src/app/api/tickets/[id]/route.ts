@@ -26,7 +26,8 @@ const patchSchema = z
     { message: "Tidak ada perubahan yang dikirim" }
   );
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
@@ -51,8 +52,9 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params: paramsPromise }: { params: Promise<{ id: string }> }
 ) {
+  const params = await paramsPromise;
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });

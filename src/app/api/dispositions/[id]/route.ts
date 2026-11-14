@@ -22,7 +22,8 @@ function clientIp(req: Request): string | null {
  * disposition. Only the target user (or an admin of the target unit) can
  * update the status.
  */
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
 

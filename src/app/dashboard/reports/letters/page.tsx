@@ -35,17 +35,18 @@ export const metadata = {
 const VIEW_LIMIT = 500;
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     from?: string;
     to?: string;
     unitId?: string;
     letterTypeId?: string;
     direction?: string;
     status?: string;
-  };
+  }>;
 }
 
-export default async function LettersReportPage({ searchParams }: PageProps) {
+export default async function LettersReportPage({ searchParams: searchParamsPromise }: PageProps) {
+  const searchParams = await searchParamsPromise;
   const session = await getSession();
   if (!session) redirect("/login");
 

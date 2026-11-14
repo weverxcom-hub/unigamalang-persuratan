@@ -32,6 +32,13 @@ const nextConfig = {
           },
         ],
       },
+      // The proof viewer frames this one same-origin route in an <iframe>.
+      // Later rules override earlier ones for the same header key, so this
+      // relaxes DENY -> SAMEORIGIN for this path only.
+      {
+        source: "/api/archives/:id/proof/file",
+        headers: [{ key: "X-Frame-Options", value: "SAMEORIGIN" }],
+      },
     ];
   },
 };

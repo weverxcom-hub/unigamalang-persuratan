@@ -135,9 +135,8 @@ export interface FinalisedFile {
  * server-side step:
  *   1. verifies the file exists and lives in our configured parent folder
  *      (defense against a malicious client passing a stranger's fileId);
- *   2. grants read access to anyone with the link, so the app and user can
- *      preview/download without further auth;
- *   3. returns the canonical webViewLink to be stored on the Archive.
+ *   2. returns the file metadata to be stored on the Archive. The file is
+ *      NOT shared publicly; see openFileStream() for how it is served.
  */
 export async function finaliseUpload(fileId: string): Promise<FinalisedFile> {
   if (!gdriveAvailable()) {
@@ -156,21 +155,9 @@ export async function finaliseUpload(fileId: string): Promise<FinalisedFile> {
     throw new Error("File bukan milik folder Drive yang dikonfigurasi");
   }
 
-  // Anyone-with-the-link reader. Idempotent if it already exists; Drive
-  // will throw a 'permissionAlreadyExists'-style error which we treat as OK.
-  try {
-    await drive.permissions.create({
-      fileId,
-      requestBody: { role: "reader", type: "anyone" },
-      supportsAllDrives: true,
-    });
-  } catch (err) {
-    const code = (err as { code?: number; errors?: { reason?: string }[] }).code;
-    const reason = (err as { errors?: { reason?: string }[] }).errors?.[0]?.reason;
-    if (code !== 409 && reason !== "duplicate") throw err;
-  }
-
-  // Re-fetch so webViewLink is populated (it may be null until shared).
+  // The file stays PRIVATE (only the service account can read it). Viewing
+  // goes through GET /api/archives/[id]/proof/file, which checks the app's
+  // own access rules first and then streams the bytes from Drive.
   const refreshed = await drive.files.get({
     fileId,
     fields: "id,name,mimeType,webViewLink,webContentLink",
@@ -186,6 +173,88 @@ export async function finaliseUpload(fileId: string): Promise<FinalisedFile> {
     mimeType: data.mimeType ?? "application/octet-stream",
     webViewLink: data.webViewLink,
     webContentLink: data.webContentLink ?? null,
+  };
+}
+
+/**
+ * Remove every "anyone with the link" permission from a file that was made
+ * public by the old finaliseUpload(). Returns how many permissions were
+ * removed. Used by prisma/revoke-gdrive-public.ts for existing files.
+ */
+export async function revokePublicAccess(fileId: string): Promise<number> {
+  const drive = getDrive();
+  const { data } = await drive.permissions.list({
+    fileId,
+    fields: "permissions(id,type,role)",
+    supportsAllDrives: true,
+  });
+  const publicPerms = (data.permissions ?? []).filter((p) => p.type === "anyone" && p.id);
+  for (const p of publicPerms) {
+    await drive.permissions.delete({
+      fileId,
+      permissionId: p.id!,
+      supportsAllDrives: true,
+    });
+  }
+  return publicPerms.length;
+}
+
+/**
+ * Only these types may be rendered inline on our own origin. Anything else
+ * (HTML, SVG, unknown) must be sent as a download, otherwise an uploaded file
+ * could run script in a logged-in user's session.
+ */
+const INLINE_MIME = new Set([
+  "application/pdf",
+  "image/png",
+  "image/jpeg",
+  "image/jpg",
+  "image/webp",
+  "image/gif",
+]);
+
+export function safeInlineMime(mime: string | null | undefined): string | null {
+  const m = (mime ?? "").split(";")[0].trim().toLowerCase();
+  return INLINE_MIME.has(m) ? m : null;
+}
+
+export interface DriveFileStream {
+  stream: NodeJS.ReadableStream;
+  name: string;
+  mimeType: string;
+  size: number | null;
+}
+
+/**
+ * Open a read stream for a private Drive file using the service account.
+ * Re-checks that the file lives in the configured parent folder, so a
+ * tampered gdriveFileId can never expose a file from elsewhere.
+ */
+export async function openFileStream(fileId: string): Promise<DriveFileStream> {
+  if (!gdriveAvailable()) {
+    throw new Error("Google Drive tidak terkonfigurasi");
+  }
+  const folderId = process.env.GOOGLE_DRIVE_PARENT_FOLDER_ID!;
+  const drive = getDrive();
+
+  const meta = await drive.files.get({
+    fileId,
+    fields: "id,name,mimeType,size,parents",
+    supportsAllDrives: true,
+  });
+  if (!(meta.data.parents ?? []).includes(folderId)) {
+    throw new Error("File bukan milik folder Drive yang dikonfigurasi");
+  }
+
+  const media = await drive.files.get(
+    { fileId, alt: "media", supportsAllDrives: true },
+    { responseType: "stream" }
+  );
+  return {
+    stream: media.data as unknown as NodeJS.ReadableStream,
+    name: meta.data.name ?? "file",
+    mimeType: meta.data.mimeType ?? "application/octet-stream",
+    size: meta.data.size ? Number(meta.data.size) : null,
   };
 }
 
