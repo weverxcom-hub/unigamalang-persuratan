@@ -487,8 +487,14 @@ export function ArchivesClient({
                     {a.direction === "OUTGOING" ? "Tujuan" : "Pengirim"}:{" "}
                     {a.direction === "INCOMING" ? a.externalSender ?? a.recipient : a.recipient}
                   </p>
+                  {a.ccUnits.length > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      Tembusan: {a.ccUnits.map((c) => c.code).join(", ")}
+                    </p>
+                  )}
                   <p className="mt-1 text-xs text-muted-foreground">
                     {formatDate(a.date)} · {a.unitCode}
+                    {sessionUnitId && a.unitId !== sessionUnitId && role !== "SUPER_ADMIN" && " · Tembusan untuk unit Anda"}
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {role !== "USER" && a.status === "PENDING" && (
@@ -592,9 +598,20 @@ export function ArchivesClient({
                         title={a.direction === "INCOMING" ? a.externalSender ?? a.recipient : a.recipient}
                       >
                         {a.direction === "INCOMING" ? a.externalSender ?? a.recipient : a.recipient}
+                        {a.ccUnits.length > 0 && (
+                          <span
+                            className="block truncate text-[11px] text-muted-foreground"
+                            title={a.ccUnits.map((c) => c.name).join(", ")}
+                          >
+                            Tembusan: {a.ccUnits.map((c) => c.code).join(", ")}
+                          </span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">{a.unitCode}</Badge>
+                        {sessionUnitId && a.unitId !== sessionUnitId && role !== "SUPER_ADMIN" && (
+                          <Badge variant="secondary" className="ml-1">Tembusan</Badge>
+                        )}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap items-center gap-1.5">
@@ -689,9 +706,11 @@ export function ArchivesClient({
                                 <Ban className="h-4 w-4 text-destructive" />
                               </Button>
                             )}
-                          <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(a.id)} aria-label="Hapus arsip">
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                          {(role === "SUPER_ADMIN" || a.unitId === sessionUnitId) && (
+                            <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(a.id)} aria-label="Hapus arsip">
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -1369,13 +1388,10 @@ function ProofViewDialog({
     };
   }, [archive]);
 
-  const isGdrive = !!dataUrl && /^https:\/\/(drive|docs)\.google\.com\//i.test(dataUrl);
-  // Drive webViewLink (`/file/d/<id>/view`) cannot be iframed, but the
-  // sibling `/preview` URL has a permissive frame policy and works for
-  // both images and PDFs.
-  const gdrivePreview = isGdrive
-    ? dataUrl!.replace(/\/view(\?[^#]*)?$/, "/preview")
-    : null;
+  // Drive proofs are private: the API returns an in-app URL that streams the
+  // file after an access check, which can be framed directly (same origin).
+  const isGdrive = !!dataUrl && dataUrl.startsWith("/api/archives/");
+  const gdrivePreview = isGdrive ? dataUrl : null;
   const isPdf =
     !!dataUrl &&
     !isGdrive &&

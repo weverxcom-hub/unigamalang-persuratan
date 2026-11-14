@@ -182,6 +182,7 @@ model Unit {
   letterTypes  LetterTypeUnit[]
   letterTypeRequestsSent     LetterTypeRequest[] @relation("LetterTypeRequestUnit")
   legacyDecrees LegacyDecree[]
+  archivesCc   ArchiveCc[]
 
   @@index([deletedAt])
 }
@@ -333,6 +334,8 @@ model Archive {
 
   dispositions Disposition[]
   auditLogs    AuditLog[]
+  // Tembusan (CC): unit lain yang menerima salinan surat ini.
+  ccUnits      ArchiveCc[]
 
   @@index([unitId])
   @@index([letterTypeId])
@@ -342,6 +345,21 @@ model Archive {
   @@index([status])
   @@index([date])
   // number already has an index via @unique above
+}
+
+/// Tembusan (CC): a letter issued by one unit that is also addressed to other
+/// units. A CC unit gets read-only access to the archive once it is ISSUED
+/// (see src/lib/cc.ts) — it never gains write/void/approve rights, and the
+/// numbering sequence is untouched (the number belongs to the issuing unit).
+model ArchiveCc {
+  archiveId String
+  archive   Archive  @relation(fields: [archiveId], references: [id], onDelete: Cascade)
+  unitId    String
+  unit      Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([archiveId, unitId])
+  @@index([unitId])
 }
 
 /// Historical SK/SE (Surat Keputusan / Surat Edaran) records recapped by BP3M

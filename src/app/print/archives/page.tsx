@@ -20,10 +20,11 @@ interface SearchParams {
 const directionLabel = (d: "OUTGOING" | "INCOMING") => (d === "OUTGOING" ? "Keluar" : "Masuk");
 
 export default async function PrintArchivesPage({
-  searchParams,
+  searchParams: searchParamsPromise,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) {
+  const searchParams = await searchParamsPromise;
   const session = await getSession();
   if (!session) redirect("/login");
 

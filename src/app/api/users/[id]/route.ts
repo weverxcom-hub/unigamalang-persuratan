@@ -25,7 +25,8 @@ const patchSchema = z.object({
  * PATCH /api/users/[id] — Super Admin only. Edit name, role, unit, password,
  * or reactivate a soft-deleted account. Email is immutable (identity key).
  */
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
   if (session.role !== "SUPER_ADMIN") {
@@ -121,7 +122,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
  * longer log in but historical records (Archive.createdBy, AuditLog.actor,
  * Disposition) remain intact.
  */
-export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_req: Request, { params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise;
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
   if (session.role !== "SUPER_ADMIN") {

@@ -1,7 +1,24 @@
 import type { Archive as PrismaArchive } from "@prisma/client";
 import type { Archive, ArchiveListItem } from "@/lib/types";
 
-export function serialiseArchive(a: PrismaArchive): Archive {
+/** Prisma archive, optionally loaded with `include: ccInclude`. */
+export type ArchiveWithCc = PrismaArchive & {
+  ccUnits?: { unit: { id: string; code: string; name: string } }[];
+};
+
+/** Pass as `include` wherever an archive is serialised so CC units are returned. */
+export const ccInclude = {
+  ccUnits: {
+    select: { unit: { select: { id: true, code: true, name: true } } },
+    orderBy: { unit: { code: "asc" } },
+  },
+} as const;
+
+function serialiseCc(a: ArchiveWithCc) {
+  return (a.ccUnits ?? []).map((c) => c.unit);
+}
+
+export function serialiseArchive(a: ArchiveWithCc): Archive {
   return {
     id: a.id,
     number: a.number,
@@ -28,10 +45,11 @@ export function serialiseArchive(a: PrismaArchive): Archive {
     overdueMarkedAt: a.overdueMarkedAt ? a.overdueMarkedAt.toISOString() : null,
     isInsert: a.isInsert,
     insertReason: a.insertReason,
+    ccUnits: serialiseCc(a),
   };
 }
 
-export function serialiseArchiveList(a: PrismaArchive): ArchiveListItem {
+export function serialiseArchiveList(a: ArchiveWithCc): ArchiveListItem {
   const hasProof = !!(a.fileUrl || a.fileDataUrl);
   // Return via (fileDataUrl omit) pattern
   return {
@@ -59,6 +77,7 @@ export function serialiseArchiveList(a: PrismaArchive): ArchiveListItem {
     overdueMarkedAt: a.overdueMarkedAt ? a.overdueMarkedAt.toISOString() : null,
     isInsert: a.isInsert,
     insertReason: a.insertReason,
+    ccUnits: serialiseCc(a),
     hasProof,
   };
 }

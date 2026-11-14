@@ -31,15 +31,16 @@ export const metadata = {
 const VIEW_LIMIT = 500;
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     from?: string;
     to?: string;
     unitId?: string;
     status?: string;
-  };
+  }>;
 }
 
-export default async function DispositionsReportPage({ searchParams }: PageProps) {
+export default async function DispositionsReportPage({ searchParams: searchParamsPromise }: PageProps) {
+  const searchParams = await searchParamsPromise;
   const session = await getSession();
   if (!session) redirect("/login");
 

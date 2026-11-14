@@ -16,6 +16,7 @@ import {
 } from "@/lib/upload-client";
 import { splitTemplate } from "@/lib/format";
 import { pad3 } from "@/lib/utils";
+import { CcUnitPicker, type CcUnitOption } from "@/components/app/cc-unit-picker";
 
 interface UnitOption {
   id: string;
@@ -42,6 +43,8 @@ interface GenerateFormProps {
   defaultUnitId: string;
   isUser: boolean;
   sessionUserId: string;
+  /** Semua unit aktif — kandidat penerima tembusan (CC). */
+  ccUnitOptions: CcUnitOption[];
 }
 
 interface AllocatedArchive {
@@ -59,12 +62,14 @@ export function GenerateForm({
   defaultUnitId,
   isUser,
   sessionUserId,
+  ccUnitOptions,
 }: GenerateFormProps) {
   const router = useRouter();
   const [unitId, setUnitId] = useState<string>(defaultUnitId);
   const [letterTypeId, setLetterTypeId] = useState<string>(letterTypes[0]?.id ?? "");
   const [subject, setSubject] = useState("");
   const [recipient, setRecipient] = useState("");
+  const [ccUnitIds, setCcUnitIds] = useState<string[]>([]);
   const [previewSeq, setPreviewSeq] = useState<number | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
@@ -99,6 +104,11 @@ export function GenerateForm({
   const isPdf = useMemo(() => proofFile?.type === "application/pdf", [proofFile]);
 
   const selectedUnit = useMemo(() => units.find((u) => u.id === unitId), [units, unitId]);
+
+  // A unit can't be CC'd on its own letter - drop it if the issuer changes.
+  useEffect(() => {
+    setCcUnitIds((prev) => (prev.includes(unitId) ? prev.filter((id) => id !== unitId) : prev));
+  }, [unitId]);
 
   // TechSpec 3.1: dropdown shows only GLOBAL letter types + the UNIT_SPECIFIC
   // ones explicitly allowlisted for the currently-selected unit.
@@ -239,6 +249,7 @@ export function GenerateForm({
           letterTypeId,
           subject,
           recipient,
+          ccUnitIds,
           direction: "OUTGOING",
           manualNumber,
           date: isInsert ? letterDate : undefined,
@@ -362,6 +373,7 @@ export function GenerateForm({
     setProofPreviewUrl(null);
     setSubject("");
     setRecipient("");
+    setCcUnitIds([]);
     setError(null);
     setUploadError(null);
     // Reset sisipan state too — the next submission must reflect a fresh
@@ -669,6 +681,18 @@ export function GenerateForm({
           onChange={(e) => setRecipient(e.target.value)}
           required
         />
+      </div>
+
+      <div className="space-y-2 md:col-span-2">
+        <Label>Tembusan (CC) — opsional</Label>
+        <CcUnitPicker
+          units={ccUnitOptions.filter((u) => u.id !== unitId)}
+          value={ccUnitIds}
+          onChange={setCcUnitIds}
+        />
+        <p className="text-xs text-muted-foreground">
+          Unit yang dipilih dapat melihat surat ini (hanya baca) setelah berstatus ISSUED.
+        </p>
       </div>
 
       <div className="md:col-span-2 rounded-md border bg-blue-50/50 px-3 py-2 text-xs text-blue-900">

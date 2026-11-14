@@ -25,10 +25,11 @@ export const metadata = {
 const VIEW_LIMIT = 200;
 
 interface PageProps {
-  searchParams: { from?: string; to?: string; unitId?: string };
+  searchParams: Promise<{ from?: string; to?: string; unitId?: string }>;
 }
 
-export default async function UserActivityReportPage({ searchParams }: PageProps) {
+export default async function UserActivityReportPage({ searchParams: searchParamsPromise }: PageProps) {
+  const searchParams = await searchParamsPromise;
   const session = await getSession();
   if (!session) redirect("/login");
   if (session.role !== "SUPER_ADMIN") redirect("/dashboard/reports");

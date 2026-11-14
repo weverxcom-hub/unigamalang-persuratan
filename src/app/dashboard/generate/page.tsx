@@ -75,6 +75,7 @@ export default async function GeneratePage() {
             defaultUnitId={session.unitId ?? visibleUnits[0]?.id ?? ""}
             isUser={session.role === "USER"}
             sessionUserId={session.userId}
+            ccUnitOptions={unitsRaw.map((u) => ({ id: u.id, code: u.code, name: u.name }))}
           />
         </CardContent>
       </Card>
