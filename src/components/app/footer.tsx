@@ -6,6 +6,10 @@ export function SiteFooter() {
           &copy; {new Date().getFullYear()} Sistem Manajemen Persuratan Universitas Gajayana Malang
         </span>
         <span>
+          <a href="/privasi" className="font-medium text-primary hover:underline">
+            Kebijakan Privasi
+          </a>
+          {" · "}
           Made by{" "}
           <a
             href="https://weverx.com"
