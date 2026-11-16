@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import { createHash } from "node:crypto";
 
 /**
  * Google Drive integration for storing letter attachments / proof files.
@@ -303,4 +304,80 @@ export async function deleteFile(fileId: string): Promise<boolean> {
 /** True if `url` looks like a Drive viewer / open URL we issued. */
 export function isGdriveUrl(url: string): boolean {
   return /^https:\/\/(drive|docs)\.google\.com\//i.test(url);
+}
+
+/** Thrown when a Drive file is gone (404) or sits in the trash. */
+export class DriveFileMissingError extends Error {
+  constructor(message = "File Drive tidak ditemukan") {
+    super(message);
+    this.name = "DriveFileMissingError";
+  }
+}
+
+export interface DriveFingerprint {
+  id: string;
+  name: string;
+  mimeType: string;
+  sizeBytes: number;
+  sha256: string;
+}
+
+/**
+ * Read a file's SHA-256 fingerprint from Drive.
+ *  - Throws DriveFileMissingError on a Drive 404 or a trashed file.
+ *  - Throws Error("File bukan milik folder Drive yang dikonfigurasi") outside
+ *    the configured parent folder.
+ *  - Throws Error("Berkas belum selesai diunggah") when size is 0 or absent.
+ * If Drive gives no sha256Checksum, the bytes are streamed and hashed here.
+ */
+export async function getFileFingerprint(fileId: string): Promise<DriveFingerprint> {
+  if (!gdriveAvailable()) {
+    throw new Error("Google Drive tidak terkonfigurasi");
+  }
+  const folderId = process.env.GOOGLE_DRIVE_PARENT_FOLDER_ID!;
+  const drive = getDrive();
+
+  let data;
+  try {
+    const meta = await drive.files.get({
+      fileId,
+      fields: "id,name,mimeType,size,parents,sha256Checksum,trashed",
+      supportsAllDrives: true,
+    });
+    data = meta.data;
+  } catch (e) {
+    const err = e as { code?: number | string; status?: number; response?: { status?: number } };
+    if (err.code === 404 || err.status === 404 || err.response?.status === 404) {
+      throw new DriveFileMissingError();
+    }
+    throw e;
+  }
+  if (data.trashed) throw new DriveFileMissingError();
+  if (!(data.parents ?? []).includes(folderId)) {
+    throw new Error("File bukan milik folder Drive yang dikonfigurasi");
+  }
+  const sizeBytes = data.size ? Number(data.size) : 0;
+  if (!Number.isFinite(sizeBytes) || sizeBytes <= 0) {
+    throw new Error("Berkas belum selesai diunggah");
+  }
+
+  let sha256 = data.sha256Checksum ?? "";
+  if (!sha256) {
+    const media = await drive.files.get(
+      { fileId, alt: "media", supportsAllDrives: true },
+      { responseType: "stream" }
+    );
+    const hash = createHash("sha256");
+    for await (const chunk of media.data as unknown as AsyncIterable<Buffer | string>) {
+      hash.update(chunk);
+    }
+    sha256 = hash.digest("hex");
+  }
+  return {
+    id: data.id ?? fileId,
+    name: data.name ?? "file",
+    mimeType: data.mimeType ?? "application/octet-stream",
+    sizeBytes,
+    sha256: sha256.toLowerCase(),
+  };
 }
