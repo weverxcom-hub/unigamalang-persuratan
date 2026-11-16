@@ -104,6 +104,7 @@ export async function importLegacyDecrees(prisma: PrismaClient) {
   let created = 0;
   let updated = 0;
   let skipped = 0;
+  let keptEdited = 0;
 
   for (const row of rows) {
     const letterType = detectLetterTypeCode(row.nomorSk) === "EDAR" ? edarType : skType;
@@ -129,6 +130,12 @@ export async function importLegacyDecrees(prisma: PrismaClient) {
 
     const existing = await prisma.legacyDecree.findUnique({ where: { noUrutAsli: row.noUrutAsli } });
     if (existing) {
+      // Rows edited in the app (editedAt set) are left alone so a re-import
+      // never overwrites in-app changes.
+      if (existing.editedAt) {
+        keptEdited++;
+        continue;
+      }
       // isPublic is NOT included in the update — see prisma/import-legacy-decrees.ts
       // for why (must not clobber a manual admin review decision).
       await prisma.legacyDecree.update({ where: { noUrutAsli: row.noUrutAsli }, data });
@@ -142,5 +149,5 @@ export async function importLegacyDecrees(prisma: PrismaClient) {
   }
 
   const hiddenCount = await prisma.legacyDecree.count({ where: { isPublic: false } });
-  return { total: rows.length, created, updated, skipped, hiddenCount };
+  return { total: rows.length, created, updated, skipped, keptEdited, hiddenCount };
 }
