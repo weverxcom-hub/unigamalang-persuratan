@@ -39,6 +39,10 @@ const nextConfig = {
         source: "/api/archives/:id/proof/file",
         headers: [{ key: "X-Frame-Options", value: "SAMEORIGIN" }],
       },
+      {
+        source: "/api/arsip-lama/:id/files/:fileId",
+        headers: [{ key: "X-Frame-Options", value: "SAMEORIGIN" }],
+      },
     ];
   },
 };
