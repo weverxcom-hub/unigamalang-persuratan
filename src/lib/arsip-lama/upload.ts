@@ -12,7 +12,7 @@ export const OLD_ARCHIVE_MAX_BYTES = 25 * 1024 * 1024;
 
 /** `${now}-${userId}-${safeName}` — full userId, unlike /api/gdrive/init's 8-char prefix. */
 export function stampUploadName(userId: string, filename: string, now: number): string {
-  const safe = filename.replace(/[\/:*?"<>|]/g, "_").slice(0, 150);
+  const safe = filename.replace(/[\\/:*?"<>|]/g, "_").slice(0, 150);
   return `${now}-${userId}-${safe}`;
 }
 

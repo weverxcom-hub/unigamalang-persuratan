@@ -36,6 +36,10 @@ describe("upload stamp", () => {
     expect(uploadedBy("1700000000000-cku1abcd-x.pdf", "cku1abcdefghijklmnop")).toBe(false); // old 8-char stamp
     expect(originalName(name, "cku1abcdefghijklmnop")).toBe("SK 1998_01.pdf");
   });
+  it("sanitises backslashes in the file name", async () => {
+    const { stampUploadName } = await import("@/lib/arsip-lama/upload");
+    expect(stampUploadName("u1", "a\\b.pdf", 1)).toBe("1-u1-a_b.pdf");
+  });
 });
 
 describe("getFileFingerprint", () => {
