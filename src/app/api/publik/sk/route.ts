@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { letterTypeCodeCandidates } from "@/lib/numbering-2027/catalog";
+import { publicLegacyWhere } from "@/lib/arsip-lama/access";
 
 // -----------------------------------------------------------------------
 // GET /api/publik/sk — public, unauthenticated search over SK/SE decrees.
@@ -69,9 +70,11 @@ export async function GET(req: Request) {
       : undefined;
 
   const [legacyRows, archiveRows] = await Promise.all([
-    prisma.legacyDecree.findMany({
+    eligibleLetterTypeIds.length === 0
+      ? Promise.resolve([])
+      : prisma.legacyDecree.findMany({
       where: {
-        isPublic: true,
+        ...publicLegacyWhere(eligibleLetterTypeIds),
         ...(unitId ? { unitId } : {}),
         ...(yearRange ? { tanggal: yearRange } : {}),
         ...(q
