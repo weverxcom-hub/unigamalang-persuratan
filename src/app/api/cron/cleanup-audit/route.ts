@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { auditCleanupWhere } from "@/lib/audit-retention";
 
 export const dynamic = "force-dynamic";
 
@@ -8,6 +9,9 @@ export const dynamic = "force-dynamic";
  *
  * Deletes audit log entries older than 2 years and webhook delivery records
  * older than 90 days. Designed to be called by Vercel Cron (weekly).
+ *
+ * Arsip Lama (LegacyDecree) audit history is kept forever and is excluded
+ * from the audit log cleanup; see src/lib/audit-retention.ts.
  *
  * Security: Protected by CRON_SECRET env var (same as mark-overdue cron).
  */
@@ -35,7 +39,7 @@ export async function GET(req: Request) {
 
   const [auditResult, webhookResult] = await Promise.all([
     prisma.auditLog.deleteMany({
-      where: { createdAt: { lt: auditCutoff } },
+      where: auditCleanupWhere(auditCutoff),
     }),
     prisma.webhookDelivery.deleteMany({
       where: { createdAt: { lt: webhookCutoff } },
