@@ -38,6 +38,17 @@ enum AuthProvider {
   SSO
 }
 
+enum LegacySource {
+  IMPORT_BP3M
+  MANUAL
+}
+
+enum PhysicalKind {
+  ASLI
+  SALINAN
+  TIDAK_ADA
+}
+
 enum Direction {
   OUTGOING
   INCOMING
@@ -378,7 +389,8 @@ model LegacyDecree {
   id         String   @id @default(cuid())
   // Row number in the original BP3M spreadsheet — kept for traceability
   // back to the source when questions come up about a specific entry.
-  noUrutAsli Int      @unique
+  // Nullable: rows added by hand in the app (source MANUAL) have no BP3M row.
+  noUrutAsli Int?     @unique
   // Null when the source date itself was invalid (e.g. "31 September" —
   // 2 rows in the 1987–2026 recap). tanggalRaw preserves what BP3M wrote
   // so it can be corrected once the original document is checked.
@@ -421,6 +433,22 @@ model LegacyDecree {
   // read, not the other way around.
   isPublic   Boolean  @default(true)
 
+  // Arsip Lama module
+  source           LegacySource @default(IMPORT_BP3M)
+  direction        Direction    @default(OUTGOING)
+  counterpart      String?
+  physicalLocation String?
+  physicalKind     PhysicalKind?
+  confidential     Boolean      @default(false)
+  createdById      String?
+  createdByEmail   String?
+  editedAt         DateTime?
+  withdrawnAt      DateTime?
+  withdrawnById    String?
+  withdrawnByEmail String?
+  withdrawnReason  String?
+  files            LegacyDecreeFile[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -428,6 +456,29 @@ model LegacyDecree {
   @@index([letterTypeId])
   @@index([isComplete])
   @@index([tanggal])
+  @@index([withdrawnAt])
+  @@index([confidential])
+}
+
+model LegacyDecreeFile {
+  id             String       @id @default(cuid())
+  decreeId       String
+  decree         LegacyDecree @relation(fields: [decreeId], references: [id], onDelete: Restrict)
+  gdriveFileId   String       @unique
+  fileName       String
+  mimeType       String
+  sizeBytes      Int
+  sha256         String
+  uploadedById   String?
+  uploadedByEmail String
+  uploadedAt     DateTime     @default(now())
+  replacedAt     DateTime?
+  replaceReason  String?
+  lastCheckedAt  DateTime?
+  lastCheckOk    Boolean?
+
+  @@index([decreeId])
+  @@index([sha256])
 }
 
 model Disposition {

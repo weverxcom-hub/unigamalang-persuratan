@@ -78,7 +78,7 @@ export function ImportButton() {
 
 type Row = {
   id: string;
-  noUrutAsli: number;
+  noUrutAsli: number | null;
   nomor: string;
   tanggal: string | null;
   tanggalRaw: string;
@@ -206,7 +206,7 @@ export function LegacyDecreesClient() {
             <TableBody>
               {data?.rows.map((r) => (
                 <TableRow key={r.id}>
-                  <TableCell className="text-xs text-muted-foreground">{r.noUrutAsli}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{r.noUrutAsli ?? "—"}</TableCell>
                   <TableCell className="max-w-lg">
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-xs text-muted-foreground">{r.nomor || "(kosong)"}</span>
